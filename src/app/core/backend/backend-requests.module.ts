@@ -4,6 +4,7 @@ import { UserHttpService } from "./user-http.service";
 @NgModule({
     declarations: [],
     imports: [],
-    providers: [UserHttpService]
+    providers: [],
+    exports: []
 })
 export class BackendRequestsModule { }
