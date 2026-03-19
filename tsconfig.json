@@ -3,6 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -13,7 +14,15 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "paths": {
+      "@backend": ["src/app/core/backend"],
+      "@interceptors": ["src/app/core/interceptors"],
+      "@guards": ["src/app/core/guards"],
+      "@services": ["src/app/core"],
+      "@models/common": ["src/app/models/common"],
+      "@models/data": ["src/app/models/data"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

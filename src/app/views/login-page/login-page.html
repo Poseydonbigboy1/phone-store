@@ -1,1 +1,200 @@
-<p>login-page works!</p>
+<!-- login-register.component.html -->
+<div class="surface-ground min-h-screen flex align-items-center justify-content-center p-4">
+  <div class="surface-card px-2 py-5 shadow-4 border-round w-full" style="max-width: 420px">
+    <!-- Заголовок -->
+    <div class="text-center mb-5">
+      <div class="text-900 text-3xl font-medium mb-2">Добро пожаловать</div>
+      <span class="text-600 font-medium line-height-3">
+        Уже есть аккаунт? Или создадим новый?
+      </span>
+    </div>
+
+    <!-- Вкладки -->
+    <p-tabs [value]="0" class="mb-5" styleClass="tabview-custom">
+      <p-tablist>
+        <p-tab [value]="0">Вход</p-tab>
+        <p-tab [value]="1">Регистрация</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel [value]="0">
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="flex flex-column gap-4 mt-3">
+            <div class="field">
+              <label for="login" class="block text-700 mb-2"> Логин</label>
+              <input
+                pInputText
+                id="login"
+                formControlName="login"
+                styleClass="w-full border-1 border-red-500"
+                [style]="{ padding: '0.75rem 1rem', width: '100%' }"
+              />
+              <small
+                *ngIf="
+                  loginForm.get('login')?.touched && loginForm.get('email')?.hasError('required')
+                "
+                class="p-error"
+              >
+                Login обязателен
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="login-password" class="block text-700 mb-2">Пароль</label>
+              <p-password
+                id="login-password"
+                formControlName="password"
+                [feedback]="false"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                placeholder="••••••••"
+                [toggleMask]="true"
+              >
+              </p-password>
+              <small
+                *ngIf="
+                  loginForm.get('password')?.touched &&
+                  loginForm.get('password')?.hasError('required')
+                "
+                class="p-error"
+              >
+                Пароль обязателен
+              </small>
+            </div>
+
+            <div class="flex align-items-center justify-content-between mb-4">
+              <p-checkbox
+                [binary]="true"
+                inputId="remember"
+                label="Запомнить меня"
+                styleClass="text-700"
+              >
+              </p-checkbox>
+              <a class="text-primary no-underline hover:underline cursor-pointer">Забыли пароль?</a>
+            </div>
+
+            <p-button
+              type="submit"
+              label="Войти"
+              icon="pi pi-sign-in"
+              [loading]="isLoading"
+              styleClass="w-full p-button-raised"
+              [disabled]="loginForm.invalid"
+            >
+            </p-button>
+          </form>
+        </p-tabpanel>
+        <p-tabpanel [value]="1">
+          <form
+            [formGroup]="registerForm"
+            (ngSubmit)="onRegister()"
+            class="flex flex-column gap-4 mt-3"
+          >
+            <div class="field">
+              <label for="reg-name" class="block text-700 mb-2">Имя / Никнейм</label>
+              <input
+                pInputText
+                id="reg-name"
+                formControlName="name"
+                styleClass="w-full"
+                placeholder="Ваше имя"
+                [style]="{ width: '100%' }"
+              />
+              <small
+                *ngIf="
+                  registerForm.get('name')?.touched &&
+                  registerForm.get('name')?.hasError('required')
+                "
+                class="p-error"
+              >
+                Имя обязательно
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="reg-login" class="block text-700 mb-2">Login</label>
+              <input pInputText id="reg-login" formControlName="login" styleClass="w-full" [style]="{ width: '100%' }" />
+              <small
+                class="p-error"
+                *ngIf="
+                  registerForm.get('login')?.touched &&
+                  registerForm.get('login')?.hasError('required')
+                "
+              >
+                Login обязателен
+              </small>
+              <small
+                class="p-error"
+                *ngIf="
+                  registerForm.get('login')?.touched && registerForm.get('login')?.hasError('login')
+                "
+              >
+                Некорректный login
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="reg-password" class="block text-700 mb-2">Пароль</label>
+              <p-password
+                id="reg-password"
+                formControlName="password"
+                [feedback]="true"
+                promptLabel="Введите пароль"
+                weakLabel="Слабый"
+                mediumLabel="Средний"
+                strongLabel="Надёжный"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                placeholder="••••••••"
+                [toggleMask]="true"
+              >
+              </p-password>
+              <small
+                class="p-error"
+                *ngIf="
+                  registerForm.get('password')?.touched &&
+                  registerForm.get('password')?.hasError('required')
+                "
+              >
+                Пароль обязателен
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="reg-password-confirm" class="block text-700 mb-2"
+                >Подтверждение пароля</label
+              >
+              <p-password
+                id="reg-password-confirm"
+                formControlName="passwordConfirm"
+                [feedback]="false"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                placeholder="••••••••"
+                [toggleMask]="true"
+              >
+              </p-password>
+              <small
+                class="p-error"
+                *ngIf="
+                  registerForm.get('passwordConfirm')?.touched &&
+                  registerForm.hasError('passwordMismatch')
+                "
+              >
+                Пароли не совпадают
+              </small>
+            </div>
+
+            <p-button
+              type="submit"
+              label="Создать аккаунт"
+              icon="pi pi-user-plus"
+              [loading]="isLoading"
+              styleClass="w-full p-button-raised p-button-success"
+              [disabled]="registerForm.invalid"
+            >
+            </p-button>
+          </form>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>

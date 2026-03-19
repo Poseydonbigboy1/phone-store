@@ -1,0 +1,17 @@
+:host ::ng-deep {
+  .tabview-custom {
+    .p-tabview-nav {
+      justify-content: center;
+      border: none;
+      margin-bottom: 1.5rem;
+    }
+    .p-tabview-nav-link {
+      padding: 0.75rem 2rem;
+      font-weight: 500;
+    }
+    .p-highlight .p-tabview-nav-link {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+  }
+}
