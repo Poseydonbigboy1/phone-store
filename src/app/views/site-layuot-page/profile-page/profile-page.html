@@ -1,9 +1,8 @@
 <h3>Профиль</h3>
 @if (user$ | async; as user) {
-  <span
-    class="white-space-nowrap overflow-hidden text-overflow-ellipsis text-white font-medium"
-    style="max-width: 100px"
-  >
-    {{ user?.login }}
-  </span>
+  <pre>
+    {{user | json}}
+  </pre>
 }
+
+<button (click)="logout()">Выйти</button>

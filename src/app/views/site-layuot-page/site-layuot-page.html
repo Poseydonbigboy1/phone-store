@@ -1,12 +1,12 @@
-<div class="flex flex-column h-screen overflow-hidden">
+<div class="flex flex-column h-screen overflow-hidden" style="background-color: #0b0612;">
   
-  <header id="menu" class="flex-none h-100px bg-primary shadow-2 z-5">
-    <p-menubar [model]="menuItems" styleClass="border-none bg-primary h-full">
+  <header id="menu" class="flex-none h-100px shadow-4 z-5" style="background-color: #161021; border-bottom: 1px solid #2d243d;">
+    <p-menubar [model]="menuItems" styleClass="border-none h-full" [style]="{'background-color': '#161021'}">
       <ng-template pTemplate="end">
         <div class="flex align-items-center gap-3">
           @if (user$ | async; as user) {
-            <span class="white-space-nowrap overflow-hidden text-overflow-ellipsis text-white font-medium" 
-                  style="max-width: 100px;">
+            <span class="white-space-nowrap overflow-hidden text-overflow-ellipsis font-medium" 
+                  style="max-width: 100px; color: #ffffff;">
               {{ user?.login }}
             </span>
           }
@@ -15,14 +15,15 @@
     </p-menubar>
   </header>
 
-  <main id="content" class="flex-grow-1 overflow-y-auto p-3 bg-gray-50">
+  <main id="content" class="flex-grow-1 overflow-y-auto p-3" style="background-color: #0b0612;">
     <div class="container mx-auto">
       <router-outlet></router-outlet>
     </div>
   </main>
 
-  <footer id="footer" class="flex-none h-75px bg-gray-900 text-white flex align-items-center justify-content-center">
-    <p>© 2026 Магазин DirektorTanka. Все права защищены.</p>
+  <footer id="footer" class="flex-none h-75px flex align-items-center justify-content-center" 
+          style="background-color: #161021; border-top: 1px solid #2d243d; color: #ffffff;">
+    <p>© 2026 Магазин DirectorTanka. Все права защищены.</p>
   </footer>
 
 </div>

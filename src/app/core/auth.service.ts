@@ -20,22 +20,28 @@ export class AuthService {
   }
 
   async initializeApp() {
-    const data = await lastValueFrom(this.getProfile$(true));
-    return data;
+    try {
+      const data = await lastValueFrom(this.getProfile$(true));
+      return data;
+    } catch (error) {
+      console.warn('Пользователь не авторизован или сервер недоступен, загружаем как гостя');
+      return null;
+    }
   }
 
   auth(login: string, password: string): void {
-    this.authHttpService.login$({ login, password }).pipe(
-      switchMap(sw => this.getProfile$())
-    ).subscribe({
-      next: (res) => {
-        console.log(`[auth] [succes]`, res);
-        // this.getProfile$();
-      },
-      error: (err0r) => {
-        console.log(`[auth] [err]`, err0r);
-      },
-    });
+    this.authHttpService
+      .login$({ login, password })
+      .pipe(switchMap((sw) => this.getProfile$()))
+      .subscribe({
+        next: (res) => {
+          this._router.navigate(['main'])
+          console.log(`[auth] [succes]`, res);
+        },
+        error: (err0r) => {
+          console.log(`[auth] [err]`, err0r);
+        },
+      });
   }
 
   logout(): void {

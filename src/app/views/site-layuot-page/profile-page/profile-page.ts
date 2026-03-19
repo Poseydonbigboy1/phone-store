@@ -22,4 +22,8 @@ export class ProfilePage {
 
     this.user$ = this.authService.user$ as Observable<Nullable<User>>;
   }
+
+  logout(): void {
+    this.authService.logout();
+  }
 }
