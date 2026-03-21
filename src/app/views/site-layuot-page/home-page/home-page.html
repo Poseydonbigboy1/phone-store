@@ -1,37 +1,131 @@
-<div class="card">
-  <!-- [responsiveOptions]="responsiveOptions" -->
+<div class="card -ml-3 -mt-3 -mr-3">
   <p-carousel
-    [value]="(products$ | async) ?? []"
+    [value]="(productsPromo$ | async) ?? []"
     [numVisible]="1"
     [numScroll]="1"
     [circular]="true"
     contentClass=""
-    
+    [prevButtonProps]="{
+      styleClass: 'absolute top-50 z-2',
+    }"
+    [nextButtonProps]="{
+      styleClass: 'absolute top-50 right-0 z-2',
+    }"
+    [pt]="{
+      indicatorlist: 'absolute w-full bottom-0',
+      content: 'relative',
+      contentcontainer: 'relative',
+    }"
   >
     <ng-template let-product #item>
-      <div class="border border-surface rounded-border m-2 p-4">
-        <div class="mb-4">
-          <div class="relative mx-auto">
-            <img
-              [src]="product.imgUrl"
-              [alt]="product.title"
-              class="w-full rounded-border"
-            />
+      <div class="w-100 relative">
+        <img [src]="product.imgUrl" [alt]="product.title" class="w-full rounded-border" />
+        <div class="absolute top-0 right-0 z-2 m-2">
+          <p-tag
+            [value]="product.inventoryStatus"
+            [severity]="getSeverity(product.inventoryStatus)"
+            class="dark:!bg-surface-900"
+          />
+        </div>
+      </div>
+    </ng-template>
+  </p-carousel>
+</div>
+
+<div class="card mt-3">
+  <h3>Новые </h3>
+  <p-carousel [value]="(productsNews$ | async) ?? []" [numVisible]="5" [numScroll]="3">
+    <ng-template let-product #item>
+      <div class="border border-surface rounded-border m-2">
+        <div class="relative flex justify-content-center mb-3">
+          @if (product.inventoryStatus) {
             <p-tag
               [value]="product.inventoryStatus"
               [severity]="getSeverity(product.inventoryStatus)"
-              class="absolute dark:!bg-surface-900"
-              [ngStyle]="{ 'left.px': 5, 'top.px': 5 }"
+              class="absolute top-0 left-0 z-1"
             />
-          </div>
+          }
+
+          <img
+            [src]="product.imgUrl"
+            [alt]="product.title"
+            class="w-full h-auto object-contain"
+            
+          />
         </div>
-        <div class="mb-4 font-medium">{{ product.title }}</div>
-        <div class="flex justify-between items-center">
-          <div class="mt-0 font-semibold text-xl">{{ '$' + product.price }}</div>
-          <span>
-            <p-button icon="pi pi-heart" severity="secondary" [outlined]="true" />
-            <p-button icon="pi pi-shopping-cart" styleClass="ml-2" />
-          </span>
+
+        <div class="flex-grow-1">
+          <div class="text-900 font-medium line-height-3 mb-4 h-3rem overflow-hidden">
+            {{ product.title }}
+          </div>
+
+          @if (product.description) {
+            <div class="text-600 text-sm mb-3">{{ product.description }}</div>
+          }
+        </div>
+
+        <div class="flex justify-content-between align-items-center mt-auto">
+          <div class="flex align-items-baseline">
+            <span class="text-2xl font-bold text-900">{{ product.price }}</span>
+            <span class="ml-1 text-sm text-700">грн</span>
+          </div>
+
+          <p-button
+            icon="pi pi-shopping-cart"
+            severity="success"
+            [rounded]="true"
+            class="shadow-2"
+          />
+        </div>
+      </div>
+    </ng-template>
+  </p-carousel>
+</div>
+
+<div class="card mt-3">
+  <h3>Просмотренные </h3>
+  <p-carousel [value]="(productsLastSeen$ | async) ?? []" [numVisible]="5" [numScroll]="3">
+    <ng-template let-product #item>
+      <div class="border border-surface rounded-border m-2">
+        <div class="relative flex justify-content-center mb-3">
+          @if (product.inventoryStatus) {
+            <p-tag
+              [value]="product.inventoryStatus"
+              [severity]="getSeverity(product.inventoryStatus)"
+              class="absolute top-0 left-0 z-1"
+            />
+          }
+
+          <img
+            [src]="product.imgUrl"
+            [alt]="product.title"
+            class="w-full h-auto object-contain"
+            
+          />
+        </div>
+
+        <div class="flex-grow-1">
+          <div class="text-900 font-medium line-height-3 mb-4 h-3rem overflow-hidden">
+            {{ product.title }}
+          </div>
+
+          @if (product.description) {
+            <div class="text-600 text-sm mb-3">{{ product.description }}</div>
+          }
+        </div>
+
+        <div class="flex justify-content-between align-items-center mt-auto">
+          <div class="flex align-items-baseline">
+            <span class="text-2xl font-bold text-900">{{ product.price }}</span>
+            <span class="ml-1 text-sm text-700">грн</span>
+          </div>
+
+          <p-button
+            icon="pi pi-shopping-cart"
+            severity="success"
+            [rounded]="true"
+            class="shadow-2"
+          />
         </div>
       </div>
     </ng-template>

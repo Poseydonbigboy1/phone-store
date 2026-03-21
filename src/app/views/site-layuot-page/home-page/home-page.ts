@@ -1,25 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
+import { CarouselProduct } from '@models/data';
 import { ButtonModule } from 'primeng/button';
 import { CarouselModule } from 'primeng/carousel';
 import { TagModule } from 'primeng/tag';
-import { HomePageService } from './home-page.service';
 import { Observable } from 'rxjs';
-import { CarouselProduct } from '@models/data';
+import { HomePageService } from './home-page.service';
+import { PanelModule } from 'primeng/panel';
 
 @Component({
   selector: 'app-home-page',
-  imports: [CommonModule, CarouselModule, TagModule, ButtonModule],
+  imports: [CommonModule, CarouselModule, TagModule, ButtonModule, PanelModule],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
   providers: [HomePageService],
 })
 export class HomePage {
   responsiveOptions: any[] | undefined;
-  products$: Observable<CarouselProduct[]>;
+  productsPromo$: Observable<CarouselProduct[]>;
+  productsLastSeen$: Observable<CarouselProduct[]>;
+  productsNews$: Observable<CarouselProduct[]>;
 
   constructor(private homePageService: HomePageService) {
-    this.products$ = this.homePageService.carouselProducts$;
+    this.productsPromo$ = this.homePageService.carouselProductsPromo$;
+    this.productsLastSeen$ = this.homePageService.carouselProductsLastSeen$;
+    this.productsNews$ = this.homePageService.carouselProductsNews$;
   }
 
   ngOnInit(): void {
@@ -46,7 +51,9 @@ export class HomePage {
       },
     ];
 
-    this.homePageService.loadCarouselProducts();
+    this.homePageService.loadCarouselProductsPromo();
+    this.homePageService.loadCarouselProductsLastSeen();
+    this.homePageService.loadCarouselProductsNews();
   }
 
   getSeverity(status: string) {
