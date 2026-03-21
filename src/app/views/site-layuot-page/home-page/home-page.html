@@ -1,1 +1,39 @@
-<p>home-page works!</p>
+<div class="card">
+  <!-- [responsiveOptions]="responsiveOptions" -->
+  <p-carousel
+    [value]="(products$ | async) ?? []"
+    [numVisible]="1"
+    [numScroll]="1"
+    [circular]="true"
+    contentClass=""
+    
+  >
+    <ng-template let-product #item>
+      <div class="border border-surface rounded-border m-2 p-4">
+        <div class="mb-4">
+          <div class="relative mx-auto">
+            <img
+              [src]="product.imgUrl"
+              [alt]="product.title"
+              class="w-full rounded-border"
+            />
+            <p-tag
+              [value]="product.inventoryStatus"
+              [severity]="getSeverity(product.inventoryStatus)"
+              class="absolute dark:!bg-surface-900"
+              [ngStyle]="{ 'left.px': 5, 'top.px': 5 }"
+            />
+          </div>
+        </div>
+        <div class="mb-4 font-medium">{{ product.title }}</div>
+        <div class="flex justify-between items-center">
+          <div class="mt-0 font-semibold text-xl">{{ '$' + product.price }}</div>
+          <span>
+            <p-button icon="pi pi-heart" severity="secondary" [outlined]="true" />
+            <p-button icon="pi pi-shopping-cart" styleClass="ml-2" />
+          </span>
+        </div>
+      </div>
+    </ng-template>
+  </p-carousel>
+</div>

@@ -43,13 +43,13 @@ export class SiteLayuotPage {
       },
       { label: 'Каталог', icon: 'pi pi-list', routerLink: '/main/products' },
       {
-        label: 'Корзина',
+        label: '',
         icon: 'pi pi-shopping-cart',
         routerLink: '/main/checkout',
         styleClass: 'ml-auto',
       },
       {
-        label: isLoggedIn ? 'Профиль' : 'Войти',
+        label: isLoggedIn ? '' : 'Войти',
         icon: 'pi pi-user',
         routerLink: isLoggedIn ? '/main/profile' : '/login',
       },
