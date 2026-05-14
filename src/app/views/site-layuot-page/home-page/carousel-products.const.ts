@@ -2,21 +2,21 @@ import { CarouselProduct } from '@models/data';
 
 export const CAROUSEL_PRODUCTS_PROMO: CarouselProduct[] = [
   {
-    imgUrl: 'https://i.can.ua/big_promo/0/71.jpg',
+    imgUrl: 'https://i.postimg.cc/V62SLQ3g/123213124532.png',
     title: 'Новый iPhone 15 Pro',
     description: 'Титановый корпус, чип A17 Pro и невероятные возможности камеры.',
     inventoryStatus: 'INSTOCK',
     price: 999,
   },
   {
-    imgUrl: 'https://i.can.ua/big_promo/0/71.jpg',
+    imgUrl: 'https://i.postimg.cc/V62SLQ3g/123213124532.png',
     title: 'Инновации складываются',
     description: 'Раскладные смартфоны нового поколения уже в наличии.',
     inventoryStatus: 'LOWSTOCK',
     price: 799,
   },
   {
-    imgUrl: 'https://i.can.ua/big_promo/0/71.jpg',
+    imgUrl: 'https://i.postimg.cc/V62SLQ3g/123213124532.png',
     title: 'Samsung Galaxy S24 Ultra',
     description: 'Встречайте новую эру мобильного ИИ с Galaxy AI.',
     inventoryStatus: 'OUTOFSTOCK',
