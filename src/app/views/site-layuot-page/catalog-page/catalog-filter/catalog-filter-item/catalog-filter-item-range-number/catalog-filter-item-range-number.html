@@ -3,8 +3,8 @@
     <div class="flex-1 flex align-items-center gap-2">
       <label class="p-text-secondary text-sm range-label">от</label>
       <p-inputNumber
-        [(ngModel)]="item.value[0]"
-        (ngModelChange)="item.value = [item.value[0], item.value[1]]"
+        [ngModel]="item.value[0]"
+        (ngModelChange)="item.value = [$event, item.value[1]]"
         [min]="min"
         [max]="item.value?.[1] || max"
         [showButtons]="false"
@@ -15,8 +15,8 @@
     <div class="flex-1 flex align-items-center gap-2">
       <label class="p-text-secondary text-sm range-label">до</label>
       <p-inputNumber
-        [(ngModel)]="item.value[1]"
-        (ngModelChange)="item.value = [item.value[0], item.value[1]]"
+        [ngModel]="item.value[1]"
+        (ngModelChange)="item.value = [item.value[0], $event]"
         [min]="item.value?.[0] || min"
         [max]="max"
         [showButtons]="false"
