@@ -1,46 +1,35 @@
 <div class="flex flex-column gap-3 w-18rem">
-  
-  <!-- Строка с инпутами от и до через PrimeFlex -->
-  <div class="flex align-items-center justify-content-between gap-2">
-    
-    <!-- Инпут Минимальной цены -->
-    <div class="p-inputgroup flex-1">
-      <span class="p-inputgroup-addon text-sm p-text-secondary">от</span>
-      <p-inputNumber 
-        [(ngModel)]="item.value[0]" 
+  <div class="flex align-items-center gap-4">
+    <div class="flex-1 flex align-items-center gap-2">
+      <label class="p-text-secondary text-sm range-label">от</label>
+      <p-inputNumber
+        [(ngModel)]="item.value[0]"
         (ngModelChange)="item.value = [item.value[0], item.value[1]]"
-        [min]="min" 
+        [min]="min"
         [max]="item.value?.[1] || max"
         [showButtons]="false"
         inputStyleClass="w-full text-right p-inputtext-sm"
       />
     </div>
 
-    <!-- Разделитель -->
-    <span class="text-400">—</span>
-
-    <!-- Инпут Максимальной цены -->
-    <div class="p-inputgroup flex-1">
-      <span class="p-inputgroup-addon text-sm p-text-secondary">до</span>
-      <p-inputNumber 
-        [(ngModel)]="item.value[1]" 
+    <div class="flex-1 flex align-items-center gap-2">
+      <label class="p-text-secondary text-sm range-label">до</label>
+      <p-inputNumber
+        [(ngModel)]="item.value[1]"
         (ngModelChange)="item.value = [item.value[0], item.value[1]]"
-        [min]="item.value?.[0] || min" 
+        [min]="item.value?.[0] || min"
         [max]="max"
         [showButtons]="false"
         inputStyleClass="w-full text-right p-inputtext-sm"
       />
     </div>
-
   </div>
 
-  <!-- Ползунок слайдера PrimeNG -->
-  <p-slider 
-    [(ngModel)]="item.value" 
-    [range]="true" 
-    [min]="min" 
-    [max]="max" 
-    styleClass="w-full mt-1" 
+  <p-slider
+    [(ngModel)]="item.value"
+    [range]="true"
+    [min]="min"
+    [max]="max"
+    styleClass="w-full mt-1"
   />
-  
 </div>
