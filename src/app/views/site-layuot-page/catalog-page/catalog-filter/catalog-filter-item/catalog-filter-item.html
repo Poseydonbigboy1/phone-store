@@ -1,0 +1,21 @@
+<!-- <pre>
+    {{ item | json }}
+</pre> -->
+<div class="grid">
+  <div class="col">
+    @switch (item.type) {
+      @case ('group') {
+        <app-catalog-filter-item-group [item]="item"></app-catalog-filter-item-group>
+      }
+      @case ('checkbox') {
+        <app-catalog-filter-item-checkbox [item]="item"></app-catalog-filter-item-checkbox>
+      }
+      @case ('rangeInt') {
+        <app-catalog-filter-item-range-number
+          [item]="item"
+          [type]="'int'"
+        ></app-catalog-filter-item-range-number>
+      }
+    }
+  </div>
+</div>

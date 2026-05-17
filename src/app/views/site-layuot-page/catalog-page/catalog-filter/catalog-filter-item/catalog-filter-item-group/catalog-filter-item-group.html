@@ -1,0 +1,4 @@
+<p>{{ item.title }}</p>
+@for (item of item.value; track $index) {
+  <ng-container *ngComponentOutlet="catalogFilterItem; inputs: { item: item }"></ng-container>
+}
