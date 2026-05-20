@@ -3,8 +3,47 @@
     <app-catalog-filter></app-catalog-filter>
   </div>
   <div class="col">
-    <div class="card">
-      <p-dataview [value]="(products$ | async) ?? []"></p-dataview>
+    <p-scrollpanel [style]="{ width: '100%', height: 'calc(100vh - 48px - 51px - 2rem - 56px - 20px)' }">
+      <div class="card">
+        <p-dataview [value]="(products$ | async) ?? []" layout="grid">
+          <!-- <ng-template #header></ng-template> -->
+          <ng-template #grid let-items>
+            <div class="grid">
+              @for (product of items; track $index) {
+                <div class="col-3 bg-white">
+                  <p-card>
+                    <ng-template pTemplate="header">
+                      <img alt="Card" class="w-full" [src]="product.images[0]" />
+                    </ng-template>
+                    <ng-template pTemplate="title"> {{ product.title }} </ng-template>
+
+                    <ng-template pTemplate="footer">
+                      <div class="flex justify-content-between align-items-center mt-3">
+                        <div class="col">
+                          <span>{{ product.price | currency }}</span>
+                        </div>
+                      </div>
+                      <p-rating [ngModel]="product.rating" [stars]="5" />
+                      <p-button severity="success" aria-label="Save" (click)="addToCart(product)">
+                        <span class="pi pi-cart-plus text-xl"></span>
+                      </p-button>
+                    </ng-template>
+                  </p-card>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </p-dataview>
+      </div>
+    </p-scrollpanel>
+    <div class="card flex justify-content-center bg-white">
+      <p-paginator
+        (onPageChange)="onPageChange($event)"
+        [first]="(skip$ | async) ?? 0"
+        [rows]="take$ | async"
+        [totalRecords]="(total$ | async) ?? 0"
+        
+      />
     </div>
   </div>
 </div>
