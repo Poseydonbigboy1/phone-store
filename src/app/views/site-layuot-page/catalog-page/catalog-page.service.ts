@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, of, skip } from 'rxjs';
+import { BehaviorSubject, delay, map, of, skip } from 'rxjs';
 import { CATALOG_FILTER } from './CATAOLOG_FILTER';
 import { CATALOG_PRODUCTS } from 'src/app/views/site-layuot-page/catalog-page/CATALOG_PRODUCTS';
 
@@ -30,6 +30,7 @@ export class CatalogPageService {
 
     of(CATALOG_PRODUCTS)
       .pipe(
+        delay(2000),
         map((products: any[]) => {
           return {
             data: {

@@ -2,13 +2,16 @@
   <div class="col-3">
     <app-catalog-filter></app-catalog-filter>
   </div>
-  <div class="col">
-    <p-scrollpanel [style]="{ width: '100%', height: 'calc(100vh - 48px - 51px - 2rem - 56px - 20px)' }">
-      <div class="card">
-        <p-dataview [value]="(products$ | async) ?? []" layout="grid">
-          <!-- <ng-template #header></ng-template> -->
-          <ng-template #grid let-items>
-            <div class="grid">
+  <div class="col flex flex-column" [style]="{height: 'calc(100vh - 140px)'}">
+    <!-- <p-scrollpanel
+      [style]="{ width: '100%', height: 'calc(100vh - 48px - 51px - 2rem - 56px - 25px)' }"
+    > -->
+    <div class="card">
+      <p-dataview [value]="(products$ | async) ?? []" layout="grid" [loading]="false">
+        <!-- <ng-template #header></ng-template> -->
+        <ng-template #grid let-items>
+          <p-scrollpanel [style]="{ width: '100%', height: 'calc(100vh - 140px - 56px)' }">
+          <div class="grid">
               @for (product of items; track $index) {
                 <div class="col-3 bg-white">
                   <p-card>
@@ -32,17 +35,20 @@
                 </div>
               }
             </div>
-          </ng-template>
-        </p-dataview>
-      </div>
-    </p-scrollpanel>
-    <div class="card flex justify-content-center bg-white">
+          </p-scrollpanel>
+        </ng-template>
+        <!-- <ng-template #loadingicon>
+            <span>test</span>
+          </ng-template> -->
+      </p-dataview>
+    </div>
+    <!-- </p-scrollpanel> -->
+    <div class="card flex justify-content-center bg-white mt-auto">
       <p-paginator
         (onPageChange)="onPageChange($event)"
         [first]="(skip$ | async) ?? 0"
         [rows]="take$ | async"
         [totalRecords]="(total$ | async) ?? 0"
-        
       />
     </div>
   </div>

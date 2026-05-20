@@ -1,10 +1,15 @@
-import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import Lara from '@primeuix/themes/lara';
 import { credentialsInterceptor } from '@interceptors';
 import { AuthService } from '@services';
 
@@ -20,14 +25,17 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     providePrimeNG({
       theme: {
-        preset: Aura,
+        preset: Lara,
+        options: {
+          darkModeSelector: ' ', // Это отключит автоматическое определение темной темы
+        },
       },
     }),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAppFactory,
       deps: [AuthService],
-      multi: true
-    }
+      multi: true,
+    },
   ],
 };
