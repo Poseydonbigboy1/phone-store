@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, delay, map, of, skip } from 'rxjs';
 import { CATALOG_FILTER } from './CATAOLOG_FILTER';
 import { CATALOG_PRODUCTS } from 'src/app/views/site-layuot-page/catalog-page/CATALOG_PRODUCTS';
+import { ProductsHttpService } from 'src/app/core/backend/products-http.service';
+import { ResponseObject } from '@models/common';
+import { FilterConverter } from 'src/app/views/site-layuot-page/catalog-page/filter-converter';
 
 @Injectable()
 export class CatalogPageService {
@@ -15,7 +18,7 @@ export class CatalogPageService {
 
   catalogFilters$: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
 
-  constructor() {}
+  constructor(private productsHttpService: ProductsHttpService) {}
 
   changeFilter(filter: any) {
     this.catalogFilters$.next([...this.catalogFilters$.getValue(), filter]);
@@ -54,8 +57,18 @@ export class CatalogPageService {
   }
 
   getCatalogFilters() {
-    of(CATALOG_FILTER).subscribe((filters) => {
-      this.catalogFilters$.next(filters);
+    this.productsHttpService.getFitlers$().subscribe({
+      next: (response: ResponseObject<any>) => {
+        const filter = FilterConverter.transform(response.data);
+        console.log(`[debug] [getCatalogFilters] [success] [converetedFilter]`, filter);
+        this.catalogFilters$.next(filter);
+      },
+      error: (err0r) => {
+        alert('Ошибка получения фильтров дял каталога');
+      },
     });
+    // of(CATALOG_FILTER).subscribe((filters) => {
+    //   this.catalogFilters$.next(filters);
+    // });
   }
 }
