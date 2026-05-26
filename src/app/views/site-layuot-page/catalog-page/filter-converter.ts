@@ -1,14 +1,10 @@
 export class FilterConverter {
-  /**
-   * Конвертирует сырой массив фильтров в сгруппированную структуру для UI
-   */
   static transform(rawData: any[]): any[] {
     const grouped = new Map<string, any>();
 
     rawData.forEach((item) => {
       const title = item.group_title;
 
-      // Если такой группы еще нет — создаем её
       if (!grouped.has(title)) {
         grouped.set(title, {
           type: 'group',
@@ -19,15 +15,31 @@ export class FilterConverter {
 
       const group = grouped.get(title)!;
 
-      // Очищаем значение от лишних экранированных кавычек, если они есть
-      let cleanTitle = item.filter_value.replace(/^"|"$/g, '');
+      if (item.data_type === 1) {
+        let rangeOption = group.value.find((v: any) => v.type === 'rangeInt');
+        const numValue = Number(item.filter_value);
 
-      // Для булевых значений (data_type: 3) меняем 'true' на более понятный текст, например 'Да'
+        if (!rangeOption) {
+          // Если это первое значение, создаем объект и ставим одинаковые границы [min, max]
+          rangeOption = {
+            type: 'rangeInt',
+            title: null,
+            value: [numValue, numValue],
+          };
+          group.value.push(rangeOption);
+        } else {
+          rangeOption.value[0] = Math.min(rangeOption.value[0], numValue);
+          rangeOption.value[1] = Math.max(rangeOption.value[1], numValue);
+        }
+        return;
+      }
+
+      let cleanTitle = String(item.filter_value).replace(/^"|"$/g, '');
+
       if (item.data_type === 3 && cleanTitle === 'true') {
         cleanTitle = 'Да';
       }
 
-      // Добавляем опцию в группу (по умолчанию все дискретные значения делаем чекбоксами)
       group.value.push({
         type: 'checkbox',
         title: cleanTitle,
@@ -35,7 +47,6 @@ export class FilterConverter {
       });
     });
 
-    // Преобразуем Map обратно в массив
     return Array.from(grouped.values());
   }
 }
