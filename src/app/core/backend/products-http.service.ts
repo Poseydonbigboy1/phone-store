@@ -10,7 +10,7 @@ export class ProductsHttpService extends HttpBase {
     filter: ProductFilter,
   ): Observable<ResponseObject<{ count: number; products: any[] }>> {
     return this.httpClient.post<ResponseObject<{ count: number; products: any[] }>>(
-      `product/all`,
+      `${this.apiUrl}/Product/filter`,
       filter,
     );
   }

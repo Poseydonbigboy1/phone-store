@@ -5,6 +5,8 @@ import { CATALOG_PRODUCTS } from 'src/app/views/site-layuot-page/catalog-page/CA
 import { ProductsHttpService } from 'src/app/core/backend/products-http.service';
 import { ResponseObject } from '@models/common';
 import { FilterConverter } from 'src/app/views/site-layuot-page/catalog-page/filter-converter';
+import { FilterRequestConverter } from './filter-request-converter';
+import { ProductFilter } from 'src/app/models/common/product-filter';
 
 @Injectable()
 export class CatalogPageService {
@@ -28,32 +30,30 @@ export class CatalogPageService {
     const skip = this.skip$.getValue();
     const take = this.take$.getValue();
     const filter = this.catalogFilters$.getValue();
+    // const filterValues = FilterRequestConverter.transform(filter);
+
+    const body: ProductFilter = {
+      skip,
+      take,
+      sortBy: 0,
+      sortDirection: 0,
+      filterValues: FilterRequestConverter.transform(filter),
+    };
 
     this.isLoading$.next(true);
 
-    of(CATALOG_PRODUCTS)
-      .pipe(
-        delay(2000),
-        map((products: any[]) => {
-          return {
-            data: {
-              items: products.slice(skip, skip + take),
-              count: products.length,
-            },
-          };
-        }),
-      )
-      .subscribe({
-        next: (data) => {
-          console.log('[debug] [getProducts]', data);
-          this.products$.next(data.data.items);
-          this.total$.next(data.data.count);
-          this.isLoading$.next(false);
-        },
-        error: (err0r) => {
-          this.isLoading$.next(false);
-        },
-      });
+    this.productsHttpService.getProducts$(body).subscribe({
+      next: (response) => {
+        console.log('[debug] [getProducts]', response);
+        this.products$.next(response?.data?.products ?? []);
+        this.total$.next(response?.data?.count ?? 0);
+        this.isLoading$.next(false);
+      },
+      error: (err0r) => {
+        this.isLoading$.next(false);
+        alert('Ошибка получения продуктов для каталога');
+      },
+    });
   }
 
   getCatalogFilters() {
