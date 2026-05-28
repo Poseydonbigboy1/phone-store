@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
+import { CatalogPageService } from 'src/app/views/site-layuot-page/catalog-page/catalog-page.service';
 
 @Component({
   selector: 'app-catalog-filter-item-checkbox',
@@ -11,6 +12,12 @@ import { CheckboxModule } from 'primeng/checkbox';
 })
 export class CatalogFilterItemCheckbox {
   @Input() item: any;
+  @Output() changed = new EventEmitter<void>();
 
-  value: boolean = false;
+  constructor(private catalogPageService: CatalogPageService) {}
+
+  onModelChange() {
+    this.catalogPageService.notifyFilterChanged();
+    this.changed.emit()
+  }
 }

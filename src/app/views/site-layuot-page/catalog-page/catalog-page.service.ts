@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, delay, map, of, skip } from 'rxjs';
-import { CATALOG_FILTER } from './CATAOLOG_FILTER';
-import { CATALOG_PRODUCTS } from 'src/app/views/site-layuot-page/catalog-page/CATALOG_PRODUCTS';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, skip } from 'rxjs';
 import { ProductsHttpService } from 'src/app/core/backend/products-http.service';
 import { ResponseObject } from '@models/common';
 import { FilterConverter } from 'src/app/views/site-layuot-page/catalog-page/filter-converter';
@@ -19,11 +17,27 @@ export class CatalogPageService {
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   catalogFilters$: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+  filterChanged$: BehaviorSubject<void> = new BehaviorSubject<void>(undefined);
 
-  constructor(private productsHttpService: ProductsHttpService) {}
+  constructor(private productsHttpService: ProductsHttpService) {
+    this.filterChanged$
+      .pipe(
+        // skip(1),
+        debounceTime(300),
+        // distinctUntilChanged((prev, curr) => {
+        //   return JSON.stringify(prev) === JSON.stringify(curr);
+        // }),
+      )
+      .subscribe(() => {
+        this.refreshProducts();
+      });
+  }
 
-  changeFilter(filter: any) {
-    this.catalogFilters$.next([...this.catalogFilters$.getValue(), filter]);
+  notifyFilterChanged(): void {
+    // const currentFilters = this.catalogFilters$.getValue();
+    // const newFilters = JSON.parse(JSON.stringify(currentFilters));
+    // this.catalogFilters$.next(newFilters);
+    this.filterChanged$.next();
   }
 
   refreshProducts(): void {

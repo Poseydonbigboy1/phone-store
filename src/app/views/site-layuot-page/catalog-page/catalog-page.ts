@@ -34,13 +34,15 @@ export class CatalogPage {
   take$: Observable<number>;
   total$: Observable<number>;
   isLoading$: Observable<boolean>;
-
+  catalogFilters$: Observable<any>;
+  
   constructor(private catalogPageService: CatalogPageService) {
     this.products$ = this.catalogPageService.products$;
     this.skip$ = this.catalogPageService.skip$;
     this.take$ = this.catalogPageService.take$;
     this.total$ = this.catalogPageService.total$;
     this.isLoading$ = this.catalogPageService.isLoading$;
+    this.catalogFilters$ = this.catalogPageService.catalogFilters$;
   }
 
   ngOnInit() {

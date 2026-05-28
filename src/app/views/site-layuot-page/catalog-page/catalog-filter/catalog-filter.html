@@ -1,5 +1,5 @@
 <div class="card">
   @for (item of catalogFilters$ | async; track $index) {
-    <app-catalog-filter-item [item]="item"></app-catalog-filter-item>
+    <app-catalog-filter-item [item]="item" (changed)="onFilterChanged()"></app-catalog-filter-item>
   }
 </div>

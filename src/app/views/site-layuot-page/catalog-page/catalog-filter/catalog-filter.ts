@@ -19,4 +19,8 @@ export class CatalogFilter {
   ngOnInit() {
     this.catalogPageService.getCatalogFilters();
   }
+
+  onFilterChanged() {
+    // this.catalogPageService.notifyFilterChanged();
+  }
 }

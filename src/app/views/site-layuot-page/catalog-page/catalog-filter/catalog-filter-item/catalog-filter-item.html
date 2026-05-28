@@ -5,15 +5,16 @@
   <div class="col">
     @switch (item.type) {
       @case ('group') {
-        <app-catalog-filter-item-group [item]="item"></app-catalog-filter-item-group>
+        <app-catalog-filter-item-group [item]="item" (changed)="changed.emit()"></app-catalog-filter-item-group>
       }
       @case ('checkbox') {
-        <app-catalog-filter-item-checkbox [item]="item"></app-catalog-filter-item-checkbox>
+        <app-catalog-filter-item-checkbox [item]="item" (changed)="changed.emit()"></app-catalog-filter-item-checkbox>
       }
       @case ('rangeInt') {
         <app-catalog-filter-item-range-number
           [item]="item"
           [type]="'int'"
+          (changed)="changed.emit()"
         ></app-catalog-filter-item-range-number>
       }
     }

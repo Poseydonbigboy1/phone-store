@@ -4,7 +4,7 @@
       <label class="p-text-secondary text-sm range-label">от</label>
       <p-inputNumber
         [ngModel]="item.value[0]"
-        (ngModelChange)="item.value = [$event, item.value[1]]"
+        (ngModelChange)="onModelChange($event, 0)"
         [min]="min"
         [max]="item.value?.[1] || max"
         [showButtons]="false"
@@ -16,7 +16,7 @@
       <label class="p-text-secondary text-sm range-label">до</label>
       <p-inputNumber
         [ngModel]="item.value[1]"
-        (ngModelChange)="item.value = [item.value[0], $event]"
+        (ngModelChange)="onModelChange($event, 1)"
         [min]="item.value?.[0] || min"
         [max]="max"
         [showButtons]="false"
@@ -27,6 +27,7 @@
 
   <p-slider
     [(ngModel)]="item.value"
+    (ngModelChange)="onModelChangeSlider()"
     [range]="true"
     [min]="min"
     [max]="max"
