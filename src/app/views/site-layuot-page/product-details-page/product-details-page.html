@@ -1,1 +1,112 @@
-<p>product-details-page works!</p>
+@if(product(); as product){
+<div class="product-details-container">
+  <div class="product-header">
+    <h1>{{ product.title }}</h1>
+    <p class="brand-title">{{ product.brandTitle }}</p>
+  </div>
+  <div class="product-main-content">
+    <div class="product-gallery">
+      <p-galleria
+        [value]="product.images ?? []"
+        [responsiveOptions]="responsiveOptions"
+        [containerStyle]="{ 'max-width': '640px' }"
+        [numVisible]="5"
+      >
+        <ng-template pTemplate="item" let-item>
+          <img
+            [src]="item"
+            style="width: 100%; display: block"
+            [alt]="product.title"
+          />
+        </ng-template>
+        <ng-template pTemplate="thumbnail" let-item>
+          <div class="grid grid-nogutter justify-content-center">
+            <img
+              [src]="item"
+              style="display: block"
+              width="100"
+              [alt]="product.title"
+            />
+          </div>
+        </ng-template>
+      </p-galleria>
+    </div>
+    <div class="product-info">
+      <p-card>
+        <ng-template pTemplate="header">
+          <h2>Цена</h2>
+        </ng-template>
+        <div class="price-section">
+          <span class="price">{{
+            product.mainSku.priceWithDiscount | currency : "USD"
+          }}</span>
+          @if(product.mainSku.discount){
+          <span class="discount">{{
+            product.mainSku.price | currency : "USD"
+          }}</span>
+          }
+        </div>
+        <p-button label="Добавить в корзину" icon="pi pi-shopping-cart" />
+      </p-card>
+
+      <p-fieldset legend="Описание" [toggleable]="true" [collapsed]="false">
+        <p>{{ product.description }}</p>
+      </p-fieldset>
+    </div>
+  </div>
+
+  <div class="product-specs">
+    <p-tabs value="0">
+      <p-tablist>
+          <p-tab value="0">Характеристики</p-tab>
+          @if(product.additionalSkus && product.additionalSkus.length){
+            <p-tab value="1">Другие варианты</p-tab>
+          }
+      </p-tablist>
+      <p-tabpanels>
+          <p-tabpanel value="0">
+            <p-table [value]="product?.commonComponents ?? []" styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Характеристика</th>
+                  <th>Значение</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-spec>
+                <tr>
+                  <td>{{ spec.title }}</td>
+                  <td>{{ spec.value }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+          @if(product.additionalSkus && product.additionalSkus.length){
+            <p-tabpanel value="1">
+              <p-table
+                [value]="product?.additionalSkus ?? []"
+                styleClass="p-datatable-gridlines"
+              >
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-sku>
+                  <tr>
+                    <td>{{ sku.priceWithDiscount | currency : "USD" }}</td>
+                    <td>{{ sku.amount }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </p-tabpanel>
+          }
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+} @else {
+<div class="loading-spinner">
+  <p-progressSpinner />
+</div>
+}

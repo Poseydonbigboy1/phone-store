@@ -3,7 +3,6 @@ import { UsersComponent } from './views/users/users.component';
 import { LoginPage } from './views/login-page/login-page';
 import { SiteLayuotPage } from './views/site-layuot-page/site-layuot-page';
 import { CatalogPage } from './views/site-layuot-page/catalog-page/catalog-page';
-import { ProductDetailsPage } from './views/site-layuot-page/product-details-page/product-details-page';
 import { HomePage } from './views/site-layuot-page/home-page/home-page';
 import { ProfilePage } from './views/site-layuot-page/profile-page/profile-page';
 import { CheckoutPage } from './views/site-layuot-page/checkout-page/checkout-page';
@@ -38,7 +37,10 @@ export const routes: Routes = [
       },
       {
         path: 'products/:id',
-        component: ProductDetailsPage,
+        loadComponent: () =>
+          import(
+            './views/site-layuot-page/product-details-page/product-details-page'
+          ).then((m) => m.ProductDetailsPage),
       },
       {
         path: 'profile',

@@ -3,6 +3,7 @@ import { HttpBase } from './http-base';
 import { Observable } from 'rxjs';
 import { ResponseObject } from '@models/common';
 import { ProductFilter } from 'src/app/models/common/product-filter';
+import { ProductDetails } from '@models/data';
 
 @Injectable({ providedIn: 'root' })
 export class ProductsHttpService extends HttpBase {
@@ -13,6 +14,10 @@ export class ProductsHttpService extends HttpBase {
       `${this.apiUrl}/Product/filter`,
       filter,
     );
+  }
+
+  getProduct(id: string): Observable<ResponseObject<ProductDetails>> {
+    return this.httpClient.get<ResponseObject<ProductDetails>>(`${this.apiUrl}/Product/${id}`);
   }
 
   getFitlers$(): Observable<ResponseObject<any>> {
