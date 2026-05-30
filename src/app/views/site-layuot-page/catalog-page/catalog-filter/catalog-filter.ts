@@ -21,6 +21,6 @@ export class CatalogFilter {
   }
 
   onFilterChanged() {
-    // this.catalogPageService.notifyFilterChanged();
+    this.catalogPageService.notifyFilterChanged();
   }
 }

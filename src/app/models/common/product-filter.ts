@@ -12,7 +12,7 @@ export enum SortDirection {
 export interface FilterValue {
   componentTitle: string;
   value: string;
-  matchMode: 'equals';
+  matchMode: 'equals' | 'gte' | 'lte';
 }
 
 export interface ProductFilter {

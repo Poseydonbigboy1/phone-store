@@ -18,8 +18,18 @@ export class FilterRequestConverter {
               matchMode: 'equals',
             });
           }
-          // Backend request format for other filter types (e.g., range) is not specified.
-          // Only checkbox filters are handled for now.
+          if (item.type === 'rangeInt' && Array.isArray(item.value)) {
+            filterValues.push({
+              componentTitle: group.title,
+              value: String(item.value[0]),
+              matchMode: 'gte',
+            });
+            filterValues.push({
+              componentTitle: group.title,
+              value: String(item.value[1]),
+              matchMode: 'lte',
+            });
+          }
         });
       }
     });
