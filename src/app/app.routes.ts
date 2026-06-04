@@ -8,11 +8,17 @@ import { ProfilePage } from './views/site-layuot-page/profile-page/profile-page'
 import { CheckoutPage } from './views/site-layuot-page/checkout-page/checkout-page';
 import { NotFound } from './views/not-found/not-found';
 import { authGuard } from '@guards';
+import { ManagerLayoutPage } from './views/manager-layout-page/manager-layout-page';
 
 export const routes: Routes = [
   {
     path: 'login',
     component: LoginPage,
+  },
+  {
+    path: 'manager',
+    component: ManagerLayoutPage,
+    canActivate: [authGuard],
   },
   {
     path: '',
@@ -38,9 +44,9 @@ export const routes: Routes = [
       {
         path: 'products/:id',
         loadComponent: () =>
-          import(
-            './views/site-layuot-page/product-details-page/product-details-page'
-          ).then((m) => m.ProductDetailsPage),
+          import('./views/site-layuot-page/product-details-page/product-details-page').then(
+            (m) => m.ProductDetailsPage,
+          ),
       },
       {
         path: 'profile',

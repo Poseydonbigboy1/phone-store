@@ -29,11 +29,11 @@ export class SiteLayuotPage {
 
   ngOnInit() {
     this.user$.subscribe((user) => {
-      this.updateMenu(!!user);
+      this.updateMenu(user);
     });
   }
 
-  updateMenu(isLoggedIn: boolean) {
+  updateMenu(user: Nullable<User>) {
     this.menuItems = [
       {
         label: 'Главная',
@@ -42,6 +42,16 @@ export class SiteLayuotPage {
         routerLinkActiveOptions: { exact: true },
       },
       { label: 'Каталог', icon: 'pi pi-list', routerLink: '/main/products' },
+    ];
+    if (user?.role === 'MANAGER') {
+      this.menuItems.push({
+        label: 'Панель управления',
+        icon: 'pi pi-cog',
+        routerLink: '/manager',
+      });
+    }
+
+    this.menuItems.push(
       {
         label: '',
         icon: 'pi pi-shopping-cart',
@@ -49,10 +59,10 @@ export class SiteLayuotPage {
         styleClass: 'ml-auto',
       },
       {
-        label: isLoggedIn ? '' : 'Войти',
+        label: !!user ? '' : 'Войти',
         icon: 'pi pi-user',
-        routerLink: isLoggedIn ? '/main/profile' : '/login',
+        routerLink: !!user ? '/main/profile' : '/login',
       },
-    ];
+    );
   }
 }
