@@ -8,7 +8,8 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { RippleModule } from 'primeng/ripple';
 import { BadgeModule } from 'primeng/badge';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-manager-layout-page',
@@ -30,8 +31,23 @@ import { RouterOutlet } from '@angular/router';
 export class ManagerLayoutPage implements OnInit {
   sidebarItems: MenuItem[] = [];
   breadcrumbItems: MenuItem[] = [];
+  home: MenuItem;
+
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) {
+    this.home = { icon: 'pi pi-home', routerLink: '/manager' };
+  }
 
   ngOnInit() {
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.breadcrumbItems = this.createBreadcrumbs(this.activatedRoute.root);
+      });
+    this.breadcrumbItems = this.createBreadcrumbs(this.activatedRoute.root);
+
     this.sidebarItems = [
       {
         label: 'Справочники',
@@ -39,21 +55,29 @@ export class ManagerLayoutPage implements OnInit {
           {
             label: 'Брэнды',
             icon: 'pi pi-tag',
-            routerLink: 'brands',
+            routerLink: 'directories/brands',
           },
           {
             label: 'Категории',
             icon: 'pi pi-tags',
-            routerLink: 'categories',
+            routerLink: 'directories/categories',
           },
         ],
       },
     ];
+  }
 
-    this.breadcrumbItems = [
-      { icon: 'pi pi-home' },
-      { label: 'Favorites' },
-      { label: 'Dashboard' },
-    ];
+  private createBreadcrumbs(route: ActivatedRoute): MenuItem[] {
+    const breadcrumbs: MenuItem[] = [];
+    let currentRoute = route.firstChild;
+    while (currentRoute) {
+      if (currentRoute.snapshot.data['breadcrumb']) {
+        breadcrumbs.push({
+          label: currentRoute.snapshot.data['breadcrumb'],
+        });
+      }
+      currentRoute = currentRoute.firstChild;
+    }
+    return breadcrumbs;
   }
 }

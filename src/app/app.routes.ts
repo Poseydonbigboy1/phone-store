@@ -19,18 +19,27 @@ export const routes: Routes = [
     path: 'manager',
     component: ManagerLayoutPage,
     canActivate: [authGuard],
+    data: { breadcrumb: 'Панель менеджера' },
     children: [
       {
-        path: 'brands',
-        loadComponent: () =>
-          import('./views/manager-layout-page/entitys/brands/brands').then((m) => m.Brands),
-      },
-      {
-        path: 'categories',
-        loadComponent: () =>
-          import(
-            './views/manager-layout-page/entitys/component-categories/component-categories'
-          ).then((m) => m.ComponentCategories),
+        path: 'directories',
+        data: { breadcrumb: 'Справочники' },
+        children: [
+          {
+            path: 'brands',
+            data: { breadcrumb: 'Брэнды' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/brands/brands').then((m) => m.Brands),
+          },
+          {
+            path: 'categories',
+            data: { breadcrumb: 'Категории' },
+            loadComponent: () =>
+              import(
+                './views/manager-layout-page/entitys/component-categories/component-categories'
+              ).then((m) => m.ComponentCategories),
+          },
+        ],
       },
     ],
   },
