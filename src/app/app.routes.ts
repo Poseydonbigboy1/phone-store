@@ -19,6 +19,20 @@ export const routes: Routes = [
     path: 'manager',
     component: ManagerLayoutPage,
     canActivate: [authGuard],
+    children: [
+      {
+        path: 'brands',
+        loadComponent: () =>
+          import('./views/manager-layout-page/entitys/brands/brands').then((m) => m.Brands),
+      },
+      {
+        path: 'categories',
+        loadComponent: () =>
+          import(
+            './views/manager-layout-page/entitys/component-categories/component-categories'
+          ).then((m) => m.ComponentCategories),
+      },
+    ],
   },
   {
     path: '',

@@ -39,10 +39,12 @@ export class ManagerLayoutPage implements OnInit {
           {
             label: 'Брэнды',
             icon: 'pi pi-tag',
+            routerLink: 'brands',
           },
           {
             label: 'Категории',
             icon: 'pi pi-tags',
+            routerLink: 'categories',
           },
         ],
       },
