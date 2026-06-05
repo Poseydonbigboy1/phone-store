@@ -1,1 +1,145 @@
-<p>brands works!</p>
+<div class="content-container flex flex-column h-full">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="card flex-1 flex flex-column overflow-hidden">
+    <p-toolbar styleClass="mb-4">
+      <ng-template pTemplate="left">
+        <div class="flex flex-wrap gap-2">
+          <button
+            pButton
+            pRipple
+            label="New"
+            icon="pi pi-plus"
+            class="p-button-success"
+            (click)="showAddForm()"
+          ></button>
+          <button
+            pButton
+            pRipple
+            label="Filter"
+            icon="pi pi-filter"
+            class="p-button-info"
+            (click)="displayFilter = true"
+          ></button>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="right">
+        <div class="flex flex-wrap gap-2">
+          <div *ngFor="let filter of appliedFilters">
+            <p-tag
+              styleClass="mr-2"
+              [value]="filter.key + ': ' + filter.value"
+              icon="pi pi-times"
+              (click)="removeFilter(filter.key)"
+            ></p-tag>
+          </div>
+        </div>
+      </ng-template>
+    </p-toolbar>
+
+    <p-table
+      [value]="brands"
+      [loading]="loading"
+      styleClass="p-datatable-sm flex-1 overflow-hidden"
+      [scrollable]="true"
+      scrollHeight="flex"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Title</th>
+          <th style="width: 100px">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-brand>
+        <tr>
+          <td>{{ brand.title }}</td>
+          <td>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-success mr-2"
+              (click)="showEditForm(brand)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-warning"
+              (click)="deleteBrand(brand.id)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <p-paginator
+      [rows]="paginatorState.rows!"
+      [totalRecords]="totalRecords"
+      [first]="paginatorState.first!"
+      (onPageChange)="onPageChange($event)"
+      [rowsPerPageOptions]="[10, 20, 50]"
+    ></p-paginator>
+  </div>
+</div>
+
+<!-- Sidebar for Add/Edit Form -->
+<p-drawer [(visible)]="displayForm" position="right" [style]="{ width: '30em' }">
+  <ng-template pTemplate="header">
+    <h3>{{ isEditMode ? 'Edit Brand' : 'Add Brand' }}</h3>
+  </ng-template>
+  <form [formGroup]="brandForm" (ngSubmit)="onFormSubmit()">
+    <div class="p-fluid">
+      <div class="field">
+        <label for="title">Title</label>
+        <input pInputText id="title" formControlName="title" />
+      </div>
+    </div>
+    <div class="p-dialog-footer mt-5">
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Cancel"
+        class="p-button-secondary"
+        (click)="displayForm = false"
+      ></button>
+      <button
+        pButton
+        pRipple
+        type="submit"
+        [label]="isEditMode ? 'Update' : 'Save'"
+        class="p-button-success"
+        [disabled]="brandForm.invalid"
+      ></button>
+    </div>
+  </form>
+</p-drawer>
+
+<!-- Sidebar for Filters -->
+<p-drawer [(visible)]="displayFilter" position="right" [style]="{ width: '25em' }">
+  <ng-template pTemplate="header">
+    <h3>Filters</h3>
+  </ng-template>
+  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <div class="p-fluid">
+      <div class="field">
+        <label for="filterTitle">Title</label>
+        <input pInputText id="filterTitle" formControlName="title" />
+      </div>
+    </div>
+    <div class="p-dialog-footer mt-5">
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Clear"
+        class="p-button-secondary"
+        (click)="filterForm.reset(); applyFilters()"
+      ></button>
+      <button pButton pRipple type="submit" label="Apply" class="p-button-info"></button>
+    </div>
+  </form>
+</p-drawer>

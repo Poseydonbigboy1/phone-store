@@ -1,0 +1,8 @@
+:host ::ng-deep {
+  .flex-1.ml-5.overflow-hidden.flex.flex-column > *:not(router-outlet) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
