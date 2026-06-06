@@ -27,8 +27,14 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Lara,
         options: {
-          darkModeSelector: ' ', // Это отключит автоматическое определение темной темы
+          darkModeSelector: ' ',
         },
+      },
+      zIndex: {
+        modal: 1100,    // drawer, dialog
+        overlay: 1000,  // dropdown, datepicker
+        menu: 1000,     // меню
+        tooltip: 1100,
       },
     }),
     {

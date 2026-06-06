@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { MessageService, MenuItem } from 'primeng/api';
 import { AvatarModule } from 'primeng/avatar';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { RippleModule } from 'primeng/ripple';
+import { ToastModule } from 'primeng/toast';
 import { CommonModule } from '@angular/common';
 import {
   ActivatedRoute,
@@ -24,10 +25,12 @@ import { filter } from 'rxjs';
     AvatarModule,
     BreadcrumbModule,
     RippleModule,
+    ToastModule,
   ],
   templateUrl: './manager-layout-page.html',
   styleUrl: './manager-layout-page.scss',
   standalone: true,
+  providers: [MessageService],
 })
 export class ManagerLayoutPage implements OnInit {
   sidebarVisible = false;

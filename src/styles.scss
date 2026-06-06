@@ -20,6 +20,11 @@ html, body {
   --primary-color:    var(--p-primary-color);
 }
 
+// Сдвигаем toast ниже фиксированного топбара (4rem) с отступом
+.app-toast {
+  top: 5rem !important;
+}
+
 // Sakai card — используется на всех страницах дашборда
 .card {
   background: var(--surface-card);

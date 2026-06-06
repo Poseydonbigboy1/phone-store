@@ -10,7 +10,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { Observable } from 'rxjs';
 import { BrandService } from './brands.service';
@@ -31,11 +30,10 @@ import { BrandService } from './brands.service';
     ToolbarModule,
     TagModule,
     ConfirmDialogModule,
-    ToastModule,
   ],
   templateUrl: './brands.html',
   styleUrl: './brands.scss',
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService],
 })
 export class Brands implements OnInit {
   readonly brands$: Observable<Brand[]>;
