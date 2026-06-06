@@ -12,9 +12,13 @@
       </a>
     </div>
 
-    <div class="layout-topbar-title" *ngIf="currentPageTitle">
+    <div class="layout-topbar-breadcrumb" *ngIf="breadcrumbItems.length">
       <span class="layout-topbar-title-separator"></span>
-      <span class="layout-topbar-title-text">{{ currentPageTitle }}</span>
+      <p-breadcrumb
+        [model]="breadcrumbItems"
+        [home]="home"
+        styleClass="layout-breadcrumb-inline"
+      />
     </div>
 
     <div class="layout-topbar-actions">
@@ -56,11 +60,9 @@
   <div class="layout-main-container">
     <div class="layout-main">
 
-      <p-breadcrumb
-        [model]="breadcrumbItems"
-        [home]="home"
-        styleClass="layout-breadcrumb"
-      />
+      <div class="layout-page-header" *ngIf="currentPageTitle">
+        <h2 class="layout-page-title">{{ currentPageTitle }}</h2>
+      </div>
 
       <div class="layout-main-content">
         <router-outlet />

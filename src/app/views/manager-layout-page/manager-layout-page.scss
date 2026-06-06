@@ -69,7 +69,8 @@
   display: none;
 }
 
-.layout-topbar-title {
+// Блок с разделителем + breadcrumb в топбаре
+.layout-topbar-breadcrumb {
   display: flex;
   align-items: center;
   gap: 0.875rem;
@@ -83,13 +84,38 @@
   flex-shrink: 0;
 }
 
-.layout-topbar-title-text {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-color-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+// Breadcrumb внутри топбара — прозрачный, без рамок, компактный
+:host ::ng-deep .layout-breadcrumb-inline.p-breadcrumb {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 0.875rem;
+
+  .p-breadcrumb-list {
+    gap: 0.25rem;
+  }
+
+  .p-breadcrumb-item-link {
+    color: var(--text-color-secondary) !important;
+    padding: 0.125rem 0.25rem !important;
+    border-radius: 6px;
+
+    &:hover {
+      color: var(--text-color) !important;
+      background: var(--surface-hover) !important;
+    }
+  }
+
+  // Последний элемент — выделен как текущая страница
+  li:last-child .p-breadcrumb-item-link {
+    color: var(--text-color) !important;
+    font-weight: 600;
+  }
+
+  .p-breadcrumb-separator {
+    color: var(--surface-border) !important;
+    margin: 0 !important;
+  }
 }
 
 // ─── Sidebar ─────────────────────────────────────────────
@@ -185,11 +211,18 @@
   min-height: 100%;
 }
 
-// ─── Breadcrumb ───────────────────────────────────────────
-:host ::ng-deep .layout-breadcrumb.p-breadcrumb {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 0 1.25rem 0 !important;
+// ─── Page header ─────────────────────────────────────────
+.layout-page-header {
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.layout-page-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.3;
 }
 
 // ─── Content ─────────────────────────────────────────────
