@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, skip } from 'rxjs';
-import { ProductsHttpService } from 'src/app/core/backend/products-http.service';
+import { CatalogHttpService } from 'src/app/core/backend/products-http.service';
 import { ResponseObject } from '@models/common';
 import { FilterConverter } from 'src/app/views/site-layuot-page/catalog-page/filter-converter';
 import { FilterRequestConverter } from './filter-request-converter';
-import { ProductFilter } from 'src/app/models/common/product-filter';
+import { CatalogFilter } from 'src/app/models/common/catalog-filter';
 
 @Injectable()
 export class CatalogPageService {
@@ -19,7 +19,7 @@ export class CatalogPageService {
   catalogFilters$: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
   filterChanged$: BehaviorSubject<void> = new BehaviorSubject<void>(undefined);
 
-  constructor(private productsHttpService: ProductsHttpService) {
+  constructor(private catalogHttpService: CatalogHttpService) {
     this.filterChanged$
       .pipe(
         // skip(1),
@@ -46,7 +46,7 @@ export class CatalogPageService {
     const filter = this.catalogFilters$.getValue();
     // const filterValues = FilterRequestConverter.transform(filter);
 
-    const body: ProductFilter = {
+    const body: CatalogFilter = {
       skip,
       take,
       sortBy: 0,
@@ -56,7 +56,7 @@ export class CatalogPageService {
 
     this.isLoading$.next(true);
 
-    this.productsHttpService.getProducts$(body).subscribe({
+    this.catalogHttpService.getProducts$(body).subscribe({
       next: (response) => {
         console.log('[debug] [getProducts]', response);
         this.products$.next(response?.data?.products ?? []);
@@ -71,7 +71,7 @@ export class CatalogPageService {
   }
 
   getCatalogFilters() {
-    this.productsHttpService.getFitlers$().subscribe({
+    this.catalogHttpService.getFilters$().subscribe({
       next: (response: ResponseObject<any>) => {
         const filter = FilterConverter.transform(response.data);
         console.log(`[debug] [getCatalogFilters] [success] [converetedFilter]`, filter);
