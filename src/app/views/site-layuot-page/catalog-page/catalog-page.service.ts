@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, skip } from 'rxjs';
-import { CatalogHttpService } from 'src/app/core/backend/products-http.service';
+import { CatalogHttpService } from 'src/app/core/backend/catalog-http.service';
 import { ResponseObject } from '@models/common';
 import { FilterConverter } from 'src/app/views/site-layuot-page/catalog-page/filter-converter';
 import { FilterRequestConverter } from './filter-request-converter';

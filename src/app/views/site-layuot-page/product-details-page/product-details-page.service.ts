@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ProductDetails } from '@models/data';
 import { ResponseObject } from '@models/common';
 import { BehaviorSubject, Observable, filter, switchMap, tap } from 'rxjs';
-import { CatalogHttpService } from 'src/app/core/backend/products-http.service';
+import { CatalogHttpService } from 'src/app/core/backend/catalog-http.service';
 
 @Injectable()
 export class ProductDetailsService {
