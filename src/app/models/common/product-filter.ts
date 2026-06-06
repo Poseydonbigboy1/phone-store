@@ -1,1 +1,1 @@
-export { SortBy, SortDirection, FilterValue, CatalogFilter as ProductFilter } from './catalog-filter';
+export type { SortBy, SortDirection, FilterValue, CatalogFilter as ProductFilter } from './catalog-filter';
