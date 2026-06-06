@@ -1,6 +1,6 @@
 <div class="flex flex-column h-full">
-  <p-toast />
-  <p-confirmDialog />
+  <p-toast appendTo="body" />
+  <p-confirmDialog appendTo="body" />
 
   <div class="card flex-1 flex flex-column" style="min-height: 0">
 
@@ -92,7 +92,7 @@
 </div>
 
 <!-- Drawer: Add / Edit -->
-<p-drawer [(visible)]="displayForm" position="right" [style]="{ width: '28rem' }">
+<p-drawer [(visible)]="displayForm" position="right" appendTo="body" [style]="{ width: '28rem' }">
   <ng-template pTemplate="header">
     <span class="font-semibold text-lg">{{ isEditMode ? 'Редактировать бренд' : 'Добавить бренд' }}</span>
   </ng-template>
@@ -114,7 +114,7 @@
 </p-drawer>
 
 <!-- Drawer: Filter -->
-<p-drawer [(visible)]="displayFilter" position="right" [style]="{ width: '24rem' }">
+<p-drawer [(visible)]="displayFilter" position="right" appendTo="body" [style]="{ width: '24rem' }">
   <ng-template pTemplate="header">
     <span class="font-semibold text-lg">Фильтр</span>
   </ng-template>
