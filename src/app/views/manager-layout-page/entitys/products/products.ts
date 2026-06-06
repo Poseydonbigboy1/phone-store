@@ -1,13 +1,15 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Product } from '@models/data';
+import { Brand, Product } from '@models/data';
+import { BrandsHttpService } from '@backend';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DrawerModule } from 'primeng/drawer';
 import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -19,7 +21,8 @@ import { ProductsManagerService } from './products.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, TableModule, ButtonModule, DrawerModule, PaginatorModule,
-    InputTextModule, FormsModule, ReactiveFormsModule, ToolbarModule, TagModule, ConfirmDialogModule],
+    InputTextModule, FormsModule, ReactiveFormsModule, ToolbarModule, TagModule,
+    ConfirmDialogModule, SelectModule],
   templateUrl: './products.html',
   styleUrl: './products.scss',
   providers: [ConfirmationService],
@@ -28,6 +31,8 @@ export class Products implements OnInit {
   readonly items$: Observable<Product[]>;
   readonly total$: Observable<number>;
   readonly loading$: Observable<boolean>;
+
+  brandOptions: Brand[] = [];
 
   paginatorState: PaginatorState = { first: 0, rows: 10, page: 0, pageCount: 0 };
   displayForm = false;
@@ -40,7 +45,9 @@ export class Products implements OnInit {
 
   constructor(
     private svc: ProductsManagerService,
+    private brandsHttp: BrandsHttpService,
     private fb: FormBuilder,
+    private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
   ) {
@@ -55,7 +62,11 @@ export class Products implements OnInit {
     this.filterForm = this.fb.group({ title: [''] });
   }
 
-  ngOnInit(): void { this.svc.load(this.paginatorState); }
+  ngOnInit(): void {
+    this.svc.load(this.paginatorState);
+    this.brandsHttp.getBrands$({ skip: 0, take: 500, sortBy: 'Title', sortDirection: 0, id: { matchMode: 'Equals', value: '' }, title: { matchMode: 'Equals', value: '' } })
+      .subscribe(res => { this.brandOptions = res?.data?.items ?? []; this.cd.markForCheck(); });
+  }
 
   onPageChange(e: PaginatorState): void { this.paginatorState = e; this.svc.load(e, this.filterForm.value.title ?? ''); }
 
@@ -64,6 +75,10 @@ export class Products implements OnInit {
   showEditForm(item: Product): void {
     this.isEditMode = true; this.selectedId = item.id;
     this.form.patchValue(item); this.displayForm = true;
+  }
+
+  getBrandTitle(id: string): string {
+    return this.brandOptions.find(b => b.id === id)?.title ?? id;
   }
 
   onFormSubmit(): void {

@@ -1,7 +1,8 @@
 import { AsyncPipe, SlicePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Order, ORDER_STATUS_LABELS, ORDER_STATUS_SEVERITIES } from '@models/data';
+import { ManagerUser, Order, ORDER_STATUS_LABELS, ORDER_STATUS_SEVERITIES } from '@models/data';
+import { UsersManagerHttpService } from '@backend';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -38,6 +39,8 @@ export class Orders implements OnInit {
   readonly statusLabels = ORDER_STATUS_LABELS;
   readonly statusSeverities = ORDER_STATUS_SEVERITIES;
 
+  userOptions: ManagerUser[] = [];
+
   paginatorState: PaginatorState = { first: 0, rows: 10, page: 0, pageCount: 0 };
   displayForm = false;
   form: FormGroup;
@@ -49,7 +52,9 @@ export class Orders implements OnInit {
 
   constructor(
     private svc: OrdersService,
+    private usersHttp: UsersManagerHttpService,
     private fb: FormBuilder,
+    private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
   ) {
@@ -65,9 +70,13 @@ export class Orders implements OnInit {
     this.filterForm = this.fb.group({ userId: [''] });
   }
 
-  ngOnInit(): void { this.svc.load(this.paginatorState); }
+  ngOnInit(): void {
+    this.svc.load(this.paginatorState);
+    this.usersHttp.getAll$({ skip: 0, take: 500, sortBy: 'Login', sortDirection: 0, id: { matchMode: 'Equals', value: '' }, login: { matchMode: 'Equals', value: '' }, name: { matchMode: 'Equals', value: '' }, roles: { matchMode: 'Equals', value: '' } })
+      .subscribe(res => { this.userOptions = res?.data?.items ?? []; this.cd.markForCheck(); });
+  }
 
-  onPageChange(e: PaginatorState): void { this.paginatorState = e; this.svc.load(e, this.filterForm.value.userId ?? ''); }
+  onPageChange(e: PaginatorState): void { this.paginatorState = e; this.svc.load(e); }
 
   showAddForm(): void { this.isEditMode = false; this.form.reset({ status: 0, totalAmount: 0 }); this.displayForm = true; }
 
@@ -76,13 +85,18 @@ export class Orders implements OnInit {
     this.form.patchValue(item); this.displayForm = true;
   }
 
+  getUserLabel(id: string): string {
+    const u = this.userOptions.find(u => u.id === id);
+    return u ? `${u.login}${u.name ? ' (' + u.name + ')' : ''}` : id;
+  }
+
   onFormSubmit(): void {
     if (this.form.invalid) return;
     const op$ = this.isEditMode
       ? this.svc.update$({ id: this.selectedId!, orderDate: new Date().toISOString(), ...this.form.value })
       : this.svc.create$({ orderDate: new Date().toISOString(), ...this.form.value });
     op$.subscribe({
-      next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: this.isEditMode ? 'Обновлено' : 'Создано' }); this.displayForm = false; this.svc.load(this.paginatorState, this.filterForm.value.userId ?? ''); },
+      next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: this.isEditMode ? 'Обновлено' : 'Создано' }); this.displayForm = false; this.svc.load(this.paginatorState); },
       error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
     });
   }
@@ -91,7 +105,7 @@ export class Orders implements OnInit {
     this.confirmationService.confirm({
       message: 'Удалить заказ?', header: 'Подтверждение', icon: 'pi pi-exclamation-triangle',
       accept: () => this.svc.delete$(id).subscribe({
-        next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' }); this.svc.load(this.paginatorState, this.filterForm.value.userId ?? ''); },
+        next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' }); this.svc.load(this.paginatorState); },
         error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
       }),
     });
@@ -99,11 +113,9 @@ export class Orders implements OnInit {
 
   applyFilters(): void {
     this.appliedFilters = [];
-    const userId = this.filterForm.get('userId')?.value;
-    if (userId) this.appliedFilters.push({ key: 'userId', value: userId });
     this.displayFilter = false;
     this.paginatorState = { ...this.paginatorState, first: 0, page: 0 };
-    this.svc.load(this.paginatorState, userId ?? '');
+    this.svc.load(this.paginatorState);
   }
 
   removeFilter(key: string): void { this.filterForm.get(key)?.reset(); this.applyFilters(); }

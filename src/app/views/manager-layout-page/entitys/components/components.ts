@@ -1,7 +1,8 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Component as ComponentEntity, DATA_TYPE_LABELS } from '@models/data';
+import { Component as ComponentEntity, ComponentCategory, DATA_TYPE_LABELS } from '@models/data';
+import { ComponentCategoriesHttpService } from '@backend';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -37,6 +38,8 @@ export class Components implements OnInit {
   ];
   readonly dataTypeLabels = DATA_TYPE_LABELS;
 
+  categoryOptions: ComponentCategory[] = [];
+
   paginatorState: PaginatorState = { first: 0, rows: 10, page: 0, pageCount: 0 };
   displayForm = false;
   form: FormGroup;
@@ -48,7 +51,9 @@ export class Components implements OnInit {
 
   constructor(
     private svc: ComponentsService,
+    private categoriesHttp: ComponentCategoriesHttpService,
     private fb: FormBuilder,
+    private cd: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
   ) {
@@ -65,11 +70,15 @@ export class Components implements OnInit {
     this.filterForm = this.fb.group({ title: [''] });
   }
 
-  ngOnInit(): void { this.svc.load(this.paginatorState); }
+  ngOnInit(): void {
+    this.svc.load(this.paginatorState);
+    this.categoriesHttp.getAll$({ skip: 0, take: 500, sortBy: 'Title', sortDirection: 0, id: { matchMode: 'Equals', value: '' }, title: { matchMode: 'Equals', value: '' } })
+      .subscribe(res => { this.categoryOptions = res?.data?.items ?? []; this.cd.markForCheck(); });
+  }
 
   onPageChange(e: PaginatorState): void {
     this.paginatorState = e;
-    this.svc.load(this.paginatorState, this.filterForm.value.title ?? '');
+    this.svc.load(e, this.filterForm.value.title ?? '');
   }
 
   showAddForm(): void { this.isEditMode = false; this.form.reset({ dataType: 0, categoryType: 0 }); this.displayForm = true; }
@@ -115,4 +124,8 @@ export class Components implements OnInit {
   }
 
   removeFilter(key: string): void { this.filterForm.get(key)?.reset(); this.applyFilters(); }
+
+  getCategoryTitle(id: string): string {
+    return this.categoryOptions.find(c => c.id === id)?.title ?? id;
+  }
 }

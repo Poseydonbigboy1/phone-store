@@ -20,7 +20,7 @@
         [rowHover]="true" [scrollable]="true" scrollHeight="flex">
         <ng-template pTemplate="header">
           <tr>
-            <th>Название</th><th>Описание</th><th>Тип данных</th><th>ID категории</th>
+            <th>Название</th><th>Описание</th><th>Тип данных</th><th>Категория</th>
             <th style="width: 8rem"></th>
           </tr>
         </ng-template>
@@ -29,7 +29,7 @@
             <td>{{ item.title }}</td>
             <td>{{ item.description }}</td>
             <td>{{ dataTypeLabels[item.dataType] }}</td>
-            <td class="text-sm text-color-secondary">{{ item.componentCategoryId }}</td>
+            <td>{{ getCategoryTitle(item.componentCategoryId) }}</td>
             <td>
               <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small" class="mr-2" (onClick)="showEditForm(item)" />
               <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" size="small" (onClick)="delete(item.id)" />
@@ -60,11 +60,13 @@
     </div>
     <div class="flex flex-column gap-1">
       <label class="font-medium text-sm">Тип данных *</label>
-      <p-select formControlName="dataType" [options]="dataTypeOptions" optionLabel="label" optionValue="value" />
+      <p-select formControlName="dataType" [options]="dataTypeOptions" optionLabel="label" optionValue="value" placeholder="Выберите тип..." />
     </div>
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">ID категории компонента *</label>
-      <input pInputText formControlName="componentCategoryId" placeholder="UUID..." />
+      <label class="font-medium text-sm">Категория компонента *</label>
+      <p-select formControlName="componentCategoryId" [options]="categoryOptions"
+        optionLabel="title" optionValue="id" [filter]="true" filterBy="title"
+        placeholder="Выберите категорию..." />
     </div>
     <div class="flex gap-2 justify-content-end mt-auto">
       <p-button label="Отмена" severity="secondary" [outlined]="true" (onClick)="displayForm = false" />

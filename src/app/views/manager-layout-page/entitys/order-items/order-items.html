@@ -23,8 +23,8 @@
         </ng-template>
         <ng-template pTemplate="body" let-item>
           <tr>
-            <td class="text-sm text-color-secondary">{{ item.orderId }}</td>
-            <td class="text-sm text-color-secondary">{{ item.skuId }}</td>
+            <td>{{ getOrderLabel(item.orderId) }}</td>
+            <td>{{ getSkuLabel(item.skuId) }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.price }}</td>
             <td>
@@ -48,12 +48,16 @@
   <ng-template pTemplate="header"><span class="font-semibold text-lg">{{ isEditMode ? 'Редактировать' : 'Добавить' }}</span></ng-template>
   <form [formGroup]="form" (ngSubmit)="onFormSubmit()" class="flex flex-column gap-4 pt-2">
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">ID заказа *</label>
-      <input pInputText formControlName="orderId" placeholder="UUID заказа..." />
+      <label class="font-medium text-sm">Заказ *</label>
+      <p-select formControlName="orderId" [options]="orderOptions"
+        optionLabel="_label" optionValue="id" [filter]="true" filterBy="_label"
+        placeholder="Выберите заказ..." />
     </div>
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">ID SKU *</label>
-      <input pInputText formControlName="skuId" placeholder="UUID SKU..." />
+      <label class="font-medium text-sm">SKU *</label>
+      <p-select formControlName="skuId" [options]="skuOptions"
+        optionLabel="_label" optionValue="id" [filter]="true" filterBy="_label"
+        placeholder="Выберите SKU..." />
     </div>
     <div class="flex flex-column gap-1">
       <label class="font-medium text-sm">Количество *</label>

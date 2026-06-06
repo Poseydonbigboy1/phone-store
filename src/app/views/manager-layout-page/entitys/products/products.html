@@ -19,13 +19,13 @@
       <p-table [value]="(items$ | async) ?? []" [loading]="(loading$ | async) ?? false"
         [rowHover]="true" [scrollable]="true" scrollHeight="flex">
         <ng-template pTemplate="header">
-          <tr><th>Название</th><th>Описание</th><th>ID бренда</th><th style="width: 8rem"></th></tr>
+          <tr><th>Название</th><th>Описание</th><th>Бренд</th><th style="width: 8rem"></th></tr>
         </ng-template>
         <ng-template pTemplate="body" let-item>
           <tr>
             <td>{{ item.title }}</td>
             <td>{{ item.description }}</td>
-            <td class="text-sm text-color-secondary">{{ item.brandId }}</td>
+            <td>{{ getBrandTitle(item.brandId) }}</td>
             <td>
               <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small" class="mr-2" (onClick)="showEditForm(item)" />
               <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" size="small" (onClick)="delete(item.id)" />
@@ -55,8 +55,10 @@
       <input pInputText formControlName="description" placeholder="Описание..." />
     </div>
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">ID бренда *</label>
-      <input pInputText formControlName="brandId" placeholder="UUID бренда..." />
+      <label class="font-medium text-sm">Бренд *</label>
+      <p-select formControlName="brandId" [options]="brandOptions"
+        optionLabel="title" optionValue="id" [filter]="true" filterBy="title"
+        placeholder="Выберите бренд..." />
     </div>
     <div class="flex gap-2 justify-content-end mt-auto">
       <p-button label="Отмена" severity="secondary" [outlined]="true" (onClick)="displayForm = false" />

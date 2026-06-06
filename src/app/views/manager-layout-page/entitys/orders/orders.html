@@ -23,7 +23,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-item>
           <tr>
-            <td class="text-sm text-color-secondary">{{ item.userId }}</td>
+            <td>{{ getUserLabel(item.userId) }}</td>
             <td>{{ item.orderDate | slice:0:10 }}</td>
             <td><p-tag [value]="statusLabels[item.status]" [severity]="statusSeverities[item.status]" /></td>
             <td>{{ item.totalAmount }}</td>
@@ -49,8 +49,10 @@
   <ng-template pTemplate="header"><span class="font-semibold text-lg">{{ isEditMode ? 'Редактировать' : 'Добавить' }}</span></ng-template>
   <form [formGroup]="form" (ngSubmit)="onFormSubmit()" class="flex flex-column gap-4 pt-2">
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">ID пользователя *</label>
-      <input pInputText formControlName="userId" placeholder="UUID пользователя..." />
+      <label class="font-medium text-sm">Пользователь *</label>
+      <p-select formControlName="userId" [options]="userOptions"
+        optionLabel="login" optionValue="id" [filter]="true" filterBy="login"
+        placeholder="Выберите пользователя..." />
     </div>
     <div class="flex flex-column gap-1">
       <label class="font-medium text-sm">Статус *</label>
