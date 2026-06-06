@@ -28,8 +28,8 @@
     <!-- Таблица во враппере — он ограничивает высоту и даёт внутренний скролл -->
     <div class="flex-1" style="min-height: 0; overflow: hidden">
       <p-table
-        [value]="brands"
-        [loading]="loading"
+        [value]="(brands$ | async) ?? []"
+        [loading]="(loading$ | async) ?? false"
         [rowHover]="true"
         [scrollable]="true"
         scrollHeight="flex"
@@ -80,7 +80,7 @@
     <!-- Пагинатор вне overflow:hidden — дропдаун не обрезается -->
     <p-paginator
       [rows]="paginatorState.rows!"
-      [totalRecords]="totalRecords"
+      [totalRecords]="(total$ | async) ?? 0"
       [first]="paginatorState.first!"
       (onPageChange)="onPageChange($event)"
       [rowsPerPageOptions]="[10, 20, 50]"

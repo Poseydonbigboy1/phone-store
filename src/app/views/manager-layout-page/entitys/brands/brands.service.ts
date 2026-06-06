@@ -1,83 +1,72 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of, timeout } from 'rxjs';
+import { catchError, finalize, map } from 'rxjs/operators';
 import { Brand } from '@models/data';
+import { BrandFilter } from '@models/common';
+import { BrandsHttpService } from '@backend';
 import { PaginatorState } from 'primeng/paginator';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
 
-export interface BrandsResponse {
-  items: Brand[];
-  total: number;
-}
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class BrandService {
-  private brands: Brand[] = [];
-  private brands$ = new BehaviorSubject<Brand[]>([]);
+  readonly brands$ = new BehaviorSubject<Brand[]>([]);
+  readonly total$ = new BehaviorSubject<number>(0);
+  readonly loading$ = new BehaviorSubject<boolean>(false);
 
-  constructor() {
-    // Generate mock data
-    for (let i = 1; i <= 100; i++) {
-      this.brands.push({ id: this.generateGuid(), title: `Brand ${i}` });
-    }
-    this.brands$.next(this.brands);
+  constructor(private http: BrandsHttpService) {}
+
+  loadBrands(paginator: PaginatorState, filter: { title?: string }): void {
+    this.loading$.next(true);
+    this.http
+      .getBrands$(this.toFilter(paginator, filter))
+      .pipe(
+        timeout(15000),
+        catchError(err => {
+          console.error('[BrandService] loadBrands error:', err);
+          return of(null);
+        }),
+        finalize(() => this.loading$.next(false)),
+      )
+      .subscribe(res => {
+        this.brands$.next(res?.data?.items ?? []);
+        this.total$.next(res?.data?.total ?? 0);
+      });
   }
 
-  private generateGuid(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = (Math.random() * 16) | 0,
-        v = c == 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
+  addBrand$(title: string): Observable<Brand> {
+    return this.http.createBrand$(title).pipe(
+      map(res => {
+        if (!res.isSuccess || !res.data) throw new Error(res.message ?? 'Ошибка создания');
+        return res.data;
+      }),
+    );
   }
 
-  getBrands(
-    paginator: PaginatorState,
-    filter: { title?: string },
-  ): Observable<BrandsResponse> {
-    let filteredBrands = [...this.brands];
-
-    if (filter.title) {
-      filteredBrands = filteredBrands.filter((b) =>
-        b.title.toLowerCase().includes(filter.title!.toLowerCase()),
-      );
-    }
-
-    const start = paginator.first || 0;
-    const end = start + (paginator.rows || 10);
-    const paginatedBrands = filteredBrands.slice(start, end);
-
-    return of({
-      items: paginatedBrands,
-      total: filteredBrands.length,
-    });
+  updateBrand$(id: string, title: string): Observable<Brand> {
+    return this.http.updateBrand$(id, title).pipe(
+      map(res => {
+        if (!res.isSuccess || !res.data) throw new Error(res.message ?? 'Ошибка обновления');
+        return res.data;
+      }),
+    );
   }
 
-  addBrand(title: string): Observable<Brand> {
-    const newBrand: Brand = { id: this.generateGuid(), title };
-    this.brands.unshift(newBrand);
-    this.brands$.next(this.brands);
-    return of(newBrand).pipe(delay(300));
+  deleteBrand$(id: string): Observable<boolean> {
+    return this.http.deleteBrand$(id).pipe(
+      map(res => {
+        if (!res.isSuccess) throw new Error(res.message ?? 'Ошибка удаления');
+        return res.data ?? false;
+      }),
+    );
   }
 
-  updateBrand(id: string, title: string): Observable<Brand> {
-    const brand = this.brands.find((b) => b.id === id);
-    if (brand) {
-      brand.title = title;
-      this.brands$.next(this.brands);
-      return of(brand).pipe(delay(300));
-    }
-    throw new Error('Brand not found');
-  }
-
-  deleteBrand(id: string): Observable<boolean> {
-    const index = this.brands.findIndex((b) => b.id === id);
-    if (index !== -1) {
-      this.brands.splice(index, 1);
-      this.brands$.next(this.brands);
-      return of(true).pipe(delay(300));
-    }
-    return of(false);
+  private toFilter(paginator: PaginatorState, filter: { title?: string }): BrandFilter {
+    return {
+      skip: paginator.first ?? 0,
+      take: paginator.rows ?? 10,
+      sortBy: null,
+      sortDirection: 0,
+      id: { matchMode: 'Equals', value: '' },
+      title: { matchMode: 'contains', value: filter.title ?? '' },
+    };
   }
 }
