@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { UsersComponent } from './views/users/users.component';
 import { LoginPage } from './views/login-page/login-page';
 import { SiteLayuotPage } from './views/site-layuot-page/site-layuot-page';
 import { CatalogPage } from './views/site-layuot-page/catalog-page/catalog-page';
@@ -27,17 +26,57 @@ export const routes: Routes = [
         children: [
           {
             path: 'brands',
-            data: { breadcrumb: 'Брэнды' },
+            data: { breadcrumb: 'Бренды' },
             loadComponent: () =>
               import('./views/manager-layout-page/entitys/brands/brands').then((m) => m.Brands),
           },
           {
             path: 'categories',
-            data: { breadcrumb: 'Категории' },
+            data: { breadcrumb: 'Категории компонентов' },
             loadComponent: () =>
-              import(
-                './views/manager-layout-page/entitys/component-categories/component-categories'
-              ).then((m) => m.ComponentCategories),
+              import('./views/manager-layout-page/entitys/component-categories/component-categories').then((m) => m.ComponentCategories),
+          },
+          {
+            path: 'components',
+            data: { breadcrumb: 'Компоненты' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/components/components').then((m) => m.Components),
+          },
+          {
+            path: 'products',
+            data: { breadcrumb: 'Продукты' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/products/products').then((m) => m.Products),
+          },
+          {
+            path: 'skus',
+            data: { breadcrumb: 'SKU' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/skus/skus').then((m) => m.Skus),
+          },
+          {
+            path: 'product-components',
+            data: { breadcrumb: 'Компоненты продуктов' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/product-components/product-components').then((m) => m.ProductComponents),
+          },
+          {
+            path: 'orders',
+            data: { breadcrumb: 'Заказы' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/orders/orders').then((m) => m.Orders),
+          },
+          {
+            path: 'order-items',
+            data: { breadcrumb: 'Позиции заказов' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/order-items/order-items').then((m) => m.OrderItems),
+          },
+          {
+            path: 'users',
+            data: { breadcrumb: 'Пользователи' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/entitys/users/users').then((m) => m.Users),
           },
         ],
       },

@@ -7,20 +7,20 @@ export enum DataType {
   DATE,
 }
 
-export interface ProductComponent {
+export interface ProductComponentView {
   title: string;
   description: string;
   dataType: DataType;
   value: string;
 }
 
-export interface Sku {
+export interface SkuView {
   skuId: string;
   price: number;
   discount: number;
   amount: number;
   priceWithDiscount: number;
-  skuSpecificComponents: ProductComponent[];
+  skuSpecificComponents: ProductComponentView[];
 }
 
 export interface ProductDetails {
@@ -29,7 +29,7 @@ export interface ProductDetails {
   description: string;
   brandTitle: string;
   images: Nullable<string[]>;
-  mainSku: Sku;
-  additionalSkus: Sku[];
-  commonComponents: ProductComponent[];
+  mainSku: SkuView;
+  additionalSkus: SkuView[];
+  commonComponents: ProductComponentView[];
 }

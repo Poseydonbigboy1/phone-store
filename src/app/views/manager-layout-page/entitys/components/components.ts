@@ -1,33 +1,41 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ComponentCategory } from '@models/data';
+import { Component as ComponentEntity, DATA_TYPE_LABELS } from '@models/data';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DrawerModule } from 'primeng/drawer';
 import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
 import { Observable } from 'rxjs';
-import { ComponentCategoryService } from './component-categories.service';
+import { ComponentsService } from './components.service';
 
 @Component({
-  selector: 'app-component-categories',
+  selector: 'app-components',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, TableModule, ButtonModule, DrawerModule, PaginatorModule,
-    InputTextModule, FormsModule, ReactiveFormsModule, ToolbarModule, TagModule, ConfirmDialogModule],
-  templateUrl: './component-categories.html',
-  styleUrl: './component-categories.scss',
+    InputTextModule, FormsModule, ReactiveFormsModule, ToolbarModule, TagModule,
+    ConfirmDialogModule, SelectModule],
+  templateUrl: './components.html',
+  styleUrl: './components.scss',
   providers: [ConfirmationService],
 })
-export class ComponentCategories implements OnInit {
-  readonly items$: Observable<ComponentCategory[]>;
+export class Components implements OnInit {
+  readonly items$: Observable<ComponentEntity[]>;
   readonly total$: Observable<number>;
   readonly loading$: Observable<boolean>;
+
+  readonly dataTypeOptions = [
+    { label: 'STRING', value: 0 }, { label: 'INT', value: 1 },
+    { label: 'DOUBLE', value: 2 }, { label: 'BOOLEAN', value: 3 },
+  ];
+  readonly dataTypeLabels = DATA_TYPE_LABELS;
 
   paginatorState: PaginatorState = { first: 0, rows: 10, page: 0, pageCount: 0 };
   displayForm = false;
@@ -39,7 +47,7 @@ export class ComponentCategories implements OnInit {
   appliedFilters: { key: string; value: string }[] = [];
 
   constructor(
-    private svc: ComponentCategoryService,
+    private svc: ComponentsService,
     private fb: FormBuilder,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -47,23 +55,28 @@ export class ComponentCategories implements OnInit {
     this.items$ = svc.items$;
     this.total$ = svc.total$;
     this.loading$ = svc.loading$;
-    this.form = this.fb.group({ title: ['', Validators.required] });
+    this.form = this.fb.group({
+      title: ['', Validators.required],
+      description: [''],
+      dataType: [0, Validators.required],
+      categoryType: [0],
+      componentCategoryId: ['', Validators.required],
+    });
     this.filterForm = this.fb.group({ title: [''] });
   }
 
   ngOnInit(): void { this.svc.load(this.paginatorState); }
 
-  onPageChange(event: PaginatorState): void {
-    this.paginatorState = event;
+  onPageChange(e: PaginatorState): void {
+    this.paginatorState = e;
     this.svc.load(this.paginatorState, this.filterForm.value.title ?? '');
   }
 
-  showAddForm(): void { this.isEditMode = false; this.form.reset(); this.displayForm = true; }
+  showAddForm(): void { this.isEditMode = false; this.form.reset({ dataType: 0, categoryType: 0 }); this.displayForm = true; }
 
-  showEditForm(item: ComponentCategory): void {
-    this.isEditMode = true;
-    this.selectedId = item.id;
-    this.form.patchValue({ title: item.title });
+  showEditForm(item: ComponentEntity): void {
+    this.isEditMode = true; this.selectedId = item.id;
+    this.form.patchValue(item);
     this.displayForm = true;
   }
 
@@ -86,10 +99,7 @@ export class ComponentCategories implements OnInit {
     this.confirmationService.confirm({
       message: 'Удалить запись?', header: 'Подтверждение', icon: 'pi pi-exclamation-triangle',
       accept: () => this.svc.delete$(id).subscribe({
-        next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' });
-          this.svc.load(this.paginatorState, this.filterForm.value.title ?? '');
-        },
+        next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' }); this.svc.load(this.paginatorState, this.filterForm.value.title ?? ''); },
         error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
       }),
     });

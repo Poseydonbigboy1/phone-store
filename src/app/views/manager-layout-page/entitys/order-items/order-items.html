@@ -17,13 +17,16 @@
     </p-toolbar>
     <div class="flex-1" style="min-height: 0; overflow: hidden">
       <p-table [value]="(items$ | async) ?? []" [loading]="(loading$ | async) ?? false"
-        [rowHover]="true" [scrollable]="true" scrollHeight="flex" [tableStyle]="{ 'min-width': '20rem' }">
+        [rowHover]="true" [scrollable]="true" scrollHeight="flex">
         <ng-template pTemplate="header">
-          <tr><th>Название</th><th style="width: 8rem"></th></tr>
+          <tr><th>ID заказа</th><th>ID SKU</th><th>Кол-во</th><th>Цена</th><th style="width: 8rem"></th></tr>
         </ng-template>
         <ng-template pTemplate="body" let-item>
           <tr>
-            <td>{{ item.title }}</td>
+            <td class="text-sm text-color-secondary">{{ item.orderId }}</td>
+            <td class="text-sm text-color-secondary">{{ item.skuId }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }}</td>
             <td>
               <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small" class="mr-2" (onClick)="showEditForm(item)" />
               <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" size="small" (onClick)="delete(item.id)" />
@@ -31,7 +34,7 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
-          <tr><td colspan="2" class="text-center py-6"><i class="pi pi-inbox text-4xl text-color-secondary block mb-3"></i><span class="text-color-secondary">Нет данных</span></td></tr>
+          <tr><td colspan="5" class="text-center py-6"><i class="pi pi-inbox text-4xl text-color-secondary block mb-3"></i><span class="text-color-secondary">Нет данных</span></td></tr>
         </ng-template>
       </p-table>
     </div>
@@ -41,12 +44,24 @@
   </div>
 </div>
 
-<p-drawer [(visible)]="displayForm" position="right" appendTo="body" [style]="{ width: '28rem' }">
+<p-drawer [(visible)]="displayForm" position="right" appendTo="body" [style]="{ width: '32rem' }">
   <ng-template pTemplate="header"><span class="font-semibold text-lg">{{ isEditMode ? 'Редактировать' : 'Добавить' }}</span></ng-template>
   <form [formGroup]="form" (ngSubmit)="onFormSubmit()" class="flex flex-column gap-4 pt-2">
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">Название</label>
-      <input pInputText formControlName="title" placeholder="Введите название..." />
+      <label class="font-medium text-sm">ID заказа *</label>
+      <input pInputText formControlName="orderId" placeholder="UUID заказа..." />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-medium text-sm">ID SKU *</label>
+      <input pInputText formControlName="skuId" placeholder="UUID SKU..." />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-medium text-sm">Количество *</label>
+      <p-inputnumber formControlName="quantity" [min]="1" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-medium text-sm">Цена *</label>
+      <p-inputnumber formControlName="price" [minFractionDigits]="2" />
     </div>
     <div class="flex gap-2 justify-content-end mt-auto">
       <p-button label="Отмена" severity="secondary" [outlined]="true" (onClick)="displayForm = false" />
@@ -59,8 +74,8 @@
   <ng-template pTemplate="header"><span class="font-semibold text-lg">Фильтр</span></ng-template>
   <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="flex flex-column gap-4 pt-2">
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">Название</label>
-      <input pInputText formControlName="title" placeholder="Фильтр по названию..." />
+      <label class="font-medium text-sm">ID заказа</label>
+      <input pInputText formControlName="orderId" placeholder="UUID..." />
     </div>
     <div class="flex gap-2 justify-content-end mt-auto">
       <p-button label="Сбросить" severity="secondary" [outlined]="true" type="button" (onClick)="filterForm.reset(); applyFilters()" />

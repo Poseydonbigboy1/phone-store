@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ComponentCategory } from '@models/data';
+import { Product } from '@models/data';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -12,20 +12,20 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
 import { Observable } from 'rxjs';
-import { ComponentCategoryService } from './component-categories.service';
+import { ProductsManagerService } from './products.service';
 
 @Component({
-  selector: 'app-component-categories',
+  selector: 'app-products',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, TableModule, ButtonModule, DrawerModule, PaginatorModule,
     InputTextModule, FormsModule, ReactiveFormsModule, ToolbarModule, TagModule, ConfirmDialogModule],
-  templateUrl: './component-categories.html',
-  styleUrl: './component-categories.scss',
+  templateUrl: './products.html',
+  styleUrl: './products.scss',
   providers: [ConfirmationService],
 })
-export class ComponentCategories implements OnInit {
-  readonly items$: Observable<ComponentCategory[]>;
+export class Products implements OnInit {
+  readonly items$: Observable<Product[]>;
   readonly total$: Observable<number>;
   readonly loading$: Observable<boolean>;
 
@@ -39,7 +39,7 @@ export class ComponentCategories implements OnInit {
   appliedFilters: { key: string; value: string }[] = [];
 
   constructor(
-    private svc: ComponentCategoryService,
+    private svc: ProductsManagerService,
     private fb: FormBuilder,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -47,24 +47,23 @@ export class ComponentCategories implements OnInit {
     this.items$ = svc.items$;
     this.total$ = svc.total$;
     this.loading$ = svc.loading$;
-    this.form = this.fb.group({ title: ['', Validators.required] });
+    this.form = this.fb.group({
+      title: ['', Validators.required],
+      description: [''],
+      brandId: ['', Validators.required],
+    });
     this.filterForm = this.fb.group({ title: [''] });
   }
 
   ngOnInit(): void { this.svc.load(this.paginatorState); }
 
-  onPageChange(event: PaginatorState): void {
-    this.paginatorState = event;
-    this.svc.load(this.paginatorState, this.filterForm.value.title ?? '');
-  }
+  onPageChange(e: PaginatorState): void { this.paginatorState = e; this.svc.load(e, this.filterForm.value.title ?? ''); }
 
   showAddForm(): void { this.isEditMode = false; this.form.reset(); this.displayForm = true; }
 
-  showEditForm(item: ComponentCategory): void {
-    this.isEditMode = true;
-    this.selectedId = item.id;
-    this.form.patchValue({ title: item.title });
-    this.displayForm = true;
+  showEditForm(item: Product): void {
+    this.isEditMode = true; this.selectedId = item.id;
+    this.form.patchValue(item); this.displayForm = true;
   }
 
   onFormSubmit(): void {
@@ -73,11 +72,7 @@ export class ComponentCategories implements OnInit {
       ? this.svc.update$({ id: this.selectedId!, ...this.form.value })
       : this.svc.create$(this.form.value);
     op$.subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Успешно', detail: this.isEditMode ? 'Обновлено' : 'Создано' });
-        this.displayForm = false;
-        this.svc.load(this.paginatorState, this.filterForm.value.title ?? '');
-      },
+      next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: this.isEditMode ? 'Обновлено' : 'Создано' }); this.displayForm = false; this.svc.load(this.paginatorState, this.filterForm.value.title ?? ''); },
       error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
     });
   }
@@ -86,10 +81,7 @@ export class ComponentCategories implements OnInit {
     this.confirmationService.confirm({
       message: 'Удалить запись?', header: 'Подтверждение', icon: 'pi pi-exclamation-triangle',
       accept: () => this.svc.delete$(id).subscribe({
-        next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' });
-          this.svc.load(this.paginatorState, this.filterForm.value.title ?? '');
-        },
+        next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' }); this.svc.load(this.paginatorState, this.filterForm.value.title ?? ''); },
         error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
       }),
     });
