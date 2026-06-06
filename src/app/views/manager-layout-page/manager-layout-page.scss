@@ -196,19 +196,22 @@
 // Sakai: padding 6rem сверху (4rem topbar + 2rem отступ), margin-left 22rem
 .layout-main-container {
   position: fixed;
-  top: 4rem;       // под топбаром
-  left: 22rem;     // правее сайдбара
+  top: 4rem;
+  left: 22rem;
   right: 0;
   bottom: 0;
-  overflow: auto;  // скроллится сам контейнер, не body
+  overflow: hidden;     // внешнего скролла нет
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
   transition: left 0.2s;
 }
 
 .layout-main {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: 0;        // разрешает flex-детям сжиматься
 }
 
 // ─── Page header ─────────────────────────────────────────
@@ -228,9 +231,10 @@
 // ─── Content ─────────────────────────────────────────────
 .layout-main-content {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0; // даёт flex-детям возможность сжиматься ниже auto-height
+  overflow: hidden;
 
   > *:not(router-outlet) {
     display: flex;
@@ -280,5 +284,6 @@
 
   .layout-main-container {
     left: 0;
+    padding: 1rem;
   }
 }

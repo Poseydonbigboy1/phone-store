@@ -12,8 +12,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { DrawerModule } from 'primeng/drawer';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-import { DrawerModule  } from 'primeng/drawer';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
@@ -26,11 +26,11 @@ import { BrandService } from './brands.service';
     CommonModule,
     TableModule,
     ButtonModule,
-    DrawerModule ,
+    DrawerModule,
+    PaginatorModule,
     InputTextModule,
     FormsModule,
     ReactiveFormsModule,
-    PaginatorModule,
     ToolbarModule,
     TagModule,
     ConfirmDialogModule,
@@ -76,6 +76,11 @@ export class Brands implements OnInit {
     this.loadBrands();
   }
 
+  onPageChange(event: PaginatorState): void {
+    this.paginatorState = event;
+    this.loadBrands();
+  }
+
   loadBrands(): void {
     this.loading = true;
     const filterValue = { title: this.filterForm.value.title };
@@ -84,11 +89,6 @@ export class Brands implements OnInit {
       this.totalRecords = response.total;
       this.loading = false;
     });
-  }
-
-  onPageChange(event: PaginatorState): void {
-    this.paginatorState = event;
-    this.loadBrands();
   }
 
   showAddForm(): void {
@@ -151,7 +151,7 @@ export class Brands implements OnInit {
       this.appliedFilters.push({ key: 'title', value: title });
     }
     this.displayFilter = false;
-    this.paginatorState.first = 0; // Reset paginator
+    this.paginatorState = { ...this.paginatorState, first: 0, page: 0 };
     this.loadBrands();
   }
 
