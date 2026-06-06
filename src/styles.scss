@@ -1,7 +1,32 @@
-/* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
 
-html,body {
+html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  font-size: 14px;
+}
+
+// Переменные, которые использует Sakai и не всегда определены в PrimeNG напрямую
+:root {
+  --surface-ground:   var(--p-surface-100);
+  --surface-card:     var(--p-content-background);
+  --surface-border:   var(--p-content-border-color);
+  --surface-hover:    var(--p-content-hover-background);
+  --text-color:       var(--p-text-color);
+  --text-color-secondary: var(--p-text-muted-color);
+  --primary-color:    var(--p-primary-color);
+}
+
+// Sakai card — используется на всех страницах дашборда
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 5px rgba(0,0,0,.02), 0 0 2px rgba(0,0,0,.05), 0 1px 4px rgba(0,0,0,.08);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }

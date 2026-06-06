@@ -1,79 +1,82 @@
-<div class="content-container flex flex-column h-full">
-  <p-toast></p-toast>
-  <p-confirmDialog></p-confirmDialog>
+<div class="flex flex-column h-full gap-3">
+  <p-toast />
+  <p-confirmDialog />
 
-  <div class="card flex-1 flex flex-column overflow-hidden">
-    <p-toolbar styleClass="mb-4">
-      <ng-template pTemplate="left">
-        <div class="flex flex-wrap gap-2">
-          <button
-            pButton
-            pRipple
-            label="New"
-            icon="pi pi-plus"
-            class="p-button-success"
-            (click)="showAddForm()"
-          ></button>
-          <button
-            pButton
-            pRipple
-            label="Filter"
-            icon="pi pi-filter"
-            class="p-button-info"
-            (click)="displayFilter = true"
-          ></button>
+  <div class="card flex-1 flex flex-column">
+
+    <p-toolbar styleClass="mb-3">
+      <ng-template pTemplate="start">
+        <div class="flex gap-2">
+          <p-button label="Добавить" icon="pi pi-plus" severity="success" (onClick)="showAddForm()" />
+          <p-button label="Фильтр" icon="pi pi-filter" severity="secondary" [outlined]="true" (onClick)="displayFilter = true" />
         </div>
       </ng-template>
 
-      <ng-template pTemplate="right">
+      <ng-template pTemplate="end">
         <div class="flex flex-wrap gap-2">
-          <div *ngFor="let filter of appliedFilters">
-            <p-tag
-              styleClass="mr-2"
-              [value]="filter.key + ': ' + filter.value"
-              icon="pi pi-times"
-              (click)="removeFilter(filter.key)"
-            ></p-tag>
-          </div>
+          <p-tag
+            *ngFor="let f of appliedFilters"
+            [value]="f.key + ': ' + f.value"
+            icon="pi pi-times"
+            severity="secondary"
+            styleClass="cursor-pointer"
+            (click)="removeFilter(f.key)"
+          />
         </div>
       </ng-template>
     </p-toolbar>
 
+    <div class="flex-1 overflow-hidden" style="min-height: 0">
     <p-table
       [value]="brands"
       [loading]="loading"
-      styleClass="p-datatable-sm flex-1 overflow-hidden"
+      styleClass="p-datatable-sm"
       [scrollable]="true"
       scrollHeight="flex"
     >
       <ng-template pTemplate="header">
         <tr>
-          <th>Title</th>
-          <th style="width: 100px">Actions</th>
+          <th>Название</th>
+          <th style="width: 8rem">Действия</th>
         </tr>
       </ng-template>
+
       <ng-template pTemplate="body" let-brand>
         <tr>
           <td>{{ brand.title }}</td>
           <td>
-            <button
-              pButton
-              pRipple
-              icon="pi pi-pencil"
-              class="p-button-rounded p-button-success mr-2"
-              (click)="showEditForm(brand)"
-            ></button>
-            <button
-              pButton
-              pRipple
-              icon="pi pi-trash"
-              class="p-button-rounded p-button-warning"
-              (click)="deleteBrand(brand.id)"
-            ></button>
+            <div class="flex gap-1">
+              <p-button
+                icon="pi pi-pencil"
+                severity="success"
+                [rounded]="true"
+                [text]="true"
+                size="small"
+                (onClick)="showEditForm(brand)"
+              />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [text]="true"
+                size="small"
+                (onClick)="deleteBrand(brand.id)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="2" class="text-center text-color-secondary py-5">
+            <i class="pi pi-inbox text-4xl mb-2 block"></i>
+            Бренды не найдены
           </td>
         </tr>
       </ng-template>
     </p-table>
+    </div>
 
     <p-paginator
       [rows]="paginatorState.rows!"
@@ -81,65 +84,56 @@
       [first]="paginatorState.first!"
       (onPageChange)="onPageChange($event)"
       [rowsPerPageOptions]="[10, 20, 50]"
-    ></p-paginator>
+    />
+
   </div>
 </div>
 
-<!-- Sidebar for Add/Edit Form -->
-<p-drawer [(visible)]="displayForm" position="right" [style]="{ width: '30em' }">
+<!-- Drawer: Add / Edit -->
+<p-drawer [(visible)]="displayForm" position="right" [style]="{ width: '28rem' }">
   <ng-template pTemplate="header">
-    <h3>{{ isEditMode ? 'Edit Brand' : 'Add Brand' }}</h3>
+    <span class="font-semibold text-lg">{{ isEditMode ? 'Редактировать бренд' : 'Добавить бренд' }}</span>
   </ng-template>
-  <form [formGroup]="brandForm" (ngSubmit)="onFormSubmit()">
-    <div class="p-fluid">
-      <div class="field">
-        <label for="title">Title</label>
-        <input pInputText id="title" formControlName="title" />
-      </div>
+
+  <form [formGroup]="brandForm" (ngSubmit)="onFormSubmit()" class="flex flex-column gap-4 pt-2">
+    <div class="flex flex-column gap-1">
+      <label for="title" class="font-medium text-sm">Название</label>
+      <input pInputText id="title" formControlName="title" placeholder="Введите название..." />
     </div>
-    <div class="p-dialog-footer mt-5">
-      <button
-        pButton
-        pRipple
-        type="button"
-        label="Cancel"
-        class="p-button-secondary"
-        (click)="displayForm = false"
-      ></button>
-      <button
-        pButton
-        pRipple
+
+    <div class="flex gap-2 justify-content-end mt-auto">
+      <p-button label="Отмена" severity="secondary" [outlined]="true" (onClick)="displayForm = false" />
+      <p-button
+        [label]="isEditMode ? 'Сохранить' : 'Добавить'"
         type="submit"
-        [label]="isEditMode ? 'Update' : 'Save'"
-        class="p-button-success"
+        severity="success"
         [disabled]="brandForm.invalid"
-      ></button>
+      />
     </div>
   </form>
 </p-drawer>
 
-<!-- Sidebar for Filters -->
-<p-drawer [(visible)]="displayFilter" position="right" [style]="{ width: '25em' }">
+<!-- Drawer: Filter -->
+<p-drawer [(visible)]="displayFilter" position="right" [style]="{ width: '24rem' }">
   <ng-template pTemplate="header">
-    <h3>Filters</h3>
+    <span class="font-semibold text-lg">Фильтр</span>
   </ng-template>
-  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
-    <div class="p-fluid">
-      <div class="field">
-        <label for="filterTitle">Title</label>
-        <input pInputText id="filterTitle" formControlName="title" />
-      </div>
+
+  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="flex flex-column gap-4 pt-2">
+    <div class="flex flex-column gap-1">
+      <label for="filterTitle" class="font-medium text-sm">Название</label>
+      <input pInputText id="filterTitle" formControlName="title" placeholder="Фильтр по названию..." />
     </div>
-    <div class="p-dialog-footer mt-5">
-      <button
-        pButton
-        pRipple
+
+    <div class="flex gap-2 justify-content-end mt-auto">
+      <p-button
+        label="Сбросить"
+        severity="secondary"
+        [outlined]="true"
         type="button"
-        label="Clear"
-        class="p-button-secondary"
-        (click)="filterForm.reset(); applyFilters()"
-      ></button>
-      <button pButton pRipple type="submit" label="Apply" class="p-button-info"></button>
+        (onClick)="filterForm.reset(); applyFilters()"
+      />
+      <p-button label="Применить" type="submit" />
     </div>
   </form>
 </p-drawer>

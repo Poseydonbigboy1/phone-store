@@ -1,19 +1,5 @@
 :host {
-  display: block;
-  height: 100%;
-}
-
-.content-container {
-  height: 100%;
   display: flex;
   flex-direction: column;
-
-  .card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Important for flex scroll */
-    border: 1px solid var(--surface-border);
-    border-radius: 12px;
-  }
+  height: 100%;
 }
