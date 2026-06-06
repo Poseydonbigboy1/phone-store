@@ -1,0 +1,15 @@
+.delivery-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--surface-border);
+  &:last-of-type { border-bottom: none; }
+}

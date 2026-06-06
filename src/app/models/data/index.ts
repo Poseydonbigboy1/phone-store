@@ -11,3 +11,6 @@ export * from './product';
 export * from './product-component';
 export * from './sku';
 export * from './manager-user';
+export * from './cart-item';
+export * from './delivery';
+export * from './order-summary';

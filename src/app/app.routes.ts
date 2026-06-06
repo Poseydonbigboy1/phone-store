@@ -4,7 +4,6 @@ import { SiteLayuotPage } from './views/site-layuot-page/site-layuot-page';
 import { CatalogPage } from './views/site-layuot-page/catalog-page/catalog-page';
 import { HomePage } from './views/site-layuot-page/home-page/home-page';
 import { ProfilePage } from './views/site-layuot-page/profile-page/profile-page';
-import { CheckoutPage } from './views/site-layuot-page/checkout-page/checkout-page';
 import { NotFound } from './views/not-found/not-found';
 import { authGuard } from '@guards';
 import { ManagerLayoutPage } from './views/manager-layout-page/manager-layout-page';
@@ -116,8 +115,18 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
+        path: 'cart',
+        loadComponent: () => import('./views/site-layuot-page/cart-page/cart-page').then(m => m.CartPage),
+        canActivate: [authGuard],
+      },
+      {
         path: 'checkout',
-        component: CheckoutPage,
+        loadComponent: () => import('./views/site-layuot-page/checkout-page/checkout-page').then(m => m.CheckoutPage),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./views/site-layuot-page/orders-page/orders-page').then(m => m.OrdersPage),
         canActivate: [authGuard],
       },
     ],

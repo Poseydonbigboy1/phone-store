@@ -4,13 +4,24 @@
     class="flex-none h-100px shadow-4 z-5"
     style="background-color: #303030; border-bottom: 1px solid #2d243d"
   >
-    <p-menubar
-      [model]="menuItems"
-      class="border-none h-full surface-800"
-    >
+    <p-menubar [model]="menuItems" class="border-none h-full surface-800">
       <ng-template pTemplate="end">
         <div class="flex align-items-center gap-3">
           @if (user$ | async; as user) {
+            <!-- Иконка корзины с бейджем -->
+            <p-overlaybadge
+              [value]="(cartCount$ | async) || null"
+              severity="danger"
+            >
+              <p-button
+                icon="pi pi-shopping-cart"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                (onClick)="goToCart()"
+              />
+            </p-overlaybadge>
+
             <span
               class="white-space-nowrap overflow-hidden text-overflow-ellipsis font-medium"
               style="max-width: 100px; color: #ffffff"

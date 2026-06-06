@@ -1,3 +1,4 @@
+<p-toast />
 <div class="flex flex-column h-full">
   <p-confirmDialog appendTo="body" />
   <div class="card flex-1 flex flex-column" style="min-height: 0">
@@ -10,8 +11,10 @@
       </ng-template>
       <ng-template pTemplate="end">
         <div class="flex flex-wrap gap-2">
-          <p-tag *ngFor="let f of appliedFilters" [value]="f.key + ': ' + f.value" icon="pi pi-times"
-            severity="secondary" styleClass="cursor-pointer" (click)="removeFilter(f.key)" />
+          @for (f of appliedFilters; track f.key) {
+            <p-tag [value]="f.key + ': ' + f.value" icon="pi pi-times"
+              severity="secondary" styleClass="cursor-pointer" (click)="removeFilter(f.key)" />
+          }
         </div>
       </ng-template>
     </p-toolbar>
@@ -19,23 +22,33 @@
       <p-table [value]="(items$ | async) ?? []" [loading]="(loading$ | async) ?? false"
         [rowHover]="true" [scrollable]="true" scrollHeight="flex">
         <ng-template pTemplate="header">
-          <tr><th>ID пользователя</th><th>Дата</th><th>Статус</th><th>Сумма</th><th>Адрес</th><th style="width: 8rem"></th></tr>
+          <tr>
+            <th>Пользователь</th>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th>Сумма</th>
+            <th style="width: 10rem"></th>
+          </tr>
         </ng-template>
         <ng-template pTemplate="body" let-item>
           <tr>
             <td>{{ getUserLabel(item.userId) }}</td>
             <td>{{ item.orderDate | slice:0:10 }}</td>
             <td><p-tag [value]="statusLabels[item.status]" [severity]="statusSeverities[item.status]" /></td>
-            <td>{{ item.totalAmount }}</td>
-            <td>{{ item.shippingAddress }}</td>
+            <td>{{ item.totalAmount | number:'1.0-0' }} ₽</td>
             <td>
-              <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small" class="mr-2" (onClick)="showEditForm(item)" />
+              <p-button icon="pi pi-eye" [rounded]="true" [outlined]="true" size="small" class="mr-1"
+                pTooltip="Детали / смена статуса" (onClick)="openDetail(item)" />
+              <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small" class="mr-1" (onClick)="showEditForm(item)" />
               <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" size="small" (onClick)="delete(item.id)" />
             </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
-          <tr><td colspan="6" class="text-center py-6"><i class="pi pi-inbox text-4xl text-color-secondary block mb-3"></i><span class="text-color-secondary">Нет данных</span></td></tr>
+          <tr><td colspan="5" class="text-center py-6">
+            <i class="pi pi-inbox text-4xl text-color-secondary block mb-3"></i>
+            <span class="text-color-secondary">Нет данных</span>
+          </td></tr>
         </ng-template>
       </p-table>
     </div>
@@ -45,6 +58,80 @@
   </div>
 </div>
 
+<!-- Детали заказа + смена статуса -->
+<p-dialog
+  header="Детали заказа"
+  [(visible)]="detailVisible"
+  [modal]="true"
+  [style]="{ width: '700px', maxWidth: '95vw' }"
+  appendTo="body"
+>
+  @if (detailLoading()) {
+    <div class="flex justify-content-center p-5">
+      <p-progressspinner strokeWidth="4" />
+    </div>
+  } @else if (selectedOrder(); as order) {
+
+    <!-- Заголовок и текущий статус -->
+    <div class="flex align-items-center justify-content-between mb-3">
+      <span class="text-color-secondary">#{{ order.id.slice(0, 8) }} · {{ order.orderDate | date:'dd MMM yyyy HH:mm' }}</span>
+      <p-tag [value]="statusLabels[order.status]" [severity]="statusSeverities[order.status]" />
+    </div>
+
+    <!-- Кнопки смены статуса -->
+    @if (transitions[order.status].length > 0) {
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="font-medium text-sm align-self-center mr-1">Перевести в:</span>
+        @for (next of transitions[order.status]; track next) {
+          <p-button
+            [label]="statusNames[next]"
+            [icon]="statusIcons[next]"
+            [severity]="next === 4 ? 'danger' : next === 3 ? 'success' : 'info'"
+            [outlined]="true"
+            size="small"
+            [loading]="statusChanging()"
+            (onClick)="changeStatus(order.id, next)"
+          />
+        }
+      </div>
+    }
+
+    <p-divider />
+
+    <!-- Позиции -->
+    <h4 class="mt-0 mb-3">Состав заказа</h4>
+    <div class="flex flex-column gap-2 mb-3">
+      @for (item of order.items; track item.skuId) {
+        <div class="flex justify-content-between align-items-center detail-item-row">
+          <div>
+            <div class="font-medium">{{ item.productTitle }}</div>
+            <small class="text-color-secondary">{{ item.quantity }} × {{ item.price | number:'1.0-0' }} ₽</small>
+          </div>
+          <span class="font-bold">{{ item.lineTotal | number:'1.0-0' }} ₽</span>
+        </div>
+      }
+    </div>
+    <div class="flex justify-content-between font-bold text-lg mb-4">
+      <span>Итого</span><span>{{ order.totalAmount | number:'1.0-0' }} ₽</span>
+    </div>
+
+    <!-- Доставка -->
+    @if (order.delivery) {
+      <p-divider />
+      <h4 class="mt-0 mb-2">Доставка</h4>
+      <div class="flex flex-column gap-1 text-sm text-color-secondary">
+        <div><i class="mr-2" [class]="order.delivery.type === 1 ? 'pi pi-box' : 'pi pi-truck'"></i>
+          <strong>{{ deliveryLabel(order.delivery.type) }}</strong></div>
+        <div>Получатель: <strong>{{ order.delivery.recipientName }}</strong></div>
+        <div>Телефон: {{ order.delivery.phone }}</div>
+        @if (order.delivery.address) { <div>Адрес: {{ order.delivery.address }}</div> }
+        @if (order.delivery.comment) { <div>Комментарий: {{ order.delivery.comment }}</div> }
+      </div>
+    }
+  }
+</p-dialog>
+
+<!-- Форма добавления/редактирования -->
 <p-drawer [(visible)]="displayForm" position="right" appendTo="body" [style]="{ width: '32rem' }">
   <ng-template pTemplate="header"><span class="font-semibold text-lg">{{ isEditMode ? 'Редактировать' : 'Добавить' }}</span></ng-template>
   <form [formGroup]="form" (ngSubmit)="onFormSubmit()" class="flex flex-column gap-4 pt-2">
@@ -56,7 +143,10 @@
     </div>
     <div class="flex flex-column gap-1">
       <label class="font-medium text-sm">Статус *</label>
-      <p-select formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value" />
+      <p-select formControlName="status" [options]="[
+        { label: 'Ожидает', value: 0 }, { label: 'Подтверждён', value: 1 },
+        { label: 'В доставке', value: 2 }, { label: 'Доставлен', value: 3 }, { label: 'Отменён', value: 4 }
+      ]" optionLabel="label" optionValue="value" />
     </div>
     <div class="flex flex-column gap-1">
       <label class="font-medium text-sm">Сумма</label>
@@ -73,11 +163,12 @@
   </form>
 </p-drawer>
 
+<!-- Фильтр -->
 <p-drawer [(visible)]="displayFilter" position="right" appendTo="body" [style]="{ width: '24rem' }">
   <ng-template pTemplate="header"><span class="font-semibold text-lg">Фильтр</span></ng-template>
   <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="flex flex-column gap-4 pt-2">
     <div class="flex flex-column gap-1">
-      <label class="font-medium text-sm">ID пользователя</label>
+      <label class="font-medium text-sm">Пользователь</label>
       <input pInputText formControlName="userId" placeholder="UUID..." />
     </div>
     <div class="flex gap-2 justify-content-end mt-auto">

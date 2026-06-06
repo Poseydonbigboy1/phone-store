@@ -1,3 +1,5 @@
+<p-toast />
+
 @if(product(); as product){
 <div class="product-details-container">
   <div class="product-header">
@@ -46,7 +48,14 @@
           }}</span>
           }
         </div>
-        <p-button label="Добавить в корзину" icon="pi pi-shopping-cart" />
+        <p-button
+          label="Добавить в корзину"
+          icon="pi pi-shopping-cart"
+          severity="success"
+          styleClass="w-full mt-3"
+          [loading]="addingToCart"
+          (onClick)="addToCart()"
+        />
       </p-card>
 
       <p-fieldset legend="Описание" [toggleable]="true" [collapsed]="false">

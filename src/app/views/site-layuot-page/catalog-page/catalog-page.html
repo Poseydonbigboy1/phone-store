@@ -1,3 +1,4 @@
+<p-toast />
 <div class="grid">
   <div class="col-3">
     <app-catalog-filter></app-catalog-filter>
@@ -23,9 +24,12 @@
                         </div>
                       </div>
                       <p-rating [ngModel]="product.rating" [stars]="5" />
-                      <p-button severity="success" aria-label="Save" (click)="addToCart(product)">
-                        <span class="pi pi-cart-plus text-xl"></span>
-                      </p-button>
+                      <p-button
+                        severity="success"
+                        icon="pi pi-cart-plus"
+                        [loading]="!!addingSkuId && addingSkuId === product?.skuId"
+                        (onClick)="addToCart(product)"
+                      />
                     </ng-template>
                   </p-card>
                 </div>

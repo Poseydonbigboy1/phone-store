@@ -4,6 +4,7 @@ import { BehaviorSubject, lastValueFrom, Observable, switchMap, tap } from 'rxjs
 import { User } from '@models/data';
 import { Nullable } from 'primeng/ts-helpers';
 import { Router } from '@angular/router';
+import { CartService } from './services/cart.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -13,9 +14,10 @@ export class AuthService {
 
   private readonly _router: Router;
 
+  private readonly cartService = inject(CartService);
+
   constructor(private authHttpService: AuthHttpService) {
     this._router = inject(Router);
-
     this.user$ = this.currentUser$.asObservable();
   }
 
@@ -35,7 +37,8 @@ export class AuthService {
       .pipe(switchMap((sw) => this.getProfile$()))
       .subscribe({
         next: (res) => {
-          this._router.navigate(['main'])
+          this.cartService.mergeOnLogin();
+          this._router.navigate(['main']);
           console.log(`[auth] [succes]`, res);
         },
         error: (err0r) => {
