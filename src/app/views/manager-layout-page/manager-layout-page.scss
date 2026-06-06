@@ -200,8 +200,9 @@
   left: 22rem;
   right: 0;
   bottom: 0;
-  overflow: hidden;     // внешнего скролла нет
+  overflow: hidden;
   padding: 2rem;
+  background-color: var(--surface-ground);
   display: flex;
   flex-direction: column;
   transition: left 0.2s;

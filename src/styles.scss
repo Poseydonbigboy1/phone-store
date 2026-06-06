@@ -5,6 +5,8 @@ html, body {
   padding: 0;
   height: 100%;
   font-size: 14px;
+  background-color: var(--surface-ground);
+  color: var(--text-color);
 }
 
 // Переменные, которые использует Sakai и не всегда определены в PrimeNG напрямую
