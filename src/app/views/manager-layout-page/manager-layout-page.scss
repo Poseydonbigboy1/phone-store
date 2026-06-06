@@ -69,6 +69,29 @@
   display: none;
 }
 
+.layout-topbar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  overflow: hidden;
+}
+
+.layout-topbar-title-separator {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--surface-border);
+  flex-shrink: 0;
+}
+
+.layout-topbar-title-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 // ─── Sidebar ─────────────────────────────────────────────
 // Точно как в Sakai: плавающий блок с отступом и скруглением
 .layout-sidebar {

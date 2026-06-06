@@ -12,6 +12,11 @@
       </a>
     </div>
 
+    <div class="layout-topbar-title" *ngIf="currentPageTitle">
+      <span class="layout-topbar-title-separator"></span>
+      <span class="layout-topbar-title-text">{{ currentPageTitle }}</span>
+    </div>
+
     <div class="layout-topbar-actions">
       <p-avatar icon="pi pi-user" shape="circle" />
     </div>

@@ -34,6 +34,10 @@ export class ManagerLayoutPage implements OnInit {
   breadcrumbItems: MenuItem[] = [];
   home: MenuItem = { icon: 'pi pi-home', routerLink: '/manager' };
 
+  get currentPageTitle(): string {
+    return this.breadcrumbItems.at(-1)?.label ?? '';
+  }
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
