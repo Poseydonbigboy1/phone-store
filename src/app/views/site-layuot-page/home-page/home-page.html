@@ -1,133 +1,181 @@
-<div class="card -ml-3 -mt-3 -mr-3">
-  <p-carousel
-    [value]="(productsPromo$ | async) ?? []"
-    [numVisible]="1"
-    [numScroll]="1"
-    [circular]="true"
-    contentClass=""
-    [prevButtonProps]="{
-      styleClass: 'absolute top-50 z-2',
-    }"
-    [nextButtonProps]="{
-      styleClass: 'absolute top-50 right-0 z-2',
-    }"
-    [pt]="{
-      indicatorlist: 'absolute w-full bottom-0',
-      content: 'relative',
-      contentcontainer: 'relative',
-    }"
-  >
-    <ng-template let-product #item>
-      <div class="w-100 relative">
-        <img [src]="product.imgUrl" [alt]="product.title" class="w-full rounded-border" />
-        <div class="absolute top-0 right-0 z-2 m-2">
-          <p-tag
-            [value]="product.inventoryStatus"
-            [severity]="getSeverity(product.inventoryStatus)"
-            class="dark:!bg-surface-900"
-          />
+<p-toast />
+
+<!-- ════════════════════ БАННЕРНЫЙ СЛАЙДЕР ════════════════════ -->
+@if (banners().length > 0) {
+  <div class="banner-slider mb-5">
+    <p-carousel
+      [value]="banners()"
+      [numVisible]="1" [numScroll]="1"
+      [circular]="true"
+      [autoplayInterval]="5000"
+      [showIndicators]="banners().length > 1"
+      [showNavigators]="banners().length > 1"
+    >
+      <ng-template pTemplate="item" let-banner>
+        <div class="banner-slide"
+             [class.banner-slide--clickable]="!!banner.link"
+             (click)="navigateBanner(banner)">
+          <img [src]="banner.imageUrl" alt="Баннер" class="banner-img" />
+          <div class="banner-slide__overlay"></div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </div>
+} @else {
+  <!-- Fallback hero -->
+  <div class="hero-fallback mb-5">
+    <div class="hero-fallback__bg"></div>
+    <div class="hero-fallback__content">
+      <div class="hero-fallback__tag">
+        <i class="pi pi-verified"></i> Официальный поставщик
+      </div>
+      <h1 class="hero-fallback__title">Смартфоны<br/>нового поколения</h1>
+      <p class="hero-fallback__subtitle">Лучшие модели, гарантия производителя, быстрая доставка</p>
+      <a routerLink="/main/products" class="hero-fallback__cta">
+        <i class="pi pi-th-large"></i>
+        Перейти в каталог
+      </a>
+    </div>
+    <!-- Floating badges -->
+    <div class="hero-fallback__badges">
+      <div class="hero-badge"><i class="pi pi-truck"></i> Бесплатная доставка</div>
+      <div class="hero-badge"><i class="pi pi-shield"></i> Гарантия 2 года</div>
+      <div class="hero-badge"><i class="pi pi-refresh"></i> Возврат 30 дней</div>
+    </div>
+  </div>
+}
+
+<!-- ════════════════════ ПОПУЛЯРНЫЕ ════════════════════ -->
+@if (popular().length > 0) {
+  <section class="mb-5">
+    <div class="section-header">
+      <h2 class="section-header__title">
+        <i class="pi pi-fire" style="color:#ef4444"></i>
+        Популярные товары
+      </h2>
+      <a routerLink="/main/products" class="section-header__link">
+        Смотреть все <i class="pi pi-arrow-right"></i>
+      </a>
+    </div>
+
+    <p-carousel [value]="popular()" [numVisible]="5" [numScroll]="1"
+                [responsiveOptions]="carouselOptions" [circular]="popular().length > 5">
+      <ng-template pTemplate="item" let-product>
+        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: product }" />
+      </ng-template>
+    </p-carousel>
+  </section>
+}
+
+<!-- ════════════════════ СКИДКИ ════════════════════ -->
+@if (discounted().length > 0) {
+  <section class="mb-5">
+    <div class="section-header">
+      <h2 class="section-header__title">
+        <i class="pi pi-tag" style="color:#f59e0b"></i>
+        Горячие скидки
+      </h2>
+      <a routerLink="/main/products" class="section-header__link">
+        Смотреть все <i class="pi pi-arrow-right"></i>
+      </a>
+    </div>
+
+    <p-carousel [value]="discounted()" [numVisible]="5" [numScroll]="1"
+                [responsiveOptions]="carouselOptions" [circular]="discounted().length > 5">
+      <ng-template pTemplate="item" let-product>
+        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: product }" />
+      </ng-template>
+    </p-carousel>
+  </section>
+}
+
+<!-- ════════════════════ НЕДАВНО ПРОСМОТРЕННЫЕ ════════════════════ -->
+@if (recentlyViewed().length > 0) {
+  <section class="mb-5">
+    <div class="section-header">
+      <h2 class="section-header__title">
+        <i class="pi pi-history" style="color:#8b5cf6"></i>
+        Вы смотрели
+      </h2>
+    </div>
+
+    <p-carousel [value]="recentlyViewed()" [numVisible]="5" [numScroll]="1"
+                [responsiveOptions]="carouselOptions" [circular]="false">
+      <ng-template pTemplate="item" let-product>
+        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: product }" />
+      </ng-template>
+    </p-carousel>
+  </section>
+}
+
+<!-- Loading state -->
+@if (popular().length === 0 && discounted().length === 0 && banners().length === 0) {
+  <div class="flex flex-column align-items-center justify-content-center py-8 gap-3">
+    <p-progressSpinner />
+    <span class="text-color-secondary">Загружаем контент...</span>
+  </div>
+}
+
+<!-- ════════════════════ ШАБЛОН КАРТОЧКИ ════════════════════ -->
+<ng-template #productCard let-product>
+  <div class="p-card-wrap">
+    <div class="product-card-ui">
+
+      <!-- Изображение -->
+      <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__img-wrap">
+        @if (product.imageUrl) {
+          <img [src]="product.imageUrl" [alt]="product.title" />
+        } @else {
+          <div class="product-card-ui__img-placeholder">
+            <i class="pi pi-mobile"></i>
+          </div>
+        }
+        @if (product.discount > 0) {
+          <span class="product-card-ui__discount-badge">−{{ product.discount }}%</span>
+        }
+      </a>
+
+      <!-- Контент -->
+      <div class="product-card-ui__body">
+        @if (product.brandTitle) {
+          <span class="product-card-ui__brand">{{ product.brandTitle }}</span>
+        }
+
+        <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__title">
+          {{ product.title }}
+        </a>
+
+        <!-- Цена -->
+        <div class="product-card-ui__price-area">
+          @if (product.discount > 0) {
+            <div class="flex align-items-center gap-2 flex-wrap">
+              <span class="product-card-ui__price product-card-ui__price--sale">
+                {{ effectivePrice(product) | number:'1.0-0' }} ₽
+              </span>
+              <span class="product-card-ui__price-old">{{ product.price | number:'1.0-0' }} ₽</span>
+            </div>
+          } @else {
+            <span class="product-card-ui__price">{{ product.price | number:'1.0-0' }} ₽</span>
+          }
+        </div>
+
+        <!-- Кнопки -->
+        <div class="product-card-ui__actions">
+          <p-button icon="pi pi-cart-plus" label="В корзину"
+                    severity="success" styleClass="flex-1" size="small"
+                    [loading]="addingSkuId() === product.skuId"
+                    (onClick)="addToCart(product)" />
+          @if (isLoggedIn()) {
+            <p-button
+              [icon]="isInWishlist(product.skuId) ? 'pi pi-heart-fill' : 'pi pi-heart'"
+              [severity]="isInWishlist(product.skuId) ? 'danger' : 'secondary'"
+              [outlined]="!isInWishlist(product.skuId)"
+              size="small" pTooltip="Избранное"
+              (onClick)="toggleWishlist(product.skuId)" />
+          }
         </div>
       </div>
-    </ng-template>
-  </p-carousel>
-</div>
 
-<div class="card mt-3">
-  <h3>Новые </h3>
-  <p-carousel [value]="(productsNews$ | async) ?? []" [numVisible]="5" [numScroll]="3">
-    <ng-template let-product #item>
-      <div class="border border-surface rounded-border m-2">
-        <div class="relative flex justify-content-center mb-3">
-          @if (product.inventoryStatus) {
-            <p-tag
-              [value]="product.inventoryStatus"
-              [severity]="getSeverity(product.inventoryStatus)"
-              class="absolute top-0 left-0 z-1"
-            />
-          }
-
-          <img
-            [src]="product.imgUrl"
-            [alt]="product.title"
-            class="w-full h-auto object-contain"
-            
-          />
-        </div>
-
-        <div class="flex-grow-1">
-          <div class="text-900 font-medium line-height-3 mb-4 h-3rem overflow-hidden">
-            {{ product.title }}
-          </div>
-
-          @if (product.description) {
-            <div class="text-600 text-sm mb-3">{{ product.description }}</div>
-          }
-        </div>
-
-        <div class="flex justify-content-between align-items-center mt-auto">
-          <div class="flex align-items-baseline">
-            <span class="text-2xl font-bold text-900">{{ product.price }}</span>
-            <span class="ml-1 text-sm text-700">руб</span>
-          </div>
-
-          <p-button
-            icon="pi pi-shopping-cart"
-            severity="success"
-            [rounded]="true"
-            class="shadow-2"
-          />
-        </div>
-      </div>
-    </ng-template>
-  </p-carousel>
-</div>
-
-<div class="card mt-3">
-  <h3>Просмотренные </h3>
-  <p-carousel [value]="(productsLastSeen$ | async) ?? []" [numVisible]="5" [numScroll]="3">
-    <ng-template let-product #item>
-      <div class="border border-surface rounded-border m-2">
-        <div class="relative flex justify-content-center mb-3">
-          @if (product.inventoryStatus) {
-            <p-tag
-              [value]="product.inventoryStatus"
-              [severity]="getSeverity(product.inventoryStatus)"
-              class="absolute top-0 left-0 z-1"
-            />
-          }
-
-          <img
-            [src]="product.imgUrl"
-            [alt]="product.title"
-            class="w-full h-auto object-contain"
-            
-          />
-        </div>
-
-        <div class="flex-grow-1">
-          <div class="text-900 font-medium line-height-3 mb-4 h-3rem overflow-hidden">
-            {{ product.title }}
-          </div>
-
-          @if (product.description) {
-            <div class="text-600 text-sm mb-3">{{ product.description }}</div>
-          }
-        </div>
-
-        <div class="flex justify-content-between align-items-center mt-auto">
-          <div class="flex align-items-baseline">
-            <span class="text-2xl font-bold text-900">{{ product.price }}</span>
-            <span class="ml-1 text-sm text-700">руб</span>
-          </div>
-
-          <p-button
-            icon="pi pi-shopping-cart"
-            severity="success"
-            [rounded]="true"
-            class="shadow-2"
-          />
-        </div>
-      </div>
-    </ng-template>
-  </p-carousel>
-</div>
+    </div>
+  </div>
+</ng-template>

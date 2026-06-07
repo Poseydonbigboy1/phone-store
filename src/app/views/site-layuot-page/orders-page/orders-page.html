@@ -1,0 +1,129 @@
+<div class="container mx-auto" style="max-width: 900px; padding: 2rem 1rem">
+  <h2 class="mt-0 mb-4">Мои заказы</h2>
+
+  @if (loading()) {
+    <div class="flex justify-content-center p-6">
+      <p-progressspinner strokeWidth="4" />
+    </div>
+  } @else if (orders().length === 0) {
+    <p-card styleClass="text-center p-5">
+      <i class="pi pi-inbox text-5xl text-color-secondary mb-3 block"></i>
+      <p class="text-xl text-color-secondary mb-3">У вас пока нет заказов</p>
+      <p-button label="Перейти в каталог" icon="pi pi-shopping-bag" routerLink="/main/products" />
+    </p-card>
+  } @else {
+    <div class="flex flex-column gap-3">
+      @for (order of orders(); track order.id) {
+        <p-card styleClass="order-card">
+          <div class="flex align-items-start justify-content-between flex-wrap gap-3">
+            <!-- Левая колонка -->
+            <div class="flex flex-column gap-2">
+              <div class="flex align-items-center gap-2">
+                <span class="font-bold text-lg">Заказ #{{ order.id.slice(0, 8) }}</span>
+                <p-tag
+                  [value]="statusLabel(order.status)"
+                  [severity]="statusSeverity(order.status)"
+                />
+              </div>
+              <div class="text-color-secondary text-sm">
+                <i class="pi pi-calendar mr-1"></i>
+                {{ order.orderDate | date:'dd MMM yyyy, HH:mm' }}
+              </div>
+              <div class="text-color-secondary text-sm">
+                <i class="mr-1" [class]="order.deliveryType === 1 ? 'pi pi-box' : 'pi pi-truck'"></i>
+                {{ deliveryLabel(order.deliveryType) }}
+                &nbsp;·&nbsp;
+                <i class="pi pi-tag mr-1"></i>{{ order.itemCount }} поз.
+              </div>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="flex flex-column align-items-end gap-2">
+              <span class="text-xl font-bold">{{ order.totalAmount | number:'1.0-0' }} ₽</span>
+              <p-button
+                label="Подробнее"
+                icon="pi pi-eye"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
+                (onClick)="openDetail(order.id)"
+              />
+            </div>
+          </div>
+        </p-card>
+      }
+    </div>
+  }
+</div>
+
+<!-- Детали заказа -->
+<p-dialog
+  header="Детали заказа"
+  [(visible)]="detailVisible"
+  [modal]="true"
+  [style]="{ width: '680px', maxWidth: '95vw' }"
+  [closable]="true"
+  (onHide)="closeDetail()"
+>
+  @if (detailLoading()) {
+    <div class="flex justify-content-center p-5">
+      <p-progressspinner strokeWidth="4" />
+    </div>
+  } @else if (selectedOrder(); as order) {
+    <!-- Статус timeline (не для отмены) -->
+    @if (order.status !== 4) {
+      <p-timeline [value]="timelineEvents(order.status)" layout="horizontal" styleClass="mb-4">
+        <ng-template pTemplate="marker" let-event>
+          <span class="timeline-icon" [style.background]="event.color">
+            <i [class]="event.icon"></i>
+          </span>
+        </ng-template>
+        <ng-template pTemplate="content" let-event>
+          <small>{{ event.status }}</small>
+        </ng-template>
+      </p-timeline>
+    } @else {
+      <p-tag value="Отменён" severity="danger" styleClass="mb-4 text-base" />
+    }
+
+    <p-divider />
+
+    <!-- Позиции -->
+    <h4 class="mt-0 mb-3">Состав заказа</h4>
+    <div class="flex flex-column gap-2 mb-3">
+      @for (item of order.items; track item.skuId) {
+        <div class="flex justify-content-between align-items-center order-item-row">
+          <div class="flex flex-column">
+            <span class="font-medium">{{ item.productTitle }}</span>
+            <small class="text-color-secondary">{{ item.quantity }} × {{ item.price | number:'1.0-0' }} ₽</small>
+          </div>
+          <span class="font-bold">{{ item.lineTotal | number:'1.0-0' }} ₽</span>
+        </div>
+      }
+    </div>
+    <div class="flex justify-content-between font-bold text-lg mb-4">
+      <span>Итого</span>
+      <span>{{ order.totalAmount | number:'1.0-0' }} ₽</span>
+    </div>
+
+    <p-divider />
+
+    <!-- Доставка -->
+    @if (order.delivery) {
+      <h4 class="mt-0 mb-3">Доставка</h4>
+      <div class="flex flex-column gap-1 text-color-secondary">
+        <div><i class="mr-2" [class]="order.delivery.type === 1 ? 'pi pi-box' : 'pi pi-truck'"></i>
+          <strong>{{ deliveryLabel(order.delivery.type) }}</strong>
+        </div>
+        <div>Получатель: <strong>{{ order.delivery.recipientName }}</strong></div>
+        <div>Телефон: <strong>{{ order.delivery.phone }}</strong></div>
+        @if (order.delivery.address) {
+          <div>Адрес: {{ order.delivery.address }}</div>
+        }
+        @if (order.delivery.comment) {
+          <div>Комментарий: {{ order.delivery.comment }}</div>
+        }
+      </div>
+    }
+  }
+</p-dialog>

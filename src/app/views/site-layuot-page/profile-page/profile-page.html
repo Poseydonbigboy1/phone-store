@@ -1,8 +1,160 @@
-<h3>Профиль</h3>
-@if (user$ | async; as user) {
-  <pre>
-    {{user | json}}
-  </pre>
-}
+<p-toast />
 
-<button (click)="logout()">Выйти</button>
+<div class="profile-container">
+
+  <!-- Шапка -->
+  @if (user(); as u) {
+    <div class="flex align-items-center justify-content-between mb-4">
+      <div class="flex align-items-center gap-3">
+        <div class="profile-avatar">
+          <i class="pi pi-user text-3xl" style="color: var(--primary-color)"></i>
+        </div>
+        <div>
+          <div class="text-xl font-bold">{{ u.name || u.login }}</div>
+          <div class="text-color-secondary text-sm">{{ u.login }}</div>
+        </div>
+      </div>
+      <p-button label="Выйти" icon="pi pi-sign-out" severity="secondary" [outlined]="true" (onClick)="logout()" />
+    </div>
+  }
+
+  <p-tabs>
+
+    <!-- ─── Личные данные ─── -->
+    <p-tabpanel header="Личные данные" value="0">
+      <form [formGroup]="profileForm" class="flex flex-column gap-4 mt-3" style="max-width: 480px">
+
+        <div class="flex flex-column gap-1">
+          <label class="font-medium text-sm">Имя</label>
+          <input pInputText formControlName="name" placeholder="Ваше имя" />
+        </div>
+
+        <div class="flex flex-column gap-1">
+          <label class="font-medium text-sm">Логин</label>
+          <input pInputText formControlName="login" placeholder="Логин" />
+        </div>
+
+        <p-button
+          label="Сохранить"
+          icon="pi pi-check"
+          [loading]="profileLoading()"
+          [disabled]="profileForm.invalid || profileLoading()"
+          (onClick)="saveProfile()"
+          styleClass="w-fit"
+        />
+      </form>
+    </p-tabpanel>
+
+    <!-- ─── Пароль ─── -->
+    <p-tabpanel header="Пароль" value="1">
+      <form [formGroup]="passwordForm" class="flex flex-column gap-4 mt-3" style="max-width: 480px">
+
+        <div class="flex flex-column gap-1">
+          <label class="font-medium text-sm">Текущий пароль</label>
+          <p-password formControlName="oldPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" />
+        </div>
+
+        <div class="flex flex-column gap-1">
+          <label class="font-medium text-sm">Новый пароль</label>
+          <p-password formControlName="newPassword" [feedback]="true" [toggleMask]="true" styleClass="w-full" />
+        </div>
+
+        <div class="flex flex-column gap-1">
+          <label class="font-medium text-sm">Повторите новый пароль</label>
+          <p-password formControlName="repeat" [feedback]="false" [toggleMask]="true" styleClass="w-full" />
+        </div>
+
+        <p-button
+          label="Изменить пароль"
+          icon="pi pi-lock"
+          severity="warn"
+          [loading]="passwordLoading()"
+          [disabled]="passwordForm.invalid || passwordLoading()"
+          (onClick)="savePassword()"
+          styleClass="w-fit"
+        />
+      </form>
+    </p-tabpanel>
+
+    <!-- ─── Адреса ─── -->
+    <p-tabpanel header="Адреса" value="2">
+      <div class="flex justify-content-end mt-3 mb-3">
+        <p-button label="Добавить адрес" icon="pi pi-plus" (onClick)="openAddAddress()" />
+      </div>
+
+      @if (addresses().length === 0) {
+        <div class="flex flex-column align-items-center py-6 gap-2 text-color-secondary">
+          <i class="pi pi-map-marker text-5xl"></i>
+          <span>Адреса не добавлены</span>
+        </div>
+      } @else {
+        <div class="flex flex-column gap-3">
+          @for (addr of addresses(); track addr.id) {
+            <div class="addr-card flex align-items-center justify-content-between p-3 border-round surface-50 border-1 surface-border">
+              <div>
+                <div class="flex align-items-center gap-2 mb-1">
+                  <span class="font-bold">{{ addr.label }}</span>
+                  @if (addr.isDefault) {
+                    <p-tag value="По умолчанию" severity="success" />
+                  }
+                </div>
+                <div class="text-color-secondary text-sm">{{ addr.address }}</div>
+              </div>
+              <div class="flex gap-2">
+                <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small"
+                  (onClick)="openEditAddress(addr)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" size="small"
+                  (onClick)="deleteAddress(addr.id)" />
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </p-tabpanel>
+
+    <!-- ─── Мои заказы (ссылка) ─── -->
+    <p-tabpanel header="Мои заказы" value="3">
+      <div class="flex flex-column align-items-center py-6 gap-3">
+        <i class="pi pi-list-check text-5xl text-color-secondary"></i>
+        <span class="text-color-secondary">История ваших заказов</span>
+        <p-button label="Перейти к заказам" icon="pi pi-arrow-right" routerLink="/main/orders" />
+      </div>
+    </p-tabpanel>
+
+  </p-tabs>
+</div>
+
+<!-- Диалог добавления/редактирования адреса -->
+<p-dialog
+  [header]="editingAddressId() ? 'Редактировать адрес' : 'Новый адрес'"
+  [visible]="addrDialogVisible()"
+  (visibleChange)="addrDialogVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '460px' }"
+  appendTo="body"
+>
+  <form [formGroup]="addrForm" class="flex flex-column gap-4 pt-2">
+    <div class="flex flex-column gap-1">
+      <label class="font-medium text-sm">Метка (Дом, Работа...)</label>
+      <input pInputText formControlName="label" placeholder="Дом" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-medium text-sm">Адрес</label>
+      <input pInputText formControlName="address" placeholder="г. Москва, ул. Ленина, д. 1, кв. 1" />
+    </div>
+    <div class="flex align-items-center gap-2">
+      <p-checkbox formControlName="isDefault" [binary]="true" inputId="isDefault" />
+      <label for="isDefault">По умолчанию</label>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" severity="secondary" [outlined]="true" (onClick)="addrDialogVisible.set(false)" />
+    <p-button
+      [label]="editingAddressId() ? 'Сохранить' : 'Добавить'"
+      [loading]="addrLoading()"
+      [disabled]="addrForm.invalid || addrLoading()"
+      (onClick)="saveAddress()"
+    />
+  </ng-template>
+</p-dialog>

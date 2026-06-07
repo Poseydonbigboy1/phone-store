@@ -1,0 +1,174 @@
+<p-toast styleClass="app-toast" />
+
+<div class="layout-wrapper" [class.layout-mobile-active]="sidebarVisible">
+
+  <!-- ───── Topbar ───── -->
+  <div class="layout-topbar">
+    <div class="layout-topbar-logo-container">
+      <button class="layout-menu-button" (click)="toggleSidebar()">
+        <i class="pi pi-bars"></i>
+      </button>
+      <a routerLink="/manager" class="layout-topbar-logo">
+        <i class="pi pi-fw pi-mobile"></i>
+        <span>PhoneStore</span>
+      </a>
+    </div>
+
+    <div class="layout-topbar-breadcrumb" *ngIf="breadcrumbItems.length">
+      <span class="layout-topbar-title-separator"></span>
+      <p-breadcrumb
+        [model]="breadcrumbItems"
+        [home]="home"
+        styleClass="layout-breadcrumb-inline"
+      />
+    </div>
+
+    <div class="layout-topbar-actions">
+      <div class="flex align-items-center gap-2">
+        <p-avatar icon="pi pi-user" shape="circle" />
+        <span class="font-medium text-sm hidden md:inline">{{ managerName() }}</span>
+        <p-button
+          icon="pi pi-home"
+          label="На сайт"
+          severity="secondary"
+          size="small"
+          [outlined]="true"
+          pTooltip="Перейти на сайт"
+          (onClick)="goToSite()"
+        />
+        <p-button
+          icon="pi pi-sign-out"
+          severity="danger"
+          size="small"
+          [outlined]="true"
+          pTooltip="Выйти"
+          (onClick)="logout()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── Sidebar ───── -->
+  <div class="layout-sidebar">
+    <ul class="layout-menu">
+      <li class="layout-root-menuitem">
+        <div class="layout-menuitem-root-text">Обзор</div>
+        <ul>
+          <li>
+            <a routerLink="dashboard" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-chart-bar layout-menuitem-icon"></i>
+              <span>Дашборд</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="analytics" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-chart-line layout-menuitem-icon"></i>
+              <span>Аналитика</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="banners" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-images layout-menuitem-icon"></i>
+              <span>Баннеры</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="layout-root-menuitem">
+        <div class="layout-menuitem-root-text">Управление</div>
+        <ul>
+          <li>
+            <a routerLink="management/orders" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-list-check layout-menuitem-icon"></i>
+              <span>Заказы</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="management/products" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-shopping-bag layout-menuitem-icon"></i>
+              <span>Товары (SKU)</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="layout-root-menuitem">
+        <div class="layout-menuitem-root-text">Справочники</div>
+        <ul>
+          <li>
+            <a routerLink="directories/brands" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-tag layout-menuitem-icon"></i>
+              <span>Бренды</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/categories" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-tags layout-menuitem-icon"></i>
+              <span>Категории компонентов</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/components" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-wrench layout-menuitem-icon"></i>
+              <span>Компоненты</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/products" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-mobile layout-menuitem-icon"></i>
+              <span>Продукты</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/skus" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-barcode layout-menuitem-icon"></i>
+              <span>SKU</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/product-components" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-list layout-menuitem-icon"></i>
+              <span>Компоненты продуктов</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/orders" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-shopping-cart layout-menuitem-icon"></i>
+              <span>Заказы</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/order-items" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-receipt layout-menuitem-icon"></i>
+              <span>Позиции заказов</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="directories/users" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-users layout-menuitem-icon"></i>
+              <span>Пользователи</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Mobile overlay -->
+  <div class="layout-mask" *ngIf="sidebarVisible" (click)="toggleSidebar()"></div>
+
+  <!-- ───── Main ───── -->
+  <div class="layout-main-container">
+    <div class="layout-main">
+
+      <div class="layout-page-header" *ngIf="currentPageTitle">
+        <h2 class="layout-page-title">{{ currentPageTitle }}</h2>
+      </div>
+
+      <div class="layout-main-content">
+        <router-outlet />
+      </div>
+
+    </div>
+  </div>
+
+</div>

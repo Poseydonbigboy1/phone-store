@@ -1,0 +1,114 @@
+<p-toast />
+
+@let items = (cart.items$ | async) ?? [];
+@let disc = (discount$ | async) ?? 0;
+
+@if (items.length === 0) {
+  <!-- Пустая корзина -->
+  <div class="flex flex-column align-items-center justify-content-center" style="min-height: 60vh; gap: 1.5rem">
+    <i class="pi pi-shopping-cart" style="font-size: 5rem; color: var(--text-color-secondary)"></i>
+    <h2 class="text-color-secondary m-0">Корзина пуста</h2>
+    <p class="text-color-secondary m-0">Найдите что-нибудь интересное в каталоге</p>
+    <p-button label="Перейти в каталог" icon="pi pi-arrow-right" iconPos="right" (onClick)="goToCatalog()" />
+  </div>
+} @else {
+  <!-- Корзина с товарами -->
+  <div class="grid mt-3">
+
+    <!-- Список позиций -->
+    <div class="col-12 lg:col-8">
+      <p-card>
+        <ng-template pTemplate="title">
+          <span class="text-xl font-semibold">Корзина ({{ items.length }})</span>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div>
+            @for (item of items; track item.skuId) {
+              <div class="cart-item-row">
+
+                <!-- Инфо о товаре -->
+                <div class="item-info">
+                  <div class="item-title">{{ item.productTitle }}</div>
+                  @if (item.discount > 0) {
+                    <div class="flex align-items-center gap-2 mt-1">
+                      <span class="price-original">{{ item.price | number:'1.0-0' }} ₽</span>
+                      <span class="price-final">{{ item.finalPrice | number:'1.0-0' }} ₽</span>
+                      <span class="text-sm" style="color: var(--green-500)">−{{ item.discount }}%</span>
+                    </div>
+                  } @else {
+                    <div class="price-final mt-1">{{ item.finalPrice | number:'1.0-0' }} ₽</div>
+                  }
+                </div>
+
+                <!-- Количество -->
+                <p-inputnumber
+                  [ngModel]="item.quantity"
+                  (ngModelChange)="onQtyChange(item.skuId, $event)"
+                  [showButtons]="true"
+                  [min]="1"
+                  [max]="item.amount"
+                  [style]="{ width: '8rem' }"
+                  buttonLayout="horizontal"
+                  decrementButtonIcon="pi pi-minus"
+                  incrementButtonIcon="pi pi-plus"
+                />
+
+                <!-- Итог по строке -->
+                <div class="line-total">{{ (item.finalPrice * item.quantity) | number:'1.0-0' }} ₽</div>
+
+                <!-- Удалить -->
+                <p-button
+                  icon="pi pi-trash"
+                  [text]="true"
+                  severity="danger"
+                  pTooltip="Убрать из корзины"
+                  (onClick)="remove(item.skuId)"
+                />
+              </div>
+            }
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+
+    <!-- Сводка -->
+    <div class="col-12 lg:col-4">
+      <p-card styleClass="summary-card">
+        <ng-template pTemplate="title">
+          <span class="text-lg font-semibold">Итого: {{ items.length }} {{ items.length === 1 ? 'товар' : 'товара' }}</span>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div class="flex flex-column gap-2">
+            <div class="flex justify-content-between">
+              <span class="text-color-secondary">Без скидок</span>
+              <span>{{ (originalTotal$ | async) | number:'1.0-0' }} ₽</span>
+            </div>
+            @if (disc > 0) {
+              <div class="flex justify-content-between">
+                <span class="text-color-secondary">Скидка</span>
+                <span style="color: var(--green-500)">−{{ disc | number:'1.0-0' }} ₽</span>
+              </div>
+            }
+            <p-divider />
+            <div class="flex justify-content-between font-bold text-lg">
+              <span>К оплате</span>
+              <span>{{ (cart.total$ | async) | number:'1.0-0' }} ₽</span>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <p-button
+            label="Оформить заказ"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            severity="success"
+            styleClass="w-full"
+            size="large"
+            (onClick)="goToCheckout()"
+          />
+        </ng-template>
+      </p-card>
+    </div>
+
+  </div>
+}

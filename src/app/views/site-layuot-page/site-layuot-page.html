@@ -1,39 +1,205 @@
-<div class="flex flex-column h-screen overflow-hidden" style="background-color: #0b0612">
-  <header
-    id="menu"
-    class="flex-none h-100px shadow-4 z-5"
-    style="background-color: #303030; border-bottom: 1px solid #2d243d"
-  >
-    <p-menubar
-      [model]="menuItems"
-      class="border-none h-full surface-800"
-    >
-      <ng-template pTemplate="end">
-        <div class="flex align-items-center gap-3">
-          @if (user$ | async; as user) {
-            <span
-              class="white-space-nowrap overflow-hidden text-overflow-ellipsis font-medium"
-              style="max-width: 100px; color: #ffffff"
-            >
-              {{ user?.login }}
-            </span>
-          }
-        </div>
-      </ng-template>
-    </p-menubar>
-  </header>
+<div class="layout-wrapper">
 
-  <main id="content" class="flex-grow-1 overflow-y-auto p-3 bg-white">
-    <div class="container mx-auto">
-      <router-outlet></router-outlet>
+  <!-- ══════════════ TOPBAR (Sakai-совместимый) ══════════════ -->
+  <div class="layout-topbar">
+
+    <!-- Левая часть: бургер (mobile) + лого -->
+    <div class="layout-topbar-logo-container">
+      <button class="layout-menu-button layout-topbar-action"
+              (click)="toggleMobile()"
+              [class.is-open]="mobileOpen()"
+              aria-label="Меню">
+        <i class="pi" [class.pi-bars]="!mobileOpen()" [class.pi-times]="mobileOpen()"></i>
+      </button>
+
+      <a routerLink="/main/home" class="layout-topbar-logo" (click)="closeMobile()">
+        <span class="topbar-logo-icon"><i class="pi pi-mobile"></i></span>
+        <span class="topbar-logo-text">Phone<span class="topbar-logo-accent">Store</span></span>
+      </a>
     </div>
-  </main>
 
-  <footer
-    id="footer"
-    class="flex-none h-75px flex align-items-center justify-content-center"
-    style="background-color: #303030; border-top: 1px solid #2d243d; color: #ffffff"
-  >
-    <p>© 2026 Магазин PhoneStore. Все права защищены.</p>
-  </footer>
+    <!-- Навигация (только desktop) -->
+    <nav class="topbar-nav">
+      <a routerLink="/main/home"
+         routerLinkActive="topbar-nav__link--active"
+         [routerLinkActiveOptions]="{exact:true}"
+         class="topbar-nav__link">Главная</a>
+      <a routerLink="/main/products"
+         routerLinkActive="topbar-nav__link--active"
+         class="topbar-nav__link">Каталог</a>
+    </nav>
+
+    <!-- Правая часть: поиск + корзина + избранное + юзер -->
+    <div class="layout-topbar-actions">
+
+      <!-- Поиск -->
+      <div class="topbar-search">
+        <i class="pi pi-search topbar-search__icon"></i>
+        <input pInputText [(ngModel)]="searchQuery" placeholder="Поиск..."
+               class="topbar-search__input" (keydown.enter)="onSearch()" />
+      </div>
+
+      <!-- Избранное (только для авторизованных) -->
+      @if (user$ | async) {
+        <p-overlaybadge
+          [value]="(wishlistCount() > 0 ? wishlistCount() : null)"
+          severity="danger" styleClass="topbar-badge-wrap">
+          <button class="layout-topbar-action"
+                  pTooltip="Избранное" tooltipPosition="bottom"
+                  (click)="goToWishlist()">
+            <i class="pi pi-heart"></i>
+          </button>
+        </p-overlaybadge>
+      }
+
+      <!-- Корзина (все пользователи) -->
+      <p-overlaybadge
+        [value]="((cartCount$ | async) ?? 0) > 0 ? (cartCount$ | async) : null"
+        severity="danger" styleClass="topbar-badge-wrap">
+        <button class="layout-topbar-action"
+                pTooltip="Корзина" tooltipPosition="bottom"
+                (click)="goToCart()">
+          <i class="pi pi-shopping-cart"></i>
+        </button>
+      </p-overlaybadge>
+
+      <!-- Авторизован: user-chip с дропдауном -->
+      @if (user$ | async; as user) {
+        <button class="topbar-user-chip layout-topbar-action"
+                (click)="toggleUserMenu($event)">
+          <p-avatar icon="pi pi-user" shape="circle" size="normal"
+                    styleClass="topbar-user-avatar" />
+          <span class="topbar-user-name">{{ user.name || user.login }}</span>
+          <i class="pi pi-chevron-down topbar-user-chevron"></i>
+        </button>
+
+        <!-- Дропдаун с "Мои заказы" и "Выйти" -->
+        <p-popover #userMenu styleClass="user-menu-popover">
+          <div class="user-menu">
+            <div class="user-menu__header">
+              <span class="user-menu__display-name">{{ user.name || user.login }}</span>
+              @if (user.role === 'MANAGER') {
+                <span class="user-menu__role-badge">Менеджер</span>
+              }
+            </div>
+            <div class="user-menu__divider"></div>
+            <a routerLink="/main/orders" class="user-menu__item" (click)="closeUserMenu()">
+              <i class="pi pi-list-check"></i> Мои заказы
+            </a>
+            <a routerLink="/main/wishlist" class="user-menu__item" (click)="closeUserMenu()">
+              <i class="pi pi-heart"></i> Избранное
+            </a>
+            <a routerLink="/main/profile" class="user-menu__item" (click)="closeUserMenu()">
+              <i class="pi pi-user"></i> Профиль
+            </a>
+            @if (user.role === 'MANAGER') {
+              <div class="user-menu__divider"></div>
+              <a routerLink="/manager" class="user-menu__item user-menu__item--manager"
+                 (click)="closeUserMenu()">
+                <i class="pi pi-cog"></i> Панель управления
+              </a>
+            }
+            <div class="user-menu__divider"></div>
+            <button class="user-menu__item user-menu__item--danger" (click)="logout()">
+              <i class="pi pi-sign-out"></i> Выйти
+            </button>
+          </div>
+        </p-popover>
+
+      } @else {
+        <!-- Не авторизован: кнопка "Войти" -->
+        <a routerLink="/login" class="topbar-login-btn">
+          <i class="pi pi-sign-in"></i>
+          <span>Войти</span>
+        </a>
+      }
+
+    </div>
+  </div>
+
+  <!-- ══════════════ МОБИЛЬНОЕ МЕНЮ ══════════════ -->
+  @if (mobileOpen()) {
+    <div class="mobile-nav" (click)="$event.stopPropagation()">
+      <div class="mobile-nav__search">
+        <i class="pi pi-search"></i>
+        <input pInputText [(ngModel)]="searchQuery" placeholder="Поиск товаров..."
+               (keydown.enter)="onSearch()" class="w-full" />
+      </div>
+
+      <nav class="mobile-nav__links">
+        <a routerLink="/main/home" routerLinkActive="mobile-nav__link--active"
+           class="mobile-nav__link" (click)="closeMobile()">
+          <i class="pi pi-home"></i><span>Главная</span>
+        </a>
+        <a routerLink="/main/products" routerLinkActive="mobile-nav__link--active"
+           class="mobile-nav__link" (click)="closeMobile()">
+          <i class="pi pi-th-large"></i><span>Каталог</span>
+        </a>
+
+        @if (user$ | async; as user) {
+          <a routerLink="/main/orders" class="mobile-nav__link" (click)="closeMobile()">
+            <i class="pi pi-list-check"></i><span>Мои заказы</span>
+          </a>
+          <a routerLink="/main/wishlist" class="mobile-nav__link" (click)="closeMobile()">
+            <i class="pi pi-heart"></i>
+            <span>Избранное</span>
+            @if (wishlistCount() > 0) {
+              <span class="mobile-nav__badge">{{ wishlistCount() }}</span>
+            }
+          </a>
+          <a routerLink="/main/cart" class="mobile-nav__link" (click)="closeMobile()">
+            <i class="pi pi-shopping-cart"></i>
+            <span>Корзина</span>
+            @if ((cartCount$ | async) ?? 0) {
+              <span class="mobile-nav__badge">{{ cartCount$ | async }}</span>
+            }
+          </a>
+          <a routerLink="/main/profile" class="mobile-nav__link" (click)="closeMobile()">
+            <i class="pi pi-user"></i><span>Профиль</span>
+          </a>
+          @if (user.role === 'MANAGER') {
+            <a routerLink="/manager" class="mobile-nav__link mobile-nav__link--manager"
+               (click)="closeMobile()">
+              <i class="pi pi-cog"></i><span>Панель управления</span>
+            </a>
+          }
+          <button class="mobile-nav__link mobile-nav__link--danger" (click)="logout()">
+            <i class="pi pi-sign-out"></i><span>Выйти</span>
+          </button>
+        } @else {
+          <a routerLink="/main/cart" class="mobile-nav__link" (click)="closeMobile()">
+            <i class="pi pi-shopping-cart"></i><span>Корзина</span>
+          </a>
+          <a routerLink="/login" class="mobile-nav__link mobile-nav__link--login"
+             (click)="closeMobile()">
+            <i class="pi pi-sign-in"></i><span>Войти</span>
+          </a>
+        }
+      </nav>
+    </div>
+  }
+
+  <!-- ══════════════ MAIN CONTENT ══════════════ -->
+  <div class="layout-main-container">
+    <div class="layout-main">
+      <router-outlet />
+    </div>
+
+    <!-- ══════════════ FOOTER (минимальный) ══════════════ -->
+    <div class="layout-footer">
+      <span class="layout-footer__copy">© 2026 PhoneStore — все права защищены</span>
+      <div class="layout-footer__social">
+        <a href="#" class="layout-footer__social-link" pTooltip="Telegram" tooltipPosition="top">
+          <i class="pi pi-telegram"></i>
+        </a>
+        <a href="#" class="layout-footer__social-link" pTooltip="VK" tooltipPosition="top">
+          <i class="pi pi-share-alt"></i>
+        </a>
+        <a href="#" class="layout-footer__social-link" pTooltip="YouTube" tooltipPosition="top">
+          <i class="pi pi-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
 </div>

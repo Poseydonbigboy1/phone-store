@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -10,6 +10,7 @@ import {
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { TabsModule } from 'primeng/tabs';
 import { AuthService } from '@services';
@@ -22,6 +23,7 @@ import { AuthService } from '@services';
     InputTextModule,
     TabsModule,
     CheckboxModule,
+    MessageModule,
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
@@ -32,8 +34,9 @@ import { AuthService } from '@services';
 export class LoginPage {
   private readonly _authService: AuthService;
 
-  activeTab: number = 0;
   isLoading = false;
+  loginError = signal<string | null>(null);
+  registerError = signal<string | null>(null);
 
   loginForm: FormGroup;
   registerForm: FormGroup;
@@ -65,17 +68,23 @@ export class LoginPage {
   onLogin() {
     if (this.loginForm.valid) {
       this.isLoading = true;
+      this.loginError.set(null);
       const { login, password } = this.loginForm.getRawValue();
       this._authService.auth(login, password);
+      // Reset loading state after delay (navigate will happen automatically)
+      setTimeout(() => (this.isLoading = false), 2000);
     }
   }
 
   onRegister() {
     if (this.registerForm.valid) {
       this.isLoading = true;
-      console.log('Register:', this.registerForm.value);
-      // здесь регистрация
-      setTimeout(() => (this.isLoading = false), 1800);
+      this.registerError.set(null);
+      const { name, login, password } = this.registerForm.getRawValue();
+      this._authService.register(name, login, password, (msg) => {
+        this.isLoading = false;
+        this.registerError.set(msg);
+      });
     }
   }
 }

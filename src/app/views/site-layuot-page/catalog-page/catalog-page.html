@@ -1,65 +1,114 @@
-<div class="grid">
-  <div class="col-3">
-    <app-catalog-filter></app-catalog-filter>
-  </div>
-  <div class="col flex flex-column" [style]="{ height: 'calc(100vh - 140px)' }">
-    <div class="card">
-      <p-dataview [value]="(products$ | async) ?? []" layout="grid" [loading]="isLoading$ | async">
-        <ng-template #grid let-items>
-          <p-scrollpanel [style]="{ width: '100%', height: 'calc(100vh - 140px - 56px)' }">
-            <div class="grid">
-              @for (product of items; track $index) {
-                <div class="col-3 bg-white">
-                  <p-card>
-                    <ng-template pTemplate="header">
-                      <img alt="Card" class="w-full" [src]="product.images[0]" />
-                    </ng-template>
-                    <ng-template pTemplate="title"> {{ product.title }} </ng-template>
+<p-toast />
 
-                    <ng-template pTemplate="footer">
-                      <div class="flex justify-content-between align-items-center mt-3">
-                        <div class="col">
-                          <span>{{ product.price | currency }}</span>
-                        </div>
-                      </div>
-                      <p-rating [ngModel]="product.rating" [stars]="5" />
-                      <p-button severity="success" aria-label="Save" (click)="addToCart(product)">
-                        <span class="pi pi-cart-plus text-xl"></span>
-                      </p-button>
-                    </ng-template>
-                  </p-card>
-                </div>
-              }
-            </div>
-          </p-scrollpanel>
-        </ng-template>
-      </p-dataview>
-    </div>
-    <div class="card flex justify-content-center bg-white mt-auto">
-      <p-paginator
-        (onPageChange)="onPageChange($event)"
-        [first]="(skip$ | async) ?? 0"
-        [rows]="take$ | async"
-        [totalRecords]="(total$ | async) ?? 0"
+<div class="catalog-layout">
+
+  <!-- ══ ФИЛЬТРЫ (sidebar) ══ -->
+  <aside class="catalog-sidebar">
+    <app-catalog-filter />
+  </aside>
+
+  <!-- ══ КОНТЕНТ ══ -->
+  <div class="catalog-content">
+
+    <!-- Тулбар -->
+    <div class="catalog-toolbar">
+      <span class="catalog-toolbar__count">
+        {{ (total$ | async) ?? 0 }} товаров
+      </span>
+      <p-select
+        [options]="sortOptions"
+        [(ngModel)]="selectedSort"
+        optionLabel="label"
+        (onChange)="onSortChange()"
+        placeholder="Сортировка"
+        styleClass="catalog-sort-select"
       />
     </div>
+
+    <!-- Сетка товаров -->
+    @if ((isLoading$ | async)) {
+      <div class="catalog-loading">
+        <p-progressSpinner />
+      </div>
+    } @else if (((products$ | async) ?? []).length === 0) {
+      <div class="catalog-empty">
+        <i class="pi pi-search-minus"></i>
+        <span>Товары не найдены</span>
+        <p>Попробуйте изменить фильтры или условия поиска</p>
+      </div>
+    } @else {
+      <div class="catalog-grid">
+        @for (product of (products$ | async) ?? []; track product.skuId) {
+          <div class="product-card-ui">
+
+            <!-- Изображение -->
+            <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__img-wrap">
+              @if (product.images?.length) {
+                <img [src]="product.images[0]" [alt]="product.title" />
+              } @else {
+                <div class="product-card-ui__img-placeholder"><i class="pi pi-mobile"></i></div>
+              }
+              @if (product.discount > 0) {
+                <span class="product-card-ui__discount-badge">−{{ product.discount }}%</span>
+              }
+            </a>
+
+            <!-- Тело карточки -->
+            <div class="product-card-ui__body">
+              @if (product.brandTitle) {
+                <span class="product-card-ui__brand">{{ product.brandTitle }}</span>
+              }
+
+              <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__title">
+                {{ product.title }}
+              </a>
+
+              <div class="product-card-ui__price-area">
+                @if (product.discount > 0) {
+                  <div class="flex align-items-center gap-2 flex-wrap">
+                    <span class="product-card-ui__price product-card-ui__price--sale">
+                      {{ product.price * (1 - product.discount / 100) | number:'1.0-0' }} ₽
+                    </span>
+                    <span class="product-card-ui__price-old">{{ product.price | number:'1.0-0' }} ₽</span>
+                  </div>
+                } @else {
+                  <span class="product-card-ui__price">{{ product.price | number:'1.0-0' }} ₽</span>
+                }
+              </div>
+
+              <div class="product-card-ui__actions">
+                <p-button icon="pi pi-cart-plus" label="В корзину"
+                          severity="success" styleClass="flex-1" size="small"
+                          [loading]="!!addingSkuId && addingSkuId === product?.skuId"
+                          (onClick)="addToCart(product)" />
+                @if (isLoggedIn()) {
+                  <p-button
+                    [icon]="isInWishlist(product.skuId) ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                    [severity]="isInWishlist(product.skuId) ? 'danger' : 'secondary'"
+                    [outlined]="!isInWishlist(product.skuId)"
+                    size="small" pTooltip="Избранное"
+                    (onClick)="toggleWishlist(product.skuId)" />
+                }
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Пагинация -->
+    @if (((total$ | async) ?? 0) > 0) {
+      <div class="catalog-pagination">
+        <p-paginator
+          (onPageChange)="onPageChange($event)"
+          [first]="(skip$ | async) ?? 0"
+          [rows]="(take$ | async) ?? 12"
+          [totalRecords]="(total$ | async) ?? 0"
+          [rowsPerPageOptions]="[12, 24, 48]"
+        />
+      </div>
+    }
+
   </div>
 </div>
-
-<!-- <div
-  style="
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    width: 300px;
-    height: 800px;
-    overflow-y: scroll;
-    background: white;
-    padding: 10px;
-    z-index: 1000;
-  "
->
-  <pre>
-    {{ catalogFilters$ | async | json }}
-  </pre>
-</div> -->

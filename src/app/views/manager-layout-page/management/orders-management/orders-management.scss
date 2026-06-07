@@ -1,0 +1,7 @@
+.font-mono { font-family: monospace; }
+
+.item-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--surface-border);
+  &:last-of-type { border-bottom: none; }
+}

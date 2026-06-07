@@ -1,0 +1,290 @@
+// ─── Topbar ──────────────────────────────────────────────
+.layout-topbar {
+  position: fixed;
+  height: 4rem;
+  z-index: 997;
+  left: 0;
+  top: 0;
+  width: 100%;
+  padding: 0 2rem;
+  background-color: var(--surface-card);
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3px 5px rgba(0,0,0,.02), 0 0 2px rgba(0,0,0,.05), 0 1px 4px rgba(0,0,0,.08);
+}
+
+.layout-topbar-logo-container {
+  width: 20rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.layout-topbar-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--text-color);
+  font-size: 1.25rem;
+  font-weight: 600;
+
+  i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+  }
+}
+
+.layout-menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color var(--p-transition-duration);
+  margin-right: 0.5rem;
+
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+
+  i {
+    font-size: 1.25rem;
+  }
+}
+
+.layout-topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.layout-topbar-menu-button {
+  display: none;
+}
+
+// Блок с разделителем + breadcrumb в топбаре
+.layout-topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  overflow: hidden;
+}
+
+.layout-topbar-title-separator {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--surface-border);
+  flex-shrink: 0;
+}
+
+// Breadcrumb внутри топбара — прозрачный, без рамок, компактный
+:host ::ng-deep .layout-breadcrumb-inline.p-breadcrumb {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 0.875rem;
+
+  .p-breadcrumb-list {
+    gap: 0.25rem;
+  }
+
+  .p-breadcrumb-item-link {
+    color: var(--text-color-secondary) !important;
+    padding: 0.125rem 0.25rem !important;
+    border-radius: 6px;
+
+    &:hover {
+      color: var(--text-color) !important;
+      background: var(--surface-hover) !important;
+    }
+  }
+
+  // Последний элемент — выделен как текущая страница
+  li:last-child .p-breadcrumb-item-link {
+    color: var(--text-color) !important;
+    font-weight: 600;
+  }
+
+  .p-breadcrumb-separator {
+    color: var(--surface-border) !important;
+    margin: 0 !important;
+  }
+}
+
+// ─── Sidebar ─────────────────────────────────────────────
+// Точно как в Sakai: плавающий блок с отступом и скруглением
+.layout-sidebar {
+  position: fixed;
+  width: 20rem;
+  height: calc(100vh - 8rem);
+  z-index: 999;
+  overflow-y: auto;
+  user-select: none;
+  top: 6rem;
+  left: 2rem;
+  background-color: var(--surface-card);
+  border-radius: 12px;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 3px 5px rgba(0,0,0,.02), 0 0 2px rgba(0,0,0,.05), 0 1px 4px rgba(0,0,0,.08);
+  transition: transform 0.4s cubic-bezier(.05,.74,.2,.99);
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--surface-border);
+    border-radius: 4px;
+  }
+}
+
+// ─── Menu ─────────────────────────────────────────────────
+.layout-menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.layout-root-menuitem {
+  > .layout-menuitem-root-text {
+    font-size: 0.857rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0.75rem 0;
+  }
+}
+
+.layout-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: flex;
+    align-items: center;
+    position: relative;
+    outline: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    transition: background-color var(--p-transition-duration);
+    text-decoration: none;
+
+    .layout-menuitem-icon {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      background-color: var(--surface-hover);
+    }
+
+    // Sakai active: только цвет и жирность, без фона
+    &.active-route {
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+  }
+}
+
+// ─── Main container ───────────────────────────────────────
+// Sakai: padding 6rem сверху (4rem topbar + 2rem отступ), margin-left 22rem
+.layout-main-container {
+  position: fixed;
+  top: 4rem;
+  left: 22rem;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  padding: 2rem;
+  background-color: var(--surface-ground);
+  display: flex;
+  flex-direction: column;
+  transition: left 0.2s;
+}
+
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;        // разрешает flex-детям сжиматься
+}
+
+// ─── Page header ─────────────────────────────────────────
+.layout-page-header {
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.layout-page-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.3;
+}
+
+// ─── Content ─────────────────────────────────────────────
+.layout-main-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  > *:not(router-outlet) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+
+// ─── Mask (mobile) ────────────────────────────────────────
+.layout-mask {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--p-mask-background, rgba(0,0,0,0.4));
+  z-index: 998;
+}
+
+// ─── Responsive ───────────────────────────────────────────
+@media (max-width: 991px) {
+  .layout-topbar-logo-container {
+    width: auto;
+  }
+
+  .layout-topbar-menu-button {
+    display: inline-flex;
+  }
+
+  .layout-sidebar {
+    transform: translateX(-110%);
+    left: 0;
+    top: 0;
+    height: 100vh;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .layout-wrapper.layout-mobile-active {
+    .layout-sidebar {
+      transform: translateX(0);
+    }
+
+    .layout-mask {
+      display: block;
+    }
+  }
+
+  .layout-main-container {
+    left: 0;
+    padding: 1rem;
+  }
+}

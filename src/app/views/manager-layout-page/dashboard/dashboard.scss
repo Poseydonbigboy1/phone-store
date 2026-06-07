@@ -1,0 +1,27 @@
+::ng-deep .metric-card {
+  text-align: center;
+  height: 100%;
+
+  .p-card-body { padding: 1.5rem 1rem; }
+
+  .metric-icon {
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+  }
+
+  .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .metric-label {
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+  }
+
+  &.metric-warn   { border-top: 3px solid var(--orange-500); .metric-value { color: var(--orange-600); } }
+  &.metric-primary { border-top: 3px solid var(--primary-color); .metric-value { color: var(--primary-600); } }
+  &.metric-danger { border-top: 3px solid var(--red-500); .metric-value { color: var(--red-600); } }
+}

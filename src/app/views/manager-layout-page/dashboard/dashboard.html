@@ -1,0 +1,140 @@
+@if (loading()) {
+  <div class="flex justify-content-center align-items-center" style="min-height: 300px">
+    <p-progressSpinner strokeWidth="4" [style]="{ width: '56px', height: '56px' }" />
+  </div>
+} @else if (data(); as d) {
+
+  <!-- ─── Метрики верхнего уровня ─── -->
+  <div class="grid mb-4">
+    <div class="col-12 md:col-3">
+      <p-card styleClass="metric-card metric-warn">
+        <div class="metric-icon"><i class="pi pi-clock text-3xl"></i></div>
+        <div class="metric-value">{{ pendingCount() }}</div>
+        <div class="metric-label">Новых заказов</div>
+      </p-card>
+    </div>
+    <div class="col-12 md:col-3">
+      <p-card styleClass="metric-card metric-primary">
+        <div class="metric-icon"><i class="pi pi-chart-line text-3xl"></i></div>
+        <div class="metric-value">{{ d.revenueToday | number:'1.0-0' }} ₽</div>
+        <div class="metric-label">Выручка сегодня</div>
+      </p-card>
+    </div>
+    <div class="col-12 md:col-3">
+      <p-card styleClass="metric-card metric-primary">
+        <div class="metric-icon"><i class="pi pi-chart-bar text-3xl"></i></div>
+        <div class="metric-value">{{ d.revenue7Days | number:'1.0-0' }} ₽</div>
+        <div class="metric-label">Выручка за 7 дней</div>
+      </p-card>
+    </div>
+    <div class="col-12 md:col-3">
+      <p-card styleClass="metric-card metric-danger">
+        <div class="metric-icon"><i class="pi pi-exclamation-circle text-3xl"></i></div>
+        <div class="metric-value">{{ zeroCount() }}</div>
+        <div class="metric-label">Нет в наличии</div>
+      </p-card>
+    </div>
+  </div>
+
+  <!-- ─── График выручки за 30 дней ─── -->
+  @if (revenueChart()) {
+    <div class="mb-4">
+      <p-card header="Выручка и заказы за последние 30 дней">
+        <p-chart type="line" [data]="revenueChart()" [options]="revenueChartOptions" height="260" />
+      </p-card>
+    </div>
+  }
+
+  <!-- ─── Заказы по статусам + Doughnut ─── -->
+  <div class="grid mb-4">
+    <div class="col-12 md:col-6">
+      <p-card header="Заказы по статусам">
+        <div class="flex flex-column gap-2">
+          @for (entry of d.ordersByStatus | keyvalue; track entry.key) {
+            <div class="flex justify-content-between align-items-center py-2 border-bottom-1 surface-border">
+              <p-tag [value]="statusLabels[entry.key] ?? entry.key"
+                     [severity]="$any(statusSeverities[entry.key] ?? 'secondary')" />
+              <span class="font-bold text-xl">{{ entry.value }}</span>
+            </div>
+          }
+        </div>
+      </p-card>
+    </div>
+
+    <div class="col-12 md:col-6">
+      @if (donutChart()) {
+        <p-card header="Распределение заказов">
+          <p-chart type="doughnut" [data]="donutChart()" [options]="donutChartOptions" height="260" />
+        </p-card>
+      } @else {
+        <p-card header="Выручка за 30 дней">
+          <div class="flex flex-column align-items-center justify-content-center" style="min-height: 140px">
+            <div class="text-4xl font-bold" style="color: var(--green-500)">
+              {{ d.revenue30Days | number:'1.0-0' }} ₽
+            </div>
+            <div class="text-color-secondary mt-2">За последние 30 дней</div>
+          </div>
+        </p-card>
+      }
+    </div>
+  </div>
+
+  <!-- ─── Топ-5 товаров + Нет в наличии ─── -->
+  <div class="grid">
+    <div class="col-12 md:col-7">
+      <p-card header="Топ-5 товаров по продажам">
+        <p-table [value]="d.topProducts" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Товар</th>
+              <th>Бренд</th>
+              <th style="width:90px">Продано</th>
+              <th style="width:120px">Выручка</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td class="font-medium">{{ row.productTitle }}</td>
+              <td class="text-color-secondary">{{ row.brandTitle }}</td>
+              <td>{{ row.totalSold }} шт</td>
+              <td>{{ row.totalRevenue | number:'1.0-0' }} ₽</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="4" class="text-center text-color-secondary py-4">Нет данных о продажах</td></tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+    </div>
+
+    <div class="col-12 md:col-5">
+      <p-card header="Нет в наличии">
+        <p-table [value]="d.zeroStockSkus" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Товар</th>
+              <th style="width:100px">Цена</th>
+              <th style="width:56px"></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>
+                <div class="font-medium">{{ row.productTitle }}</div>
+                <div class="text-color-secondary text-xs">{{ row.brandTitle }}</div>
+              </td>
+              <td>{{ row.price | number:'1.0-0' }} ₽</td>
+              <td>
+                <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small"
+                  pTooltip="Редактировать SKU" (onClick)="goToSku(row.skuId)" />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="3" class="text-center text-color-secondary py-4">Все товары в наличии 🎉</td></tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+    </div>
+  </div>
+}

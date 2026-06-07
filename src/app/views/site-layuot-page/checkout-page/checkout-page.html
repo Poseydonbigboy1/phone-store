@@ -1,1 +1,155 @@
-<p>checkout-page works!</p>
+<p-toast />
+
+<div class="container mx-auto" style="max-width: 860px; padding: 2rem 1rem">
+
+  <!-- Заголовок со шагами -->
+  <div class="flex align-items-center gap-3 mb-4">
+    <div class="step-indicator" [class.active]="step() === 1" [class.done]="step() > 1">
+      <span>1</span>
+    </div>
+    <span class="font-medium" [class.text-color-secondary]="step() !== 1">Доставка</span>
+    <i class="pi pi-arrow-right text-color-secondary mx-2"></i>
+    <div class="step-indicator" [class.active]="step() === 2">
+      <span>2</span>
+    </div>
+    <span class="font-medium" [class.text-color-secondary]="step() !== 2">Подтверждение</span>
+  </div>
+
+  <!-- ШАГ 1: Данные доставки -->
+  @if (step() === 1) {
+    <p-card header="Способ и данные доставки">
+      <form [formGroup]="form" class="flex flex-column gap-4">
+
+        <!-- Тип доставки -->
+        <div class="flex flex-column gap-2">
+          <label class="font-medium">Способ доставки</label>
+          <p-selectbutton
+            formControlName="deliveryType"
+            [options]="deliveryOptions"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
+
+        <!-- Имя получателя -->
+        <p-floatlabel variant="on">
+          <input pInputText id="recipientName" formControlName="recipientName" class="w-full" />
+          <label for="recipientName">Имя получателя *</label>
+        </p-floatlabel>
+
+        <!-- Телефон -->
+        <p-floatlabel variant="on">
+          <input pInputText id="phone" formControlName="phone" class="w-full" placeholder="+7 (___) ___-__-__" />
+          <label for="phone">Телефон *</label>
+        </p-floatlabel>
+
+        <!-- Адрес (только курьер) -->
+        @if (isCourier) {
+          <p-floatlabel variant="on">
+            <textarea
+              pTextarea
+              id="address"
+              formControlName="address"
+              rows="2"
+              class="w-full"
+            ></textarea>
+            <label for="address">Адрес доставки *</label>
+          </p-floatlabel>
+        }
+
+        <!-- Комментарий -->
+        <p-floatlabel variant="on">
+          <textarea
+            pTextarea
+            id="comment"
+            formControlName="comment"
+            rows="2"
+            class="w-full"
+          ></textarea>
+          <label for="comment">Комментарий к заказу</label>
+        </p-floatlabel>
+
+        <div class="flex justify-content-end">
+          <p-button
+            label="Далее"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            (onClick)="goToStep2()"
+          />
+        </div>
+      </form>
+    </p-card>
+  }
+
+  <!-- ШАГ 2: Подтверждение -->
+  @if (step() === 2) {
+    <div class="grid">
+
+      <!-- Состав заказа -->
+      <div class="col-12 md:col-7">
+        <p-card header="Ваш заказ">
+          <div class="flex flex-column gap-2">
+            @for (item of (cart.items$ | async) ?? []; track item.skuId) {
+              <div class="flex justify-content-between align-items-center order-row">
+                <div class="flex flex-column">
+                  <span class="font-medium">{{ item.productTitle }}</span>
+                  <small class="text-color-secondary">{{ item.quantity }} × {{ item.finalPrice | number:'1.0-0' }} ₽</small>
+                </div>
+                <span class="font-bold">{{ item.finalPrice * item.quantity | number:'1.0-0' }} ₽</span>
+              </div>
+            }
+          </div>
+          <p-divider />
+          <div class="flex justify-content-between font-bold text-lg">
+            <span>Итого</span>
+            <span>{{ (cart.total$ | async) | number:'1.0-0' }} ₽</span>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Детали доставки -->
+      <div class="col-12 md:col-5">
+        <p-card header="Доставка">
+          <div class="flex flex-column gap-2 text-color-secondary">
+            <div>
+              <i class="mr-2" [class]="isCourier ? 'pi pi-truck' : 'pi pi-box'"></i>
+              <strong>{{ isCourier ? 'Курьер' : 'Самовывоз' }}</strong>
+            </div>
+            <div>Получатель: <strong>{{ form.get('recipientName')?.value }}</strong></div>
+            <div>Телефон: <strong>{{ form.get('phone')?.value }}</strong></div>
+            @if (isCourier && form.get('address')?.value) {
+              <div>Адрес: {{ form.get('address')?.value }}</div>
+            }
+            @if (form.get('comment')?.value) {
+              <div>Комментарий: {{ form.get('comment')?.value }}</div>
+            }
+          </div>
+        </p-card>
+      </div>
+
+    </div>
+
+    @if (errorMessage()) {
+      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mt-3" />
+    }
+
+    <div class="flex gap-2 justify-content-between mt-4">
+      <p-button
+        label="Назад"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="step.set(1)"
+      />
+      <p-button
+        label="Оформить заказ"
+        icon="pi pi-check"
+        severity="success"
+        [loading]="isSubmitting()"
+        [disabled]="form.invalid || isSubmitting()"
+        (onClick)="submit()"
+      />
+    </div>
+  }
+
+</div>

@@ -19,10 +19,10 @@ export class AuthHttpService extends HttpBase {
   }
 
   /**
-   * Регитсранция
+   * Регистрация
    */
-  register$(): Observable<any> {
-    throw new Error('Not implemented');
+  register$(model: { name: string; login: string; password: string }): Observable<ResponseObject<string>> {
+    return this.httpClient.post<ResponseObject<string>>(`${this.apiUrl}/Auth/register`, model);
   }
 
   getProfile$(isCheckAuth: boolean): Observable<ResponseObject<ProfileResponse>> {
@@ -33,5 +33,13 @@ export class AuthHttpService extends HttpBase {
 
   logout$(): Observable<ResponseObject<boolean>> {
     return this.httpClient.get<ResponseObject<boolean>>(`${this.apiUrl}/Auth/logout`);
+  }
+
+  updateProfile$(model: { name?: string; login?: string }): Observable<ResponseObject<boolean>> {
+    return this.httpClient.put<ResponseObject<boolean>>(`${this.apiUrl}/Auth/profile`, model);
+  }
+
+  changePassword$(model: { oldPassword: string; newPassword: string }): Observable<ResponseObject<boolean>> {
+    return this.httpClient.put<ResponseObject<boolean>>(`${this.apiUrl}/Auth/password`, model);
   }
 }

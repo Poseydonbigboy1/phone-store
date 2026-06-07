@@ -1,0 +1,115 @@
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Brand, Product } from '@models/data';
+import { BrandsHttpService } from '@backend';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DrawerModule } from 'primeng/drawer';
+import { InputTextModule } from 'primeng/inputtext';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { ToolbarModule } from 'primeng/toolbar';
+import { Observable } from 'rxjs';
+import { ProductsManagerService } from './products.service';
+
+@Component({
+  selector: 'app-products',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AsyncPipe, TableModule, ButtonModule, DrawerModule, PaginatorModule,
+    InputTextModule, FormsModule, ReactiveFormsModule, ToolbarModule, TagModule,
+    ConfirmDialogModule, SelectModule],
+  templateUrl: './products.html',
+  styleUrl: './products.scss',
+  providers: [ConfirmationService],
+})
+export class Products implements OnInit {
+  readonly items$: Observable<Product[]>;
+  readonly total$: Observable<number>;
+  readonly loading$: Observable<boolean>;
+
+  brandOptions: Brand[] = [];
+
+  paginatorState: PaginatorState = { first: 0, rows: 10, page: 0, pageCount: 0 };
+  displayForm = false;
+  form: FormGroup;
+  isEditMode = false;
+  selectedId: string | null = null;
+  displayFilter = false;
+  filterForm: FormGroup;
+  appliedFilters: { key: string; value: string }[] = [];
+
+  constructor(
+    private svc: ProductsManagerService,
+    private brandsHttp: BrandsHttpService,
+    private fb: FormBuilder,
+    private cd: ChangeDetectorRef,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService,
+  ) {
+    this.items$ = svc.items$;
+    this.total$ = svc.total$;
+    this.loading$ = svc.loading$;
+    this.form = this.fb.group({
+      title: ['', Validators.required],
+      description: [''],
+      brandId: ['', Validators.required],
+    });
+    this.filterForm = this.fb.group({ title: [''] });
+  }
+
+  ngOnInit(): void {
+    this.svc.load(this.paginatorState);
+    this.brandsHttp.getBrands$({ skip: 0, take: 500, sortBy: 'Title', sortDirection: 0, id: { matchMode: 'Equals', value: '' }, title: { matchMode: 'Equals', value: '' } })
+      .subscribe(res => { this.brandOptions = res?.data?.items ?? []; this.cd.markForCheck(); });
+  }
+
+  onPageChange(e: PaginatorState): void { this.paginatorState = e; this.svc.load(e, this.filterForm.value.title ?? ''); }
+
+  showAddForm(): void { this.isEditMode = false; this.form.reset(); this.displayForm = true; }
+
+  showEditForm(item: Product): void {
+    this.isEditMode = true; this.selectedId = item.id;
+    this.form.patchValue(item); this.displayForm = true;
+  }
+
+  getBrandTitle(id: string): string {
+    return this.brandOptions.find(b => b.id === id)?.title ?? id;
+  }
+
+  onFormSubmit(): void {
+    if (this.form.invalid) return;
+    const op$ = this.isEditMode
+      ? this.svc.update$({ id: this.selectedId!, ...this.form.value })
+      : this.svc.create$(this.form.value);
+    op$.subscribe({
+      next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: this.isEditMode ? 'Обновлено' : 'Создано' }); this.displayForm = false; this.svc.load(this.paginatorState, this.filterForm.value.title ?? ''); },
+      error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
+    });
+  }
+
+  delete(id: string): void {
+    this.confirmationService.confirm({
+      message: 'Удалить запись?', header: 'Подтверждение', icon: 'pi pi-exclamation-triangle',
+      accept: () => this.svc.delete$(id).subscribe({
+        next: () => { this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Удалено' }); this.svc.load(this.paginatorState, this.filterForm.value.title ?? ''); },
+        error: (err: Error) => this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err.message }),
+      }),
+    });
+  }
+
+  applyFilters(): void {
+    this.appliedFilters = [];
+    const title = this.filterForm.get('title')?.value;
+    if (title) this.appliedFilters.push({ key: 'title', value: title });
+    this.displayFilter = false;
+    this.paginatorState = { ...this.paginatorState, first: 0, page: 0 };
+    this.svc.load(this.paginatorState, title ?? '');
+  }
+
+  removeFilter(key: string): void { this.filterForm.get(key)?.reset(); this.applyFilters(); }
+}

@@ -4,6 +4,7 @@ import { BehaviorSubject, lastValueFrom, Observable, switchMap, tap } from 'rxjs
 import { User } from '@models/data';
 import { Nullable } from 'primeng/ts-helpers';
 import { Router } from '@angular/router';
+import { CartService } from './services/cart.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -13,9 +14,10 @@ export class AuthService {
 
   private readonly _router: Router;
 
+  private readonly cartService = inject(CartService);
+
   constructor(private authHttpService: AuthHttpService) {
     this._router = inject(Router);
-
     this.user$ = this.currentUser$.asObservable();
   }
 
@@ -35,11 +37,28 @@ export class AuthService {
       .pipe(switchMap((sw) => this.getProfile$()))
       .subscribe({
         next: (res) => {
-          this._router.navigate(['main'])
+          this.cartService.mergeOnLogin();
+          this._router.navigate(['main']);
           console.log(`[auth] [succes]`, res);
         },
         error: (err0r) => {
           console.log(`[auth] [err]`, err0r);
+        },
+      });
+  }
+
+  register(name: string, login: string, password: string, onError?: (msg: string) => void): void {
+    this.authHttpService
+      .register$({ name, login, password })
+      .pipe(switchMap(() => this.getProfile$()))
+      .subscribe({
+        next: () => {
+          this.cartService.mergeOnLogin();
+          this._router.navigate(['main']);
+        },
+        error: (err) => {
+          const msg = err?.error?.message || 'Ошибка регистрации';
+          onError?.(msg);
         },
       });
   }
@@ -63,14 +82,21 @@ export class AuthService {
         next: (response) => {
           if (response.data) {
             const user = new User();
+            user.id    = response.data.id ?? '';
             user.login = response.data.login;
-            user.name = response.data.name;
-            user.role = response.data.role;
+            user.name  = response.data.name ?? '';
+            user.role  = response.data.role;
 
             this.currentUser$.next(user);
+          } else {
+            // Ответ пришёл, но без данных пользователя — сбрасываем сессию
+            this.currentUser$.next(null);
           }
         },
-        error: (er0r) => {},
+        error: () => {
+          // 401 / network error — пользователь не авторизован
+          this.currentUser$.next(null);
+        },
       }),
     );
   }
