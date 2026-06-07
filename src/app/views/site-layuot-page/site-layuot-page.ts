@@ -1,36 +1,45 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { User } from '@models/data';
 import { AuthService } from '@services';
 import { CartService } from '../../core/services/cart.service';
 import { WishlistService } from '../../core/services/wishlist.service';
-import { MenuItem } from 'primeng/api';
-import { MenubarModule } from 'primeng/menubar';
-import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
+import { AvatarModule } from 'primeng/avatar';
+import { PopoverModule } from 'primeng/popover';
+import { RippleModule } from 'primeng/ripple';
 import { FormsModule } from '@angular/forms';
 import { Nullable } from 'primeng/ts-helpers';
 import { Observable } from 'rxjs';
+import { Popover } from 'primeng/popover';
 
 @Component({
   selector: 'app-site-layuot-page',
-  imports: [RouterOutlet, MenubarModule, CommonModule, AsyncPipe, BadgeModule, ButtonModule, OverlayBadgeModule, InputTextModule, FormsModule, TooltipModule],
+  standalone: true,
+  imports: [
+    RouterOutlet, RouterLink, RouterLinkActive,
+    CommonModule, AsyncPipe, FormsModule,
+    ButtonModule, OverlayBadgeModule,
+    InputTextModule, TooltipModule, AvatarModule,
+    PopoverModule, RippleModule,
+  ],
   templateUrl: './site-layuot-page.html',
   styleUrl: './site-layuot-page.scss',
-  standalone: true,
 })
 export class SiteLayuotPage implements OnInit {
-  menuItems: MenuItem[] = [];
+  @ViewChild('userMenu') userMenu!: Popover;
+
   user$: Observable<Nullable<User>>;
   cartCount$: Observable<number>;
   searchQuery = '';
+  mobileOpen = signal(false);
 
-  private readonly authService    = inject(AuthService);
-  readonly cartService    = inject(CartService);
+  private readonly authService     = inject(AuthService);
+  readonly         cartService     = inject(CartService);
   private readonly wishlistService = inject(WishlistService);
   private readonly router          = inject(Router);
 
@@ -43,7 +52,6 @@ export class SiteLayuotPage implements OnInit {
 
   ngOnInit() {
     this.user$.subscribe(user => {
-      this.updateMenu(user);
       if (user) {
         this.cartService.load();
         this.wishlistService.load();
@@ -53,34 +61,24 @@ export class SiteLayuotPage implements OnInit {
     });
   }
 
-  updateMenu(user: Nullable<User>) {
-    this.menuItems = [
-      { label: 'Главная', icon: 'pi pi-home', routerLink: '/', routerLinkActiveOptions: { exact: true } },
-      { label: 'Каталог', icon: 'pi pi-list', routerLink: '/main/products' },
-    ];
-    if (user?.role === 'MANAGER') {
-      this.menuItems.push({ label: 'Панель управления', icon: 'pi pi-cog', routerLink: '/manager' });
-    }
-    if (user) {
-      this.menuItems.push({ label: 'Мои заказы', icon: 'pi pi-list-check', routerLink: '/main/orders' });
-    }
-    this.menuItems.push({
-      label: !!user ? '' : 'Войти',
-      icon: 'pi pi-user',
-      routerLink: !!user ? '/main/profile' : '/login',
-    });
+  goToCart()     { this.router.navigate(['/main/cart']); }
+  goToWishlist() { this.router.navigate(['/main/wishlist']); }
+
+  toggleMobile() { this.mobileOpen.update(v => !v); }
+  closeMobile()  { this.mobileOpen.set(false); }
+
+  toggleUserMenu(event: Event) { this.userMenu?.toggle(event); }
+  closeUserMenu()              { this.userMenu?.hide(); }
+
+  logout() {
+    this.closeUserMenu();
+    this.closeMobile();
+    this.authService.logout();
   }
 
-  goToCart() {
-    this.router.navigate(['/main/cart']);
-  }
-
-  goToWishlist() {
-    this.router.navigate(['/main/wishlist']);
-  }
-
-  onSearch(): void {
+  onSearch() {
     const q = this.searchQuery.trim();
+    this.closeMobile();
     this.router.navigate(['/main/products'], q ? { queryParams: { q } } : {});
   }
 }

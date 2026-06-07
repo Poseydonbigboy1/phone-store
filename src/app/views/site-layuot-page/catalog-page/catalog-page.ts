@@ -2,6 +2,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataViewModule } from 'primeng/dataview';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Observable } from 'rxjs';
 import { CatalogPageService } from './catalog-page.service';
 import { CatalogFilter } from './catalog-filter/catalog-filter';
@@ -28,7 +29,7 @@ import { SortBy, SortDirection } from '@models/common';
   imports: [
     DataViewModule, PaginatorModule, CommonModule, DecimalPipe, RouterLink,
     CatalogFilter, CardModule, ButtonModule, FormsModule, ScrollPanelModule,
-    ToastModule, TagModule, SelectModule, TooltipModule,
+    ToastModule, TagModule, SelectModule, TooltipModule, ProgressSpinnerModule,
   ],
   providers: [CatalogPageService, MessageService],
   templateUrl: './catalog-page.html',

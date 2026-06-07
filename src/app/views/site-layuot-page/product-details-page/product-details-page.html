@@ -1,215 +1,233 @@
 <p-toast />
 
 @if (product(); as product) {
-  <div class="product-details-container">
 
-    <!-- Заголовок -->
-    <div class="product-header mb-4">
-      <h1 class="m-0 text-2xl font-bold">{{ product.title }}</h1>
-      <p class="text-color-secondary mt-1 mb-0">{{ product.brandTitle }}</p>
+  <!-- ══ BREADCRUMB ══ -->
+  <nav class="pd-breadcrumb">
+    <a routerLink="/main/home">Главная</a>
+    <i class="pi pi-angle-right"></i>
+    <a routerLink="/main/products">Каталог</a>
+    <i class="pi pi-angle-right"></i>
+    <span>{{ product.title }}</span>
+  </nav>
+
+  <div class="pd-layout">
+
+    <!-- ══ LEFT: Галерея ══ -->
+    <div class="pd-gallery">
+      @if (product.images?.length) {
+        @let imgs = product.images ?? [];
+        <p-galleria
+          [value]="imgs"
+          [responsiveOptions]="responsiveOptions"
+          [containerStyle]="{ 'max-width': '100%' }"
+          [numVisible]="5"
+          [showIndicators]="imgs.length > 1"
+          [showThumbnails]="imgs.length > 1"
+          styleClass="pd-galleria"
+        >
+          <ng-template pTemplate="item" let-item>
+            @if (isVideo(item)) {
+              <video [src]="item" controls class="pd-media"></video>
+            } @else {
+              <img [src]="item" [alt]="product.title" class="pd-media" />
+            }
+          </ng-template>
+          <ng-template pTemplate="thumbnail" let-item>
+            @if (isVideo(item)) {
+              <video [src]="item" muted preload="metadata" class="pd-thumb"></video>
+            } @else {
+              <img [src]="item" [alt]="product.title" class="pd-thumb" />
+            }
+          </ng-template>
+        </p-galleria>
+      } @else {
+        <div class="pd-no-image">
+          <i class="pi pi-mobile"></i>
+        </div>
+      }
     </div>
 
-    <div class="grid">
+    <!-- ══ RIGHT: Инфо ══ -->
+    <div class="pd-info">
 
-      <!-- Галерея -->
-      <div class="col-12 md:col-5">
-        @if (product.images?.length) {
-          @let imgs = product.images ?? [];
-          <p-galleria
-            [value]="imgs"
-            [responsiveOptions]="responsiveOptions"
-            [containerStyle]="{ 'max-width': '100%' }"
-            [numVisible]="5"
-            [showIndicators]="imgs.length > 1"
-            [showThumbnails]="imgs.length > 1"
-          >
-            <ng-template pTemplate="item" let-item>
-              @if (isVideo(item)) {
-                <video [src]="item" controls style="width:100%; max-height:380px; object-fit:contain; display:block"></video>
-              } @else {
-                <img [src]="item" [alt]="product.title"
-                     style="width:100%; max-height:380px; object-fit:contain; display:block" />
-              }
-            </ng-template>
-            <ng-template pTemplate="thumbnail" let-item>
-              @if (isVideo(item)) {
-                <video [src]="item" muted preload="metadata" width="60" style="object-fit:contain"></video>
-              } @else {
-                <img [src]="item" [alt]="product.title" width="60" style="object-fit:contain" />
-              }
-            </ng-template>
-          </p-galleria>
-        } @else {
-          <div class="flex align-items-center justify-content-center border-round surface-100"
-               style="height: 320px">
-            <i class="pi pi-image text-7xl text-color-secondary"></i>
+      <!-- Бренд + название -->
+      @if (product.brandTitle) {
+        <span class="pd-brand">{{ product.brandTitle }}</span>
+      }
+      <h1 class="pd-title">{{ product.title }}</h1>
+
+      <!-- Выбор варианта SKU -->
+      @if (allSkus().length > 1) {
+        <div class="pd-sku-section">
+          <span class="pd-sku-label">Конфигурация</span>
+          <div class="pd-sku-list">
+            @for (sku of allSkus(); track sku.skuId) {
+              <button
+                class="pd-sku-chip"
+                [class.pd-sku-chip--active]="(selectedSkuId() ?? product.mainSku?.skuId) === sku.skuId"
+                [class.pd-sku-chip--unavailable]="sku.amount <= 0"
+                [disabled]="sku.amount <= 0"
+                (click)="selectSku(sku)"
+              >
+                {{ skuLabel(sku) }}
+                @if (sku.amount <= 0) { <span class="pd-sku-chip__sub">нет</span> }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Цена + наличие -->
+      @if (currentSku(); as sku) {
+        <div class="pd-price-block">
+          @if (sku.discount > 0) {
+            <div class="pd-price-row">
+              <span class="pd-price pd-price--sale">
+                {{ sku.price * (1 - sku.discount / 100) | number:'1.0-0' }} ₽
+              </span>
+              <span class="pd-price-badge">−{{ sku.discount }}%</span>
+            </div>
+            <span class="pd-price-old">{{ sku.price | number:'1.0-0' }} ₽</span>
+          } @else {
+            <span class="pd-price">{{ sku.price | number:'1.0-0' }} ₽</span>
+          }
+        </div>
+
+        <!-- Доступность -->
+        <div class="pd-availability">
+          @if (sku.amount > 10) {
+            <span class="pd-avail pd-avail--yes">
+              <i class="pi pi-check-circle"></i> В наличии
+            </span>
+          } @else if (sku.amount > 0) {
+            <span class="pd-avail pd-avail--low">
+              <i class="pi pi-exclamation-circle"></i> Осталось {{ sku.amount }} шт
+            </span>
+          } @else {
+            <span class="pd-avail pd-avail--no">
+              <i class="pi pi-times-circle"></i> Нет в наличии
+            </span>
+          }
+        </div>
+
+        <!-- SKU-специфичные характеристики -->
+        @if (sku.skuSpecificComponents?.length) {
+          <div class="pd-spec-mini">
+            @for (comp of sku.skuSpecificComponents; track comp.title) {
+              <div class="pd-spec-mini__row">
+                <span class="pd-spec-mini__key">{{ comp.title }}</span>
+                <span class="pd-spec-mini__val">{{ comp.value }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Действия -->
+        <div class="pd-actions">
+          <p-button
+            label="Добавить в корзину"
+            icon="pi pi-shopping-cart"
+            severity="success"
+            styleClass="pd-btn-cart"
+            [loading]="addingToCart()"
+            [disabled]="sku.amount <= 0"
+            (onClick)="addToCart()"
+          />
+          @if (isLoggedIn()) {
+            <p-button
+              [icon]="inWishlist() ? 'pi pi-heart-fill' : 'pi pi-heart'"
+              [severity]="inWishlist() ? 'danger' : 'secondary'"
+              [outlined]="!inWishlist()"
+              pTooltip="Избранное"
+              styleClass="pd-btn-wish"
+              (onClick)="toggleWishlist(sku.skuId)"
+            />
+          }
+        </div>
+
+        <!-- Описание -->
+        @if (product.description) {
+          <div class="pd-description">
+            <h3 class="pd-description__title">О товаре</h3>
+            <p class="pd-description__text">{{ product.description }}</p>
+          </div>
+        }
+      }
+
+    </div><!-- /pd-info -->
+  </div><!-- /pd-layout -->
+
+  <!-- ══ ХАРАКТЕРИСТИКИ ══ -->
+  @if (product.commonComponents?.length) {
+    <section class="pd-specs-section">
+      <h2 class="pd-section-title">Характеристики</h2>
+      <div class="pd-specs-table">
+        @for (spec of product.commonComponents; track spec.title) {
+          <div class="pd-specs-row">
+            <span class="pd-specs-row__key">{{ spec.title }}</span>
+            <span class="pd-specs-row__val">{{ spec.value }}</span>
           </div>
         }
       </div>
+    </section>
+  }
 
-      <!-- Правая панель: цена, варианты, кнопка -->
-      <div class="col-12 md:col-7">
-        <p-card>
-
-          <!-- Варианты SKU (чипы) -->
-          @if (allSkus().length > 1) {
-            <div class="mb-4">
-              <div class="text-sm font-medium text-color-secondary mb-2">Варианты:</div>
-              <div class="flex flex-wrap gap-2">
-                @for (sku of allSkus(); track sku.skuId) {
-                  <div
-                    class="sku-chip border-round px-3 py-2 cursor-pointer border-1 transition-all transition-duration-200"
-                    [class.sku-chip--active]="(selectedSkuId() ?? product.mainSku?.skuId) === sku.skuId"
-                    [class.sku-chip--disabled]="sku.amount <= 0"
-                    (click)="sku.amount > 0 && selectSku(sku)"
-                    [title]="sku.amount <= 0 ? 'Нет в наличии' : ''"
-                  >
-                    <span class="text-sm font-medium">{{ skuLabel(sku) }}</span>
-                    @if (sku.amount <= 0) {
-                      <span class="text-xs text-color-secondary block">нет в наличии</span>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Цена -->
-          @if (currentSku(); as sku) {
-            <div class="mb-4">
-              @if (sku.discount > 0) {
-                <div class="flex align-items-center gap-3 flex-wrap">
-                  <span class="text-3xl font-bold" style="color: var(--green-600)">
-                    {{ sku.price * (1 - sku.discount / 100) | number:'1.0-0' }} ₽
-                  </span>
-                  <span class="text-xl text-color-secondary line-through">
-                    {{ sku.price | number:'1.0-0' }} ₽
-                  </span>
-                  <span class="text-sm font-bold px-2 py-1 border-round"
-                        style="background: var(--orange-100); color: var(--orange-700)">
-                    −{{ sku.discount }}%
-                  </span>
-                </div>
-              } @else {
-                <span class="text-3xl font-bold">{{ sku.price | number:'1.0-0' }} ₽</span>
-              }
-
-              <!-- Остаток -->
-              <div class="mt-2">
-                @if (sku.amount > 10) {
-                  <p-tag value="В наличии" severity="success" icon="pi pi-check" />
-                } @else if (sku.amount > 0) {
-                  <p-tag [value]="'Осталось ' + sku.amount + ' шт'" severity="warn" icon="pi pi-exclamation-triangle" />
-                } @else {
-                  <p-tag value="Нет в наличии" severity="danger" icon="pi pi-times" />
-                }
-              </div>
-            </div>
-
-            <!-- SKU-специфичные компоненты (выбранного варианта) -->
-            @if (sku.skuSpecificComponents?.length) {
-              <div class="mb-4">
-                @for (comp of sku.skuSpecificComponents; track comp.title) {
-                  <div class="flex justify-content-between py-1 border-bottom-1 surface-border">
-                    <span class="text-color-secondary text-sm">{{ comp.title }}</span>
-                    <span class="font-medium text-sm">{{ comp.value }}</span>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- Кнопки -->
-            <div class="flex gap-2">
-              <p-button
-                label="Добавить в корзину"
-                icon="pi pi-shopping-cart"
-                severity="success"
-                styleClass="flex-1"
-                size="large"
-                [loading]="addingToCart()"
-                [disabled]="sku.amount <= 0"
-                (onClick)="addToCart()"
-              />
-              @if (isLoggedIn()) {
-                <p-button
-                  [icon]="inWishlist() ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                  [severity]="inWishlist() ? 'danger' : 'secondary'"
-                  [outlined]="!inWishlist()"
-                  size="large"
-                  pTooltip="Избранное"
-                  (onClick)="toggleWishlist(sku.skuId)"
-                />
-              }
-            </div>
-          }
-        </p-card>
-
-        <!-- Описание -->
-        <p-fieldset legend="Описание" [toggleable]="true" class="mt-3">
-          <p class="m-0 line-height-3">{{ product.description }}</p>
-        </p-fieldset>
+  <!-- ══ ПОХОЖИЕ ТОВАРЫ ══ -->
+  @if (similar().length > 0) {
+    <section class="pd-similar-section">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <i class="pi pi-objects-column" style="color:#6366f1"></i> Похожие товары
+        </h2>
       </div>
-    </div>
 
-    <!-- Таблица характеристик -->
-    @if (product.commonComponents?.length) {
-      <div class="mt-4">
-        <h3 class="mb-3">Характеристики</h3>
-        <p-table [value]="product.commonComponents" styleClass="p-datatable-sm p-datatable-striped">
-          <ng-template pTemplate="body" let-spec>
-            <tr>
-              <td class="text-color-secondary" style="width: 40%">{{ spec.title }}</td>
-              <td class="font-medium">{{ spec.value }}</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
-    }
-
-    <!-- Похожие товары -->
-    @if (similar().length > 0) {
-      <div class="mt-5">
-        <h3 class="mb-3">Похожие товары</h3>
-        <p-carousel
-          [value]="similar()"
-          [numVisible]="4"
-          [numScroll]="1"
-          [responsiveOptions]="carouselOptions"
-          [circular]="true"
-        >
-          <ng-template pTemplate="item" let-item>
-            <div class="similar-card m-2 border-1 surface-border border-round surface-card overflow-hidden">
-              <a [routerLink]="['/main/products', item.productId]" class="block" style="height:160px; background:var(--surface-100)">
+      <p-carousel
+        [value]="similar()"
+        [numVisible]="4"
+        [numScroll]="1"
+        [responsiveOptions]="carouselOptions"
+        [circular]="similar().length > 4"
+      >
+        <ng-template pTemplate="item" let-item>
+          <div class="p-card-wrap">
+            <div class="product-card-ui">
+              <a [routerLink]="['/main/products', item.productId]" class="product-card-ui__img-wrap">
                 @if (item.imageUrl) {
-                  <img [src]="item.imageUrl" [alt]="item.title" class="w-full h-full" style="object-fit:contain;padding:8px" />
+                  <img [src]="item.imageUrl" [alt]="item.title" />
                 } @else {
-                  <div class="flex align-items-center justify-content-center h-full">
-                    <i class="pi pi-image text-4xl text-color-secondary"></i>
-                  </div>
+                  <div class="product-card-ui__img-placeholder"><i class="pi pi-mobile"></i></div>
+                }
+                @if (item.discount > 0) {
+                  <span class="product-card-ui__discount-badge">−{{ item.discount }}%</span>
                 }
               </a>
-              <div class="p-3">
-                <a [routerLink]="['/main/products', item.productId]" class="font-semibold text-color"
-                   style="text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.85rem;line-height:1.3">
+              <div class="product-card-ui__body">
+                @if (item.brandTitle) {
+                  <span class="product-card-ui__brand">{{ item.brandTitle }}</span>
+                }
+                <a [routerLink]="['/main/products', item.productId]" class="product-card-ui__title">
                   {{ item.title }}
                 </a>
-                <div class="mt-2 font-bold">
+                <div class="product-card-ui__price-area">
                   @if (item.discount > 0) {
-                    {{ item.price * (1 - item.discount / 100) | number:'1.0-0' }} ₽
+                    <span class="product-card-ui__price product-card-ui__price--sale">
+                      {{ item.price * (1 - item.discount / 100) | number:'1.0-0' }} ₽
+                    </span>
                   } @else {
-                    {{ item.price | number:'1.0-0' }} ₽
+                    <span class="product-card-ui__price">{{ item.price | number:'1.0-0' }} ₽</span>
                   }
                 </div>
               </div>
             </div>
-          </ng-template>
-        </p-carousel>
-      </div>
-    }
+          </div>
+        </ng-template>
+      </p-carousel>
+    </section>
+  }
 
-  </div>
 } @else {
-  <div class="flex align-items-center justify-content-center" style="min-height: 60vh">
+  <div class="pd-loading">
     <p-progressSpinner />
   </div>
 }

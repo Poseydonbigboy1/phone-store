@@ -1,71 +1,191 @@
+// ═══════════════════════════════════════════════════════════════
+// BANNER SLIDER
+// ═══════════════════════════════════════════════════════════════
 .banner-slider {
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
+  background: #000;
 
-  ::ng-deep .p-carousel-content {
-    border-radius: 12px;
-  }
+  ::ng-deep .p-carousel-content { border-radius: 16px; }
 
   ::ng-deep .p-carousel-indicators {
     position: absolute;
-    bottom: 12px;
+    bottom: 14px;
     left: 50%;
     transform: translateX(-50%);
     gap: 6px;
+    padding: 0;
   }
 
   ::ng-deep .p-carousel-indicator button {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.45);
     border: none;
+    transition: background 0.2s, width 0.2s;
   }
 
   ::ng-deep .p-carousel-indicator.p-carousel-indicator-active button {
     background: #fff;
+    width: 22px;
+    border-radius: 4px;
+  }
+
+  ::ng-deep .p-carousel-prev-button,
+  ::ng-deep .p-carousel-next-button {
+    background: rgba(255,255,255,0.15) !important;
+    border: none !important;
+    color: #fff !important;
+    backdrop-filter: blur(4px);
+
+    &:hover { background: rgba(255,255,255,0.3) !important; }
   }
 }
 
 .banner-slide {
-  width: 100%;
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
-  background: #000;
+  background: #0f172a;
 
-  &--clickable {
-    cursor: pointer;
+  &--clickable { cursor: pointer; &:hover .banner-img { transform: scale(1.02); } }
 
-    &:hover .banner-img {
-      transform: scale(1.02);
-    }
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 50%);
+    pointer-events: none;
   }
 }
 
 .banner-img {
   width: 100%;
-  height: 420px;
+  height: 440px;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s ease;
 
-  @media (max-width: 768px) {
-    height: 220px;
-  }
+  @media (max-width: 768px) { height: 220px; }
+  @media (max-width: 480px) { height: 170px; }
 }
 
-.home-hero {
+// ═══════════════════════════════════════════════════════════════
+// HERO FALLBACK
+// ═══════════════════════════════════════════════════════════════
+.hero-fallback {
   position: relative;
+  border-radius: 16px;
   overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  align-items: flex-end;
+
+  @media (max-width: 768px) { min-height: 280px; }
 }
 
-.product-card {
-  height: 100%;
-  transition: box-shadow 0.2s, transform 0.2s;
+.hero-fallback__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e293b 70%, #312e81 100%);
+  z-index: 0;
+}
 
-  &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-  }
+.hero-fallback__content {
+  position: relative;
+  z-index: 1;
+  padding: 2.5rem;
+  flex: 1;
+
+  @media (max-width: 600px) { padding: 1.5rem; }
+}
+
+.hero-fallback__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+
+  i { color: #60a5fa; }
+}
+
+.hero-fallback__title {
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  margin: 0 0 0.875rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-fallback__subtitle {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0 0 1.75rem;
+  max-width: 420px;
+}
+
+.hero-fallback__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s, background 0.15s;
+
+  &:hover { transform: translateY(-2px); background: #f1f5f9; }
+}
+
+.hero-fallback__badges {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+
+  @media (max-width: 700px) { display: none; }
+}
+
+.hero-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.875rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  font-size: 0.775rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  white-space: nowrap;
+
+  i { color: #60a5fa; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTIONS — spacing
+// ═══════════════════════════════════════════════════════════════
+section {
+  &:not(:last-of-type) { margin-bottom: 2.5rem; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CAROUSEL: no clip inside card-wrap so hover shadow shows
+// ═══════════════════════════════════════════════════════════════
+::ng-deep .p-carousel-item {
+  padding: 0.25rem;
 }

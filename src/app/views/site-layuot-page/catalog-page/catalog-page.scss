@@ -1,0 +1,101 @@
+// ═══════════════════════════════════════════════════════════════
+// CATALOG LAYOUT (sidebar + main)
+// ═══════════════════════════════════════════════════════════════
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.catalog-sidebar {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+
+  @media (max-width: 900px) {
+    position: static;
+    max-height: none;
+  }
+}
+
+.catalog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+// ─ Toolbar ───────────────────────────────────────────────────
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  &__count {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+}
+
+::ng-deep .catalog-sort-select {
+  min-width: 220px;
+
+  @media (max-width: 480px) { min-width: 0; width: 100%; }
+}
+
+// ─ Grid ──────────────────────────────────────────────────────
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+// ─ Empty / Loading ───────────────────────────────────────────
+.catalog-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  gap: 0.75rem;
+  text-align: center;
+
+  i { font-size: 3rem; color: #cbd5e1; }
+  span { font-size: 1.05rem; font-weight: 600; color: #475569; }
+  p { font-size: 0.875rem; color: #94a3b8; margin: 0; }
+}
+
+.catalog-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+}
+
+// ─ Pagination ────────────────────────────────────────────────
+.catalog-pagination {
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.5rem;
+}
