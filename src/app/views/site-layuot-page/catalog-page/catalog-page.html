@@ -1,20 +1,40 @@
 <p-toast />
 
-<div class="catalog-layout">
+<div class="catalog-layout" [class.catalog-layout--filter-open]="filterOpen">
 
-  <!-- ══ ФИЛЬТРЫ (sidebar) ══ -->
-  <aside class="catalog-sidebar">
+  <!-- ══ ФИЛЬТРЫ (sidebar / drawer) ══ -->
+  <aside class="catalog-sidebar" [class.catalog-sidebar--open]="filterOpen">
+    <div class="catalog-sidebar__header">
+      <span class="catalog-sidebar__title">
+        <i class="pi pi-filter"></i> Фильтры
+      </span>
+      <button class="catalog-sidebar__close" (click)="filterOpen = false">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
     <app-catalog-filter />
   </aside>
+
+  <!-- Оверлей под drawer на мобилке -->
+  @if (filterOpen) {
+    <div class="catalog-overlay" (click)="filterOpen = false"></div>
+  }
 
   <!-- ══ КОНТЕНТ ══ -->
   <div class="catalog-content">
 
     <!-- Тулбар -->
     <div class="catalog-toolbar">
+      <!-- Кнопка фильтров (мобилка / планшет) -->
+      <button class="catalog-filter-btn" (click)="filterOpen = !filterOpen">
+        <i class="pi pi-filter"></i>
+        <span>Фильтры</span>
+      </button>
+
       <span class="catalog-toolbar__count">
         {{ (total$ | async) ?? 0 }} товаров
       </span>
+
       <p-select
         [options]="sortOptions"
         [(ngModel)]="selectedSort"
@@ -41,7 +61,6 @@
         @for (product of (products$ | async) ?? []; track product.skuId) {
           <div class="product-card-ui">
 
-            <!-- Изображение -->
             <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__img-wrap">
               @if (product.images?.length) {
                 <img [src]="product.images[0]" [alt]="product.title" />
@@ -53,16 +72,13 @@
               }
             </a>
 
-            <!-- Тело карточки -->
             <div class="product-card-ui__body">
               @if (product.brandTitle) {
                 <span class="product-card-ui__brand">{{ product.brandTitle }}</span>
               }
-
               <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__title">
                 {{ product.title }}
               </a>
-
               <div class="product-card-ui__price-area">
                 @if (product.discount > 0) {
                   <div class="flex align-items-center gap-2 flex-wrap">
@@ -75,7 +91,6 @@
                   <span class="product-card-ui__price">{{ product.price | number:'1.0-0' }} ₽</span>
                 }
               </div>
-
               <div class="product-card-ui__actions">
                 <p-button icon="pi pi-cart-plus" label="В корзину"
                           severity="success" styleClass="flex-1" size="small"

@@ -1,7 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // TOPBAR
+// xs/sm (≤767)  : бургер, нет nav/поиска/user-chip, login → icon only
+// md (768-1023) : бургер, нет nav/поиска, user-chip без имени
+// lg+ (≥1024)   : полная шапка
+// 2xl (≥1440)   : контент с max-width
 // ═══════════════════════════════════════════════════════════════
 $topbar-height: 64px;
+$topbar-height-xs: 56px;
 
 .layout-topbar {
   position: fixed;
@@ -13,11 +18,21 @@ $topbar-height: 64px;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 1px 8px rgba(15, 23, 42, 0.06);
-
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
   padding: 0 1.5rem;
+
+  @media (min-width: 1440px) {
+    padding: 0 2.5rem;
+    gap: 2rem;
+  }
+
+  @media (max-width: 767px) {
+    height: $topbar-height-xs;
+    padding: 0 1rem;
+    gap: 0.75rem;
+  }
 }
 
 // ── Logo container ────────────────────────────────────────────
@@ -28,6 +43,7 @@ $topbar-height: 64px;
   flex-shrink: 0;
 }
 
+// Бургер — показывается на xs/sm/md (≤1023px)
 .layout-menu-button {
   display: none;
   align-items: center;
@@ -45,7 +61,7 @@ $topbar-height: 64px;
 
   &:hover { background: #f1f5f9; color: #0f172a; }
 
-  @media (max-width: 900px) { display: flex; }
+  @media (max-width: 1023px) { display: flex; }
 }
 
 .layout-topbar-logo {
@@ -67,6 +83,8 @@ $topbar-height: 64px;
   color: #fff;
   font-size: 1rem;
   box-shadow: 0 2px 6px rgba(30, 41, 59, 0.3);
+
+  @media (max-width: 767px) { width: 30px; height: 30px; font-size: 0.875rem; }
 }
 
 .topbar-logo-text {
@@ -75,18 +93,20 @@ $topbar-height: 64px;
   color: #0f172a;
   letter-spacing: -0.025em;
   line-height: 1;
+
+  @media (max-width: 767px) { font-size: 1rem; }
 }
 
 .topbar-logo-accent { color: #1e293b; }
 
-// ── Center nav ────────────────────────────────────────────────
+// ── Center nav — только lg+ (≥1024px) ────────────────────────
 .topbar-nav {
   display: flex;
   align-items: center;
   gap: 0.125rem;
   flex: 1;
 
-  @media (max-width: 900px) { display: none; }
+  @media (max-width: 1023px) { display: none; }
 }
 
 .topbar-nav__link {
@@ -99,6 +119,11 @@ $topbar-height: 64px;
   transition: color 0.15s, background 0.15s;
   white-space: nowrap;
 
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    padding: 0.4rem 0.625rem;
+    font-size: 0.825rem;
+  }
+
   &:hover { color: #1e293b; background: #f1f5f9; }
 
   &--active {
@@ -108,16 +133,17 @@ $topbar-height: 64px;
   }
 }
 
-// ── Actions (right side) ──────────────────────────────────────
+// ── Actions (правая сторона) ──────────────────────────────────
 .layout-topbar-actions {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   margin-left: auto;
   flex-shrink: 0;
+
+  @media (max-width: 767px) { gap: 0.25rem; }
 }
 
-// Base action button (icon-only)
 .layout-topbar-action {
   display: flex;
   align-items: center;
@@ -132,6 +158,8 @@ $topbar-height: 64px;
   font-size: 1.05rem;
   transition: background 0.15s, color 0.15s;
 
+  @media (max-width: 767px) { width: 34px; height: 34px; font-size: 1rem; }
+
   &:hover { background: #f1f5f9; color: #0f172a; }
 }
 
@@ -139,13 +167,13 @@ $topbar-height: 64px;
   .p-overlaybadge-badge { font-size: 0.6rem; min-width: 16px; height: 16px; }
 }
 
-// ── Search ────────────────────────────────────────────────────
+// ── Search — только lg+ ───────────────────────────────────────
 .topbar-search {
   position: relative;
   display: flex;
   align-items: center;
 
-  @media (max-width: 900px) { display: none; }
+  @media (max-width: 1023px) { display: none; }
 }
 
 .topbar-search__icon {
@@ -158,7 +186,7 @@ $topbar-height: 64px;
 }
 
 .topbar-search__input {
-  width: 210px;
+  width: 200px;
   padding-left: 2.1rem !important;
   border-radius: 20px !important;
   background: #f1f5f9 !important;
@@ -167,8 +195,11 @@ $topbar-height: 64px;
   height: 36px !important;
   transition: width 0.2s, background 0.15s, border-color 0.15s;
 
+  @media (min-width: 1280px) { width: 220px; }
+  @media (min-width: 1440px) { width: 260px; }
+
   &:focus {
-    width: 260px;
+    width: 270px !important;
     background: #fff !important;
     border-color: #1e293b !important;
     box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.12) !important;
@@ -188,7 +219,15 @@ $topbar-height: 64px;
 
   &:hover { background: #e2e8f0; }
 
-  @media (max-width: 900px) { display: none; }
+  // На md (768-1023): показываем chip, но без имени (через CSS скрываем текст)
+  @media (max-width: 767px) { display: none; }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    padding: 0.25rem 0.3rem;
+    border-radius: 50%;
+    .topbar-user-name { display: none; }
+    .topbar-user-chevron { display: none; }
+  }
 }
 
 ::ng-deep .topbar-user-avatar.p-avatar {
@@ -204,10 +243,12 @@ $topbar-height: 64px;
   font-size: 0.825rem;
   font-weight: 500;
   color: #0f172a;
-  max-width: 100px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (min-width: 1024px) and (max-width: 1279px) { max-width: 80px; }
 }
 
 .topbar-user-chevron {
@@ -234,10 +275,21 @@ $topbar-height: 64px;
   &:hover { background: #334155; transform: translateY(-1px); }
   &:active { transform: translateY(0); }
 
-  @media (max-width: 900px) {
+  // md: скрываем текст, оставляем иконку
+  @media (min-width: 768px) and (max-width: 1023px) {
     span { display: none; }
-    width: 38px;
-    height: 38px;
+    padding: 0.25rem 0.3rem;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+
+  // xs/sm: то же
+  @media (max-width: 767px) {
+    span { display: none; }
+    width: 34px;
+    height: 34px;
     padding: 0;
     border-radius: 10px;
     justify-content: center;
@@ -307,14 +359,13 @@ $topbar-height: 64px;
     i { font-size: 0.875rem; color: #64748b; width: 16px; }
 
     &:hover { background: #f1f5f9; color: #0f172a; }
-
     &--manager { color: #b45309; i { color: #d97706; } }
     &--danger  { color: #dc2626; i { color: #dc2626; } &:hover { background: #fef2f2; } }
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MOBILE NAV
+// MOBILE NAV — показывается при mobileOpen на ≤1023px
 // ═══════════════════════════════════════════════════════════════
 .mobile-nav {
   position: fixed;
@@ -324,11 +375,12 @@ $topbar-height: 64px;
   z-index: 998;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 1rem 1rem 1.25rem;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
-  display: none;
+  padding: 0.875rem 1rem 1.25rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  max-height: calc(100vh - #{$topbar-height});
+  overflow-y: auto;
 
-  @media (max-width: 900px) { display: block; }
+  @media (max-width: 767px) { top: $topbar-height-xs; max-height: calc(100vh - #{$topbar-height-xs}); }
 
   &__search {
     display: flex;
@@ -374,14 +426,15 @@ $topbar-height: 64px;
     width: 100%;
     text-align: left;
 
-    i { width: 18px; color: #64748b; }
+    @media (max-width: 479px) { padding: 0.625rem 0.75rem; font-size: 0.825rem; }
+
+    i { width: 18px; color: #64748b; flex-shrink: 0; }
 
     &:hover { background: #f1f5f9; }
-
     &--active { color: #1e293b; background: #f1f5f9; }
     &--manager { color: #b45309; i { color: #d97706; } }
-    &--danger { color: #dc2626; i { color: #dc2626; } &:hover { background: #fef2f2; } }
-    &--login { color: #1e293b; font-weight: 600; }
+    &--danger  { color: #dc2626; i { color: #dc2626; } &:hover { background: #fef2f2; } }
+    &--login   { color: #1e293b; font-weight: 600; }
   }
 
   &__badge {
@@ -397,6 +450,7 @@ $topbar-height: 64px;
     align-items: center;
     justify-content: center;
     padding: 0 4px;
+    flex-shrink: 0;
   }
 }
 
@@ -408,16 +462,22 @@ $topbar-height: 64px;
   flex-direction: column;
   flex: 1;
   margin-top: $topbar-height;
+
+  @media (max-width: 767px) { margin-top: $topbar-height-xs; }
 }
 
 .layout-main {
   flex: 1;
-  max-width: 1440px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
 
-  @media (max-width: 600px) { padding: 1.25rem 1rem; }
+  // Отступы по брейкпоинтам
+  padding: 2rem 1.5rem;                        // lg / xl (default)
+
+  @media (max-width: 479px)  { padding: 1rem 0.875rem; }   // xs  — маленький телефон
+  @media (min-width: 480px) and (max-width: 767px)  { padding: 1.25rem 1rem; }    // sm  — телефон
+  @media (min-width: 768px) and (max-width: 1023px) { padding: 1.5rem 1.25rem; }  // md  — планшет
+  @media (min-width: 1440px) { padding: 2.5rem 2rem; max-width: 1600px; }         // 2xl — широкий
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -434,18 +494,25 @@ $topbar-height: 64px;
   gap: 1rem;
   flex-shrink: 0;
 
-  @media (max-width: 600px) { padding: 0 1rem; }
+  @media (max-width: 479px) { padding: 0 0.875rem; height: 48px; }
+  @media (min-width: 480px) and (max-width: 767px) { padding: 0 1rem; }
+  @media (min-width: 1440px) { padding: 0 2.5rem; }
 
   &__copy {
     font-size: 0.775rem;
     color: #94a3b8;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (max-width: 479px) { font-size: 0.7rem; }
   }
 
   &__social {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    flex-shrink: 0;
   }
 
   &__social-link {

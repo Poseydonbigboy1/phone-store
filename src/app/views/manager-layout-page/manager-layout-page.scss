@@ -255,14 +255,28 @@
 }
 
 // ─── Responsive ───────────────────────────────────────────
-@media (max-width: 991px) {
-  .layout-topbar-logo-container {
-    width: auto;
+
+// lg- (≤1279px): сайдбар чуть уже
+@media (min-width: 992px) and (max-width: 1279px) {
+  .layout-sidebar {
+    width: 16rem;
   }
 
-  .layout-topbar-menu-button {
-    display: inline-flex;
+  .layout-topbar-logo-container {
+    width: 16rem;
   }
+
+  .layout-main-container {
+    left: 18rem;
+    padding: 1.5rem;
+  }
+}
+
+// md- (≤991px): сайдбар — drawer
+@media (max-width: 991px) {
+  .layout-topbar-logo-container { width: auto; }
+  .layout-topbar { padding: 0 1.25rem; }
+  .layout-topbar-menu-button { display: inline-flex; }
 
   .layout-sidebar {
     transform: translateX(-110%);
@@ -271,20 +285,41 @@
     height: 100vh;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    width: min(18rem, 85vw);
   }
 
   .layout-wrapper.layout-mobile-active {
-    .layout-sidebar {
-      transform: translateX(0);
-    }
-
-    .layout-mask {
-      display: block;
-    }
+    .layout-sidebar { transform: translateX(0); }
+    .layout-mask { display: block; }
   }
 
   .layout-main-container {
     left: 0;
+    padding: 1.25rem;
+  }
+}
+
+// sm (≤767px): совсем маленький экран
+@media (max-width: 767px) {
+  .layout-topbar { padding: 0 1rem; }
+
+  .layout-topbar-breadcrumb { display: none; }
+
+  .layout-main-container {
     padding: 1rem;
   }
+
+  .layout-page-title { font-size: 1.15rem; }
+}
+
+// xs (≤479px)
+@media (max-width: 479px) {
+  .layout-topbar { height: 3.5rem; }
+
+  .layout-main-container {
+    top: 3.5rem;
+    padding: 0.875rem;
+  }
+
+  .layout-page-title { font-size: 1.05rem; }
 }
