@@ -23,4 +23,13 @@ export class CheckoutHttpService extends HttpBase {
   changeStatus$(orderId: string, status: number): Observable<ResponseObject<boolean>> {
     return this.httpClient.put<ResponseObject<boolean>>(`${this.url}/${orderId}/status`, { status });
   }
+
+  // Manager
+  getAllOrders$(): Observable<ResponseObject<OrderSummary[]>> {
+    return this.httpClient.get<ResponseObject<OrderSummary[]>>(`${this.url}/all`);
+  }
+
+  getOrderDetails$(orderId: string): Observable<ResponseObject<OrderDetail>> {
+    return this.httpClient.get<ResponseObject<OrderDetail>>(`${this.url}/${orderId}/details`);
+  }
 }

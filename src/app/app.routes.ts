@@ -20,6 +20,19 @@ export const routes: Routes = [
     data: { breadcrumb: 'Панель менеджера' },
     children: [
       {
+        path: 'management',
+        data: { breadcrumb: 'Управление' },
+        children: [
+          {
+            path: 'orders',
+            data: { breadcrumb: 'Заказы' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/management/orders-management/orders-management')
+                .then(m => m.OrdersManagement),
+          },
+        ],
+      },
+      {
         path: 'directories',
         data: { breadcrumb: 'Справочники' },
         children: [
