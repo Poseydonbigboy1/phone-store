@@ -30,6 +30,13 @@ export const routes: Routes = [
               import('./views/manager-layout-page/management/orders-management/orders-management')
                 .then(m => m.OrdersManagement),
           },
+          {
+            path: 'products',
+            data: { breadcrumb: 'Товары (SKU)' },
+            loadComponent: () =>
+              import('./views/manager-layout-page/management/sku-management/sku-management')
+                .then(m => m.SkuManagement),
+          },
         ],
       },
       {

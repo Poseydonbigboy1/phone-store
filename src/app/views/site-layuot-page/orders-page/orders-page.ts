@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CheckoutHttpService } from '@backend';
@@ -25,7 +25,7 @@ interface StatusEvent {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe, DatePipe, DecimalPipe, NgClass, RouterLink,
+    DatePipe, DecimalPipe, RouterLink,
     DataViewModule, CardModule, ButtonModule, BadgeModule, TagModule,
     ChipModule, DialogModule, DividerModule, TimelineModule, ProgressSpinnerModule,
   ],
