@@ -24,11 +24,19 @@
             [showThumbnails]="imgs.length > 1"
           >
             <ng-template pTemplate="item" let-item>
-              <img [src]="item" [alt]="product.title"
-                   style="width:100%; max-height:380px; object-fit:contain; display:block" />
+              @if (isVideo(item)) {
+                <video [src]="item" controls style="width:100%; max-height:380px; object-fit:contain; display:block"></video>
+              } @else {
+                <img [src]="item" [alt]="product.title"
+                     style="width:100%; max-height:380px; object-fit:contain; display:block" />
+              }
             </ng-template>
             <ng-template pTemplate="thumbnail" let-item>
-              <img [src]="item" [alt]="product.title" width="60" style="object-fit:contain" />
+              @if (isVideo(item)) {
+                <video [src]="item" muted preload="metadata" width="60" style="object-fit:contain"></video>
+              } @else {
+                <img [src]="item" [alt]="product.title" width="60" style="object-fit:contain" />
+              }
             </ng-template>
           </p-galleria>
         } @else {

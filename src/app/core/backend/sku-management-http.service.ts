@@ -23,6 +23,11 @@ export interface SkuManagementViewModel {
   components: SkuComponentView[];
 }
 
+export interface SkuImageViewModel {
+  productComponentId: string;
+  url: string;
+}
+
 export interface SkuComponentUpsert {
   productComponentId?: string;
   componentId: string;
@@ -56,5 +61,20 @@ export class SkuManagementHttpService extends HttpBase {
 
   delete$(id: string): Observable<ResponseObject<boolean>> {
     return this.httpClient.delete<ResponseObject<boolean>>(`${this.url}/${id}`);
+  }
+
+  // Изображения
+  getImages$(skuId: string): Observable<ResponseObject<SkuImageViewModel[]>> {
+    return this.httpClient.get<ResponseObject<SkuImageViewModel[]>>(`${this.url}/${skuId}/images`);
+  }
+
+  uploadImage$(skuId: string, file: File): Observable<ResponseObject<SkuImageViewModel>> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.httpClient.post<ResponseObject<SkuImageViewModel>>(`${this.url}/${skuId}/images`, form);
+  }
+
+  deleteImage$(skuId: string, productComponentId: string): Observable<ResponseObject<boolean>> {
+    return this.httpClient.delete<ResponseObject<boolean>>(`${this.url}/${skuId}/images/${productComponentId}`);
   }
 }

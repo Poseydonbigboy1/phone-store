@@ -72,6 +72,10 @@ export class ProductDetailsPage {
     this.selectedSkuId.set(sku.skuId);
   }
 
+  isVideo(url: string): boolean {
+    return /\.(mp4|webm|mov|avi)(\?.*)?$/i.test(url);
+  }
+
   responsiveOptions: any[] = [
     { breakpoint: '1024px', numVisible: 5 },
     { breakpoint: '768px',  numVisible: 3 },

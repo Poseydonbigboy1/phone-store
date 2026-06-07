@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ComponentsHttpService, ProductsManagerHttpService, SkuManagementHttpService,
-  SkuManagementViewModel, SkuComponentView, UploadHttpService,
+  SkuManagementViewModel, SkuImageViewModel, SkuComponentView, UploadHttpService,
 } from '@backend';
 import { Component as ComponentModel, Product } from '@models/data';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -69,6 +69,18 @@ export class SkuManagement implements OnInit {
   formLoading  = signal(false);
   form!: FormGroup;
 
+  // Менеджер изображений
+  imagesVisible    = signal(false);
+  imagesSku        = signal<SkuManagementViewModel | null>(null);
+  images           = signal<SkuImageViewModel[]>([]);
+  imagesLoading    = signal(false);
+  uploadingImages  = signal(false);
+  isDragOver       = signal(false);
+
+  // Изображения в карточке просмотра
+  cardImages       = signal<SkuImageViewModel[]>([]);
+  cardImagesLoading = signal(false);
+
   ngOnInit(): void {
     this.initForm();
     forkJoin({
@@ -113,7 +125,13 @@ export class SkuManagement implements OnInit {
 
   openCard(sku: SkuManagementViewModel): void {
     this.selectedSku.set(sku);
+    this.cardImages.set([]);
     this.cardVisible.set(true);
+    this.cardImagesLoading.set(true);
+    this.skuHttp.getImages$(sku.id).subscribe({
+      next: res => { this.cardImages.set(res?.data ?? []); this.cardImagesLoading.set(false); },
+      error: () => this.cardImagesLoading.set(false),
+    });
   }
 
   openCreate(): void {
@@ -184,6 +202,93 @@ export class SkuManagement implements OnInit {
 
   componentLabel(id: string): string {
     return this.components().find(c => c.id === id)?.title ?? id;
+  }
+
+  // ─── Менеджер изображений ──────────────────────────────────────────────────
+
+  openImages(sku: SkuManagementViewModel): void {
+    this.imagesSku.set(sku);
+    this.imagesVisible.set(true);
+    this.loadImages(sku.id);
+  }
+
+  private loadImages(skuId: string): void {
+    this.imagesLoading.set(true);
+    this.skuHttp.getImages$(skuId).subscribe({
+      next: res => { this.images.set(res?.data ?? []); this.imagesLoading.set(false); },
+      error: () => { this.imagesLoading.set(false); },
+    });
+  }
+
+  onImagesFileSelected(event: Event): void {
+    const files = (event.target as HTMLInputElement).files;
+    if (!files?.length) return;
+    this.uploadFiles(Array.from(files));
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver.set(true);
+  }
+
+  onDragLeave(): void { this.isDragOver.set(false); }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver.set(false);
+    const files = event.dataTransfer?.files;
+    if (files?.length) this.uploadFiles(Array.from(files));
+  }
+
+  isVideo(url: string): boolean {
+    return /\.(mp4|webm|mov|avi)(\?.*)?$/i.test(url);
+  }
+
+  private uploadFiles(files: File[]): void {
+    const sku = this.imagesSku();
+    if (!sku) return;
+    const mediaFiles = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    if (!mediaFiles.length) {
+      this.msg.add({ severity: 'warn', summary: 'Выберите изображение или видео', life: 3000 });
+      return;
+    }
+    const imageFiles = mediaFiles;
+    this.uploadingImages.set(true);
+    let done = 0;
+    let errors = 0;
+    imageFiles.forEach(file => {
+      this.skuHttp.uploadImage$(sku.id, file).subscribe({
+        next: res => {
+          done++;
+          if (res?.isSuccess && res.data) {
+            this.images.update(list => [...list, res.data!]);
+            // Обновляем превью в основном списке SKU
+            this.skus.update(list => list.map(s =>
+              s.id === sku.id ? { ...s } : s
+            ));
+          } else { errors++; }
+          if (done + errors === imageFiles.length) this.uploadingImages.set(false);
+        },
+        error: () => {
+          errors++;
+          if (done + errors === imageFiles.length) this.uploadingImages.set(false);
+          this.msg.add({ severity: 'error', summary: 'Ошибка загрузки' });
+        },
+      });
+    });
+  }
+
+  deleteImage(img: SkuImageViewModel, fromCard = false): void {
+    const sku = fromCard ? this.selectedSku() : this.imagesSku();
+    if (!sku) return;
+    this.skuHttp.deleteImage$(sku.id, img.productComponentId).subscribe({
+      next: () => {
+        this.images.update(list => list.filter(i => i.productComponentId !== img.productComponentId));
+        this.cardImages.update(list => list.filter(i => i.productComponentId !== img.productComponentId));
+      },
+      error: () => this.msg.add({ severity: 'error', summary: 'Не удалось удалить', life: 3000 }),
+    });
   }
 
   isImageComponent(componentId: string): boolean {

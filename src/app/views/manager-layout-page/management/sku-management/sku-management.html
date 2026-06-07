@@ -67,6 +67,8 @@
       </td>
       <td>
         <div class="flex gap-1">
+          <p-button icon="pi pi-images" [rounded]="true" [outlined]="true" size="small"
+            pTooltip="Изображения" severity="info" (onClick)="openImages(sku)" />
           <p-button icon="pi pi-eye" [rounded]="true" [outlined]="true" size="small"
             pTooltip="Карточка SKU" (onClick)="openCard(sku)" />
           <p-button icon="pi pi-pencil" [rounded]="true" [outlined]="true" size="small"
@@ -89,7 +91,8 @@
 <!-- ───── Карточка SKU (просмотр) ───── -->
 <p-dialog
   [header]="selectedSku()?.productTitle ?? ''"
-  [(visible)]="cardVisible"
+  [visible]="cardVisible()"
+  (visibleChange)="cardVisible.set($event)"
   [modal]="true"
   [style]="{ width: '680px', maxWidth: '95vw' }"
   appendTo="body"
@@ -144,15 +147,116 @@
     }
 
     <p-divider />
+
+    <!-- Изображения / видео -->
+    <div class="flex align-items-center justify-content-between mb-3">
+      <h4 class="mt-0 mb-0">Медиафайлы</h4>
+      <p-button label="Управление" icon="pi pi-images" size="small" severity="secondary" [outlined]="true"
+        (onClick)="cardVisible.set(false); openImages(sku)" />
+    </div>
+    @if (cardImagesLoading()) {
+      <div class="flex justify-content-center py-3">
+        <p-progressSpinner strokeWidth="4" [style]="{ width: '32px', height: '32px' }" />
+      </div>
+    } @else if (cardImages().length === 0) {
+      <p class="text-color-secondary text-sm">Медиафайлы не добавлены</p>
+    } @else {
+      <div class="images-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr))">
+        @for (img of cardImages(); track img.productComponentId) {
+          <div class="img-thumb" style="aspect-ratio:1">
+            @if (isVideo(img.url)) {
+              <video [src]="img.url" muted preload="metadata" style="width:100%;height:100%;object-fit:contain;padding:4px"></video>
+            } @else {
+              <img [src]="img.url" [alt]="sku.productTitle" />
+            }
+            <button class="img-thumb__delete" (click)="deleteImage(img, true)" title="Удалить">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <p-divider />
     <div class="flex justify-content-end">
       <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(sku)" />
     </div>
   }
 </p-dialog>
 
+<!-- ───── Менеджер изображений ───── -->
+<p-dialog
+  [header]="'Изображения: ' + (imagesSku()?.productTitle ?? '')"
+  [visible]="imagesVisible()"
+  (visibleChange)="imagesVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '760px', maxWidth: '95vw' }"
+  appendTo="body"
+>
+  @if (imagesLoading()) {
+    <div class="flex justify-content-center py-6">
+      <p-progressSpinner strokeWidth="4" [style]="{ width: '48px', height: '48px' }" />
+    </div>
+  } @else {
+
+    <!-- Зона загрузки (drag-and-drop) -->
+    <div
+      class="upload-zone border-2 border-dashed border-round-xl flex flex-column align-items-center justify-content-center gap-2 cursor-pointer mb-4"
+      [class.upload-zone--over]="isDragOver()"
+      [class.upload-zone--loading]="uploadingImages()"
+      style="min-height: 130px; padding: 2rem; transition: all .2s"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="imgInput.click()"
+    >
+      @if (uploadingImages()) {
+        <p-progressSpinner strokeWidth="4" [style]="{ width: '36px', height: '36px' }" />
+        <span class="text-color-secondary text-sm">Загружаю...</span>
+      } @else {
+        <i class="pi pi-cloud-upload text-4xl" style="color: var(--primary-color)"></i>
+        <span class="font-semibold">Перетащите файлы или нажмите для выбора</span>
+        <span class="text-color-secondary text-sm">JPG, PNG, WEBP, GIF — до 5 МБ; MP4, WEBM, MOV — до 50 МБ</span>
+      }
+    </div>
+    <input #imgInput type="file" accept="image/*,video/mp4,video/webm,video/quicktime,video/x-msvideo" multiple style="display:none"
+           (change)="onImagesFileSelected($event)" />
+
+    <!-- Сетка изображений -->
+    @if (images().length === 0) {
+      <div class="flex flex-column align-items-center py-5 gap-2 text-color-secondary">
+        <i class="pi pi-image text-5xl"></i>
+        <span>Изображения не добавлены</span>
+      </div>
+    } @else {
+      <div class="images-grid">
+        @for (img of images(); track img.productComponentId) {
+          <div class="img-thumb">
+            @if (isVideo(img.url)) {
+              <video [src]="img.url" muted preload="metadata" style="width:100%;height:100%;object-fit:contain;padding:4px"></video>
+            } @else {
+              <img [src]="img.url" [alt]="imagesSku()?.productTitle" />
+            }
+            <button class="img-thumb__delete"
+                    (click)="deleteImage(img)"
+                    title="Удалить">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button label="Закрыть" severity="secondary" [outlined]="true" (onClick)="imagesVisible.set(false)" />
+  </ng-template>
+</p-dialog>
+
 <!-- ───── Форма создания / редактирования ───── -->
 <p-drawer
-  [(visible)]="formVisible"
+  [visible]="formVisible()"
+  (visibleChange)="formVisible.set($event)"
   position="right"
   appendTo="body"
   [style]="{ width: '480px' }"
