@@ -38,6 +38,12 @@ export const routes: Routes = [
           import('./views/manager-layout-page/analytics/analytics').then(m => m.AnalyticsPage),
       },
       {
+        path: 'banners',
+        data: { breadcrumb: 'Баннеры' },
+        loadComponent: () =>
+          import('./views/manager-layout-page/banners/banners').then(m => m.BannersPage),
+      },
+      {
         path: 'management',
         data: { breadcrumb: 'Управление' },
         children: [

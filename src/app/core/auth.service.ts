@@ -88,9 +88,15 @@ export class AuthService {
             user.role  = response.data.role;
 
             this.currentUser$.next(user);
+          } else {
+            // Ответ пришёл, но без данных пользователя — сбрасываем сессию
+            this.currentUser$.next(null);
           }
         },
-        error: (er0r) => {},
+        error: () => {
+          // 401 / network error — пользователь не авторизован
+          this.currentUser$.next(null);
+        },
       }),
     );
   }
