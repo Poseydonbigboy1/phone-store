@@ -3,6 +3,31 @@
   padding: 2rem;
 }
 
+.sku-chip {
+  background: var(--surface-100);
+  border-color: var(--surface-border);
+  user-select: none;
+  min-width: 64px;
+  text-align: center;
+
+  &:hover:not(.sku-chip--disabled) {
+    border-color: var(--primary-color);
+    background: var(--primary-50);
+  }
+
+  &--active {
+    border-color: var(--primary-color) !important;
+    background: var(--primary-100) !important;
+    color: var(--primary-700);
+    font-weight: 600;
+  }
+
+  &--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
 .product-details-container {
   display: flex;
   flex-direction: column;

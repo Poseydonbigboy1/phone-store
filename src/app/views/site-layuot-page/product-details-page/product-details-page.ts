@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ProductDetailsService } from './product-details-page.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '@services';
-import { Router } from '@angular/router';
 import { map } from 'rxjs';
 import { GalleriaModule } from 'primeng/galleria';
 import { CardModule } from 'primeng/card';
@@ -13,22 +13,20 @@ import { TabsModule } from 'primeng/tabs';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
-import { CommonModule } from '@angular/common';
+import { TagModule } from 'primeng/tag';
+import { DividerModule } from 'primeng/divider';
+import { ChipModule } from 'primeng/chip';
 import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-product-details-page',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
-    GalleriaModule,
-    CardModule,
-    ButtonModule,
-    FieldsetModule,
-    TabsModule,
-    TableModule,
-    ProgressSpinnerModule,
-    ToastModule,
+    DecimalPipe,
+    GalleriaModule, CardModule, ButtonModule, FieldsetModule,
+    TabsModule, TableModule, ProgressSpinnerModule, ToastModule,
+    TagModule, DividerModule, ChipModule,
   ],
   templateUrl: './product-details-page.html',
   styleUrl: './product-details-page.scss',
@@ -38,12 +36,41 @@ export class ProductDetailsPage {
   private productDetailsService = inject(ProductDetailsService);
   private cartService = inject(CartService);
   private authService = inject(AuthService);
-  private router = inject(Router);
   private messageService = inject(MessageService);
 
   product = toSignal(this.productDetailsService.product$);
   isLoggedIn = toSignal(this.authService.user$.pipe(map(u => !!u)));
-  addingToCart = false;
+  addingToCart = signal(false);
+
+  // Выбранный SKU (по умолчанию — mainSku)
+  selectedSkuId = signal<string | null>(null);
+
+  // Текущий SKU — mainSku или выбранный из additionalSkus
+  currentSku = computed(() => {
+    const p = this.product();
+    if (!p) return null;
+    const id = this.selectedSkuId();
+    if (!id || id === p.mainSku?.skuId) return p.mainSku;
+    return p.additionalSkus?.find((s: any) => s.skuId === id) ?? p.mainSku;
+  });
+
+  // Все варианты для чипов (mainSku + additionalSkus)
+  allSkus = computed(() => {
+    const p = this.product();
+    if (!p) return [];
+    return [p.mainSku, ...(p.additionalSkus ?? [])].filter(Boolean);
+  });
+
+  // Метка чипа: первый специфичный компонент или цена
+  skuLabel(sku: any): string {
+    const comp = sku?.skuSpecificComponents?.[0];
+    if (comp) return `${comp.value}`;
+    return `${sku?.price?.toLocaleString('ru-RU') ?? ''} ₽`;
+  }
+
+  selectSku(sku: any): void {
+    this.selectedSkuId.set(sku.skuId);
+  }
 
   responsiveOptions: any[] = [
     { breakpoint: '1024px', numVisible: 5 },
@@ -52,40 +79,25 @@ export class ProductDetailsPage {
   ];
 
   addToCart(): void {
+    const sku = this.currentSku();
     const p = this.product();
-    if (!p) return;
+    if (!sku || !p) return;
 
-    // Гость — сохраняем в localStorage
     if (!this.isLoggedIn()) {
-      this.cartService.addLocal(p.mainSku.skuId, 1);
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Добавлено в корзину',
-        detail: 'Войдите, чтобы оформить заказ',
-        life: 3000,
-      });
+      this.cartService.addLocal(sku.skuId, 1);
+      this.messageService.add({ severity: 'info', summary: 'Добавлено в корзину', detail: 'Войдите, чтобы оформить заказ', life: 3000 });
       return;
     }
 
-    this.addingToCart = true;
-    this.cartService.add(p.mainSku.skuId, 1).subscribe({
+    this.addingToCart.set(true);
+    this.cartService.add(sku.skuId, 1).subscribe({
       next: () => {
-        this.addingToCart = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Добавлено в корзину',
-          detail: p.title,
-          life: 3000,
-        });
+        this.addingToCart.set(false);
+        this.messageService.add({ severity: 'success', summary: 'Добавлено в корзину', detail: p.title, life: 3000 });
       },
       error: (err) => {
-        this.addingToCart = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Ошибка',
-          detail: err?.error?.message ?? 'Не удалось добавить товар',
-          life: 4000,
-        });
+        this.addingToCart.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err?.error?.message ?? 'Не удалось добавить товар', life: 4000 });
       },
     });
   }

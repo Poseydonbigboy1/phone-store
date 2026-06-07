@@ -1,69 +1,117 @@
 <p-toast />
-<div class="grid">
-  <div class="col-3">
+<div class="grid" style="height: calc(100vh - 140px); overflow: hidden">
+
+  <!-- Фильтры -->
+  <div class="col-3 h-full overflow-y-auto">
     <app-catalog-filter></app-catalog-filter>
   </div>
-  <div class="col flex flex-column" [style]="{ height: 'calc(100vh - 140px)' }">
-    <div class="card">
-      <p-dataview [value]="(products$ | async) ?? []" layout="grid" [loading]="isLoading$ | async">
-        <ng-template #grid let-items>
-          <p-scrollpanel [style]="{ width: '100%', height: 'calc(100vh - 140px - 56px)' }">
-            <div class="grid">
-              @for (product of items; track $index) {
-                <div class="col-3 bg-white">
-                  <p-card>
-                    <ng-template pTemplate="header">
-                      <img alt="Card" class="w-full" [src]="product.images[0]" />
-                    </ng-template>
-                    <ng-template pTemplate="title"> {{ product.title }} </ng-template>
 
-                    <ng-template pTemplate="footer">
-                      <div class="flex justify-content-between align-items-center mt-3">
-                        <div class="col">
-                          <span>{{ product.price | currency }}</span>
-                        </div>
-                      </div>
-                      <p-rating [ngModel]="product.rating" [stars]="5" />
-                      <p-button
-                        severity="success"
-                        icon="pi pi-cart-plus"
-                        [loading]="!!addingSkuId && addingSkuId === product?.skuId"
-                        (onClick)="addToCart(product)"
-                      />
-                    </ng-template>
-                  </p-card>
-                </div>
-              }
-            </div>
-          </p-scrollpanel>
-        </ng-template>
-      </p-dataview>
+  <!-- Основной контент -->
+  <div class="col flex flex-column gap-2" style="min-width: 0">
+
+    <!-- Тулбар: поиск + сортировка -->
+    <div class="flex align-items-center justify-content-between gap-3">
+      <span class="text-color-secondary text-sm">
+        {{ (total$ | async) ?? 0 }} товаров
+      </span>
+      <p-select
+        [options]="sortOptions"
+        [(ngModel)]="selectedSort"
+        optionLabel="label"
+        (onChange)="onSortChange()"
+        [style]="{ minWidth: '220px' }"
+        placeholder="Сортировка"
+      />
     </div>
-    <div class="card flex justify-content-center bg-white mt-auto">
+
+    <!-- Карточки товаров -->
+    <p-dataview
+      [value]="(products$ | async) ?? []"
+      layout="grid"
+      [loading]="(isLoading$ | async) ?? false"
+      styleClass="flex-1"
+    >
+      <ng-template #grid let-items>
+        <p-scrollpanel [style]="{ width: '100%', height: 'calc(100vh - 140px - 110px)' }">
+          <div class="grid p-2">
+            @for (product of items; track product.skuId) {
+              <div class="col-12 sm:col-6 lg:col-4 xl:col-3 p-2">
+                <div class="product-card border-1 surface-border border-round surface-card h-full flex flex-column">
+
+                  <!-- Изображение -->
+                  <a [routerLink]="['/main/products', product.productId]" class="block overflow-hidden border-round-top" style="height:200px; background: var(--surface-100)">
+                    @if (product.images?.length) {
+                      <img [src]="product.images[0]" [alt]="product.title"
+                           class="w-full h-full" style="object-fit: contain; padding: 0.5rem" />
+                    } @else {
+                      <div class="flex align-items-center justify-content-center h-full">
+                        <i class="pi pi-image text-5xl text-color-secondary"></i>
+                      </div>
+                    }
+                  </a>
+
+                  <!-- Контент -->
+                  <div class="flex flex-column flex-1 p-3 gap-2">
+                    <a [routerLink]="['/main/products', product.productId]"
+                       class="font-semibold text-color line-height-2 hover:text-primary transition-colors transition-duration-200"
+                       style="text-decoration:none; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">
+                      {{ product.title }}
+                    </a>
+
+                    <!-- Цена -->
+                    <div class="mt-auto">
+                      @if (product.discount > 0) {
+                        <div class="flex align-items-center gap-2 flex-wrap">
+                          <span class="font-bold text-lg" style="color: var(--green-600)">
+                            {{ product.price * (1 - product.discount / 100) | number:'1.0-0' }} ₽
+                          </span>
+                          <span class="text-sm text-color-secondary line-through">
+                            {{ product.price | number:'1.0-0' }} ₽
+                          </span>
+                          <span class="text-xs font-semibold px-2 py-1 border-round" style="background:var(--orange-100); color:var(--orange-700)">
+                            −{{ product.discount }}%
+                          </span>
+                        </div>
+                      } @else {
+                        <span class="font-bold text-lg">{{ product.price | number:'1.0-0' }} ₽</span>
+                      }
+                    </div>
+
+                    <!-- Кнопка -->
+                    <p-button
+                      icon="pi pi-cart-plus"
+                      label="В корзину"
+                      severity="success"
+                      styleClass="w-full"
+                      size="small"
+                      [loading]="!!addingSkuId && addingSkuId === product?.skuId"
+                      (onClick)="addToCart(product)"
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </p-scrollpanel>
+      </ng-template>
+
+      <ng-template #empty>
+        <div class="flex flex-column align-items-center justify-content-center py-8 gap-3">
+          <i class="pi pi-search text-5xl text-color-secondary"></i>
+          <span class="text-color-secondary text-lg">Товары не найдены</span>
+        </div>
+      </ng-template>
+    </p-dataview>
+
+    <!-- Пагинация -->
+    <div class="flex justify-content-center surface-card border-round p-2 border-1 surface-border">
       <p-paginator
         (onPageChange)="onPageChange($event)"
         [first]="(skip$ | async) ?? 0"
-        [rows]="take$ | async"
+        [rows]="(take$ | async) ?? 12"
         [totalRecords]="(total$ | async) ?? 0"
+        [rowsPerPageOptions]="[12, 24, 48]"
       />
     </div>
   </div>
 </div>
-
-<!-- <div
-  style="
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    width: 300px;
-    height: 800px;
-    overflow-y: scroll;
-    background: white;
-    padding: 10px;
-    z-index: 1000;
-  "
->
-  <pre>
-    {{ catalogFilters$ | async | json }}
-  </pre>
-</div> -->

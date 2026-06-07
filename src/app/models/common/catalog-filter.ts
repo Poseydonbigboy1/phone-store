@@ -20,5 +20,6 @@ export interface CatalogFilter {
   take: number;
   sortBy: SortBy;
   sortDirection: SortDirection;
+  search?: string;
   filterValues: FilterValue[];
 }

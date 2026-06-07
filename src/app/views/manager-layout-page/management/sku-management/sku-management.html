@@ -215,7 +215,33 @@
             styleClass="w-full mb-2"
           />
           <div class="flex gap-2 align-items-center">
-            <input pInputText formControlName="value" placeholder="Значение" class="flex-1" />
+            @if (isImageComponent(row.get('componentId')?.value)) {
+              <!-- IMAGE-компонент: загрузка файла -->
+              <div class="flex flex-column flex-1 gap-1">
+                @if (row.get('value')?.value) {
+                  <img [src]="row.get('value')?.value" alt="preview"
+                       style="max-height:80px; max-width:100%; object-fit:contain; border-radius:4px" />
+                }
+                <div class="flex align-items-center gap-2">
+                  <input pInputText [value]="row.get('value')?.value ?? ''"
+                         (input)="row.get('value')?.setValue($any($event.target).value)"
+                         placeholder="URL или загрузите файл" class="flex-1" />
+                  <label class="p-button p-button-sm p-button-outlined p-button-secondary cursor-pointer"
+                         style="display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .75rem">
+                    @if (uploadingIndex() === i) {
+                      <i class="pi pi-spin pi-spinner"></i>
+                    } @else {
+                      <i class="pi pi-upload"></i>
+                    }
+                    <span class="text-sm">Загрузить</span>
+                    <input type="file" accept="image/*" style="display:none"
+                           (change)="onFileSelected($event, i)" />
+                  </label>
+                </div>
+              </div>
+            } @else {
+              <input pInputText formControlName="value" placeholder="Значение" class="flex-1" />
+            }
             <p-button icon="pi pi-times" severity="danger" [text]="true" (onClick)="removeComponent(i)" />
           </div>
         </div>

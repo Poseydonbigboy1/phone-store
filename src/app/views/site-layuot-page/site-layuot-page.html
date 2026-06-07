@@ -7,6 +7,18 @@
     <p-menubar [model]="menuItems" class="border-none h-full surface-800">
       <ng-template pTemplate="end">
         <div class="flex align-items-center gap-3">
+          <!-- Поиск -->
+          <span class="p-input-icon-right" style="position:relative">
+            <i class="pi pi-search" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none"></i>
+            <input
+              pInputText
+              [(ngModel)]="searchQuery"
+              placeholder="Поиск товаров..."
+              style="padding-right:2.5rem; width:220px; background:#424242; color:#fff; border-color:#555"
+              (keydown.enter)="onSearch()"
+            />
+          </span>
+
           @if (user$ | async; as user) {
             <!-- Иконка корзины с бейджем -->
             <p-overlaybadge

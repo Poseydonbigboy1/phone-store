@@ -13,6 +13,9 @@ export class CatalogPageService {
   skip$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   take$: BehaviorSubject<number> = new BehaviorSubject<number>(12);
   total$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  search$: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  sortBy$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  sortDirection$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
@@ -46,11 +49,13 @@ export class CatalogPageService {
     const filter = this.catalogFilters$.getValue();
     // const filterValues = FilterRequestConverter.transform(filter);
 
+    const search = this.search$.getValue();
     const body: CatalogFilter = {
       skip,
       take,
-      sortBy: 0,
-      sortDirection: 0,
+      sortBy: this.sortBy$.getValue(),
+      sortDirection: this.sortDirection$.getValue(),
+      search: search || undefined,
       filterValues: FilterRequestConverter.transform(filter),
     };
 

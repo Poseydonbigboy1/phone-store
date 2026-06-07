@@ -9,12 +9,14 @@ import { MenubarModule } from 'primeng/menubar';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 import { Nullable } from 'primeng/ts-helpers';
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-site-layuot-page',
-  imports: [RouterOutlet, MenubarModule, CommonModule, AsyncPipe, BadgeModule, ButtonModule, OverlayBadgeModule],
+  imports: [RouterOutlet, MenubarModule, CommonModule, AsyncPipe, BadgeModule, ButtonModule, OverlayBadgeModule, InputTextModule, FormsModule],
   templateUrl: './site-layuot-page.html',
   styleUrl: './site-layuot-page.scss',
   standalone: true,
@@ -23,6 +25,7 @@ export class SiteLayuotPage implements OnInit {
   menuItems: MenuItem[] = [];
   user$: Observable<Nullable<User>>;
   cartCount$: Observable<number>;
+  searchQuery = '';
 
   private readonly authService = inject(AuthService);
   readonly cartService = inject(CartService);
@@ -60,5 +63,10 @@ export class SiteLayuotPage implements OnInit {
 
   goToCart() {
     this.router.navigate(['/main/cart']);
+  }
+
+  onSearch(): void {
+    const q = this.searchQuery.trim();
+    this.router.navigate(['/main/products'], q ? { queryParams: { q } } : {});
   }
 }

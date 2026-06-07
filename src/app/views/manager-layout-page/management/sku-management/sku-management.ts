@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ComponentsHttpService, ProductsManagerHttpService, SkuManagementHttpService,
-  SkuManagementViewModel, SkuComponentView,
+  SkuManagementViewModel, SkuComponentView, UploadHttpService,
 } from '@backend';
 import { Component as ComponentModel, Product } from '@models/data';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -45,9 +45,14 @@ export class SkuManagement implements OnInit {
   private readonly skuHttp     = inject(SkuManagementHttpService);
   private readonly productsHttp = inject(ProductsManagerHttpService);
   private readonly compHttp    = inject(ComponentsHttpService);
+  private readonly uploadHttp  = inject(UploadHttpService);
   private readonly msg         = inject(MessageService);
   private readonly confirm     = inject(ConfirmationService);
   private readonly fb          = inject(FormBuilder);
+
+  // EDataType.IMAGE = 4 (порядок: STRING=0, INT=1, DOUBLE=2, BOOLEAN=3, IMAGE=4)
+  readonly IMAGE_DATA_TYPE = 4;
+  uploadingIndex = signal<number | null>(null);
 
   skus        = signal<SkuManagementViewModel[]>([]);
   products    = signal<Product[]>([]);
@@ -179,5 +184,35 @@ export class SkuManagement implements OnInit {
 
   componentLabel(id: string): string {
     return this.components().find(c => c.id === id)?.title ?? id;
+  }
+
+  isImageComponent(componentId: string): boolean {
+    const comp = this.components().find(c => c.id === componentId);
+    return (comp as any)?.dataType === this.IMAGE_DATA_TYPE;
+  }
+
+  onFileSelected(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.uploadingIndex.set(index);
+    this.uploadHttp.uploadImage$(file).subscribe({
+      next: res => {
+        this.uploadingIndex.set(null);
+        if (res?.isSuccess && res.data) {
+          this.compArray.at(index).patchValue({ value: res.data });
+          this.msg.add({ severity: 'success', summary: 'Загружено', life: 2000 });
+        } else {
+          this.msg.add({ severity: 'error', summary: 'Ошибка загрузки', detail: res?.message ?? undefined });
+        }
+        input.value = '';
+      },
+      error: err => {
+        this.uploadingIndex.set(null);
+        this.msg.add({ severity: 'error', summary: 'Ошибка', detail: err?.error?.message ?? 'Не удалось загрузить файл' });
+        input.value = '';
+      },
+    });
   }
 }
