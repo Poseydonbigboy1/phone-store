@@ -47,6 +47,22 @@ export class AuthService {
       });
   }
 
+  register(name: string, login: string, password: string, onError?: (msg: string) => void): void {
+    this.authHttpService
+      .register$({ name, login, password })
+      .pipe(switchMap(() => this.getProfile$()))
+      .subscribe({
+        next: () => {
+          this.cartService.mergeOnLogin();
+          this._router.navigate(['main']);
+        },
+        error: (err) => {
+          const msg = err?.error?.message || 'Ошибка регистрации';
+          onError?.(msg);
+        },
+      });
+  }
+
   logout(): void {
     this.authHttpService.logout$().subscribe({
       next: (res) => {

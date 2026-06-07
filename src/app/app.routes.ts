@@ -32,6 +32,12 @@ export const routes: Routes = [
           import('./views/manager-layout-page/dashboard/dashboard').then(m => m.DashboardPage),
       },
       {
+        path: 'analytics',
+        data: { breadcrumb: 'Аналитика' },
+        loadComponent: () =>
+          import('./views/manager-layout-page/analytics/analytics').then(m => m.AnalyticsPage),
+      },
+      {
         path: 'management',
         data: { breadcrumb: 'Управление' },
         children: [

@@ -17,6 +17,9 @@
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel [value]="0">
+          @if (loginError()) {
+            <p-message severity="error" [text]="loginError()!" styleClass="w-full mb-3" />
+          }
           <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="flex flex-column gap-4 mt-3">
             <div class="field">
               <label for="login" class="block text-700 mb-2"> Логин</label>
@@ -83,6 +86,9 @@
           </form>
         </p-tabpanel>
         <p-tabpanel [value]="1">
+          @if (registerError()) {
+            <p-message severity="error" [text]="registerError()!" styleClass="w-full mb-3" />
+          }
           <form
             [formGroup]="registerForm"
             (ngSubmit)="onRegister()"

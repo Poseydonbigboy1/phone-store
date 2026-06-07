@@ -19,10 +19,10 @@ export class AuthHttpService extends HttpBase {
   }
 
   /**
-   * Регитсранция
+   * Регистрация
    */
-  register$(): Observable<any> {
-    throw new Error('Not implemented');
+  register$(model: { name: string; login: string; password: string }): Observable<ResponseObject<string>> {
+    return this.httpClient.post<ResponseObject<string>>(`${this.apiUrl}/Auth/register`, model);
   }
 
   getProfile$(isCheckAuth: boolean): Observable<ResponseObject<ProfileResponse>> {

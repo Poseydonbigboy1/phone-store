@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MessageService, MenuItem } from 'primeng/api';
 import { AvatarModule } from 'primeng/avatar';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { CommonModule } from '@angular/common';
 import {
   ActivatedRoute,
@@ -13,7 +15,9 @@ import {
   RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '@services';
 
 @Component({
   selector: 'app-manager-layout-page',
@@ -24,8 +28,10 @@ import { filter } from 'rxjs';
     RouterLinkActive,
     AvatarModule,
     BreadcrumbModule,
+    ButtonModule,
     RippleModule,
     ToastModule,
+    TooltipModule,
   ],
   templateUrl: './manager-layout-page.html',
   styleUrl: './manager-layout-page.scss',
@@ -33,9 +39,13 @@ import { filter } from 'rxjs';
   providers: [MessageService],
 })
 export class ManagerLayoutPage implements OnInit {
+  private authService = inject(AuthService);
+
   sidebarVisible = false;
   breadcrumbItems: MenuItem[] = [];
   home: MenuItem = { icon: 'pi pi-home', routerLink: '/manager' };
+
+  managerName = toSignal(this.authService.user$.pipe(map(u => u?.name || u?.login || 'Менеджер')));
 
   get currentPageTitle(): string {
     return this.breadcrumbItems.at(-1)?.label ?? '';
@@ -58,6 +68,15 @@ export class ManagerLayoutPage implements OnInit {
 
   toggleSidebar() {
     this.sidebarVisible = !this.sidebarVisible;
+  }
+
+  goToSite(): void {
+    this.router.navigate(['/main/home']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   private createBreadcrumbs(route: ActivatedRoute): MenuItem[] {

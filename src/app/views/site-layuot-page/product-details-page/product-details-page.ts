@@ -72,14 +72,25 @@ export class ProductDetailsPage implements OnInit {
   });
 
   ngOnInit(): void {
-    // Load similar products once main product is resolved
+    // Load similar products and track recently viewed once main product is resolved
     this.productDetailsService.product$.subscribe(p => {
       if (p?.mainSku?.skuId) {
         this.catalogHttp.getSimilar$(p.mainSku.skuId, 8).subscribe(res => {
           this.similar.set(res?.data ?? []);
         });
+        this.trackRecentlyViewed(p.mainSku.skuId);
       }
     });
+  }
+
+  private trackRecentlyViewed(skuId: string): void {
+    const KEY = 'recently_viewed';
+    const MAX = 10;
+    let ids: string[] = [];
+    try { ids = JSON.parse(localStorage.getItem(KEY) ?? '[]'); } catch { ids = []; }
+    // Remove duplicate, prepend
+    ids = [skuId, ...ids.filter(id => id !== skuId)].slice(0, MAX);
+    localStorage.setItem(KEY, JSON.stringify(ids));
   }
 
   skuLabel(sku: any): string {

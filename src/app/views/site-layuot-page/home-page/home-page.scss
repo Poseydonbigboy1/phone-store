@@ -1,3 +1,23 @@
-// ::ng-deep .p-carousel-content {
-//   height: auto;
-// }
+.home-hero {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="80" cy="20" r="40" fill="rgba(255,255,255,0.05)"/><circle cx="20" cy="80" r="30" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat;
+    background-size: cover;
+  }
+}
+
+.product-card {
+  height: 100%;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: default;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+}

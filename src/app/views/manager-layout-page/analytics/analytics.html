@@ -1,0 +1,213 @@
+<p-toast />
+
+<!-- ─── Фильтры ─── -->
+<div class="flex flex-wrap align-items-end gap-3 mb-4 surface-card border-1 surface-border border-round p-3">
+  <div class="flex flex-column gap-1">
+    <label class="text-sm text-color-secondary">Дата с</label>
+    <p-datepicker
+      [ngModel]="dateFrom"
+      (ngModelChange)="dateFrom = $event"
+      dateFormat="dd.mm.yy"
+      [showIcon]="true"
+      [style]="{ width: '160px' }"
+    />
+  </div>
+  <div class="flex flex-column gap-1">
+    <label class="text-sm text-color-secondary">Дата по</label>
+    <p-datepicker
+      [ngModel]="dateTo"
+      (ngModelChange)="dateTo = $event"
+      dateFormat="dd.mm.yy"
+      [showIcon]="true"
+      [style]="{ width: '160px' }"
+    />
+  </div>
+  <div class="flex flex-column gap-1">
+    <label class="text-sm text-color-secondary">Группировка</label>
+    <p-selectbutton
+      [options]="groupByOpt"
+      [ngModel]="groupBy"
+      (ngModelChange)="groupBy = $event"
+      optionLabel="label"
+      optionValue="value"
+    />
+  </div>
+  <p-button
+    label="Применить"
+    icon="pi pi-filter"
+    (onClick)="apply()"
+    [loading]="loading()"
+  />
+</div>
+
+@if (loading()) {
+  <div class="flex justify-content-center py-8">
+    <p-progressSpinner />
+  </div>
+} @else {
+
+  <!-- ─── Вкладки ─── -->
+  <p-tabs [value]="0">
+    <p-tablist>
+      <p-tab [value]="0"><i class="pi pi-chart-line mr-2"></i>Выручка и заказы</p-tab>
+      <p-tab [value]="1"><i class="pi pi-shopping-bag mr-2"></i>Топ товаров</p-tab>
+      <p-tab [value]="2"><i class="pi pi-users mr-2"></i>Новые клиенты</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+
+      <!-- ═══ ОТЧЁТ 1: Выручка ═══ -->
+      <p-tabpanel [value]="0">
+        <!-- Итоги -->
+        <div class="grid mb-4 mt-3">
+          <div class="col-12 md:col-4">
+            <p-card styleClass="text-center">
+              <div class="text-3xl font-bold" style="color:var(--indigo-500)">
+                {{ totalRevenue() | number:'1.0-0' }} ₽
+              </div>
+              <div class="text-color-secondary mt-1">Выручка за период</div>
+            </p-card>
+          </div>
+          <div class="col-12 md:col-4">
+            <p-card styleClass="text-center">
+              <div class="text-3xl font-bold" style="color:var(--green-500)">
+                {{ totalOrders() }}
+              </div>
+              <div class="text-color-secondary mt-1">Заказов</div>
+            </p-card>
+          </div>
+          @if (avgOrder(); as avg) {
+            <div class="col-12 md:col-4">
+              <p-card styleClass="text-center">
+                <div class="text-3xl font-bold" style="color:var(--blue-500)">
+                  {{ avg.avgAmount | number:'1.0-0' }} ₽
+                </div>
+                <div class="text-color-secondary mt-1">Средний чек</div>
+              </p-card>
+            </div>
+          }
+        </div>
+
+        <!-- График -->
+        @if (revenueChart()) {
+          <p-card class="mb-4">
+            <div class="flex justify-content-between align-items-center mb-3">
+              <span class="font-semibold">Выручка и заказы</span>
+              <p-button icon="pi pi-file-export" label="Скачать CSV" severity="secondary" size="small"
+                        [outlined]="true" (onClick)="exportRevenue()" />
+            </div>
+            <p-chart type="line" [data]="revenueChart()" [options]="revenueChartOptions" height="300" />
+          </p-card>
+        }
+
+        <!-- Таблица детализации -->
+        <p-card header="Детализация по периодам">
+          <p-table [value]="revenuePoints()" styleClass="p-datatable-sm p-datatable-striped"
+                   [scrollable]="true" scrollHeight="320px">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Период</th>
+                <th style="width:140px" pSortableColumn="ordersCount">Заказов <p-sortIcon field="ordersCount"/></th>
+                <th style="width:160px" pSortableColumn="revenue">Выручка <p-sortIcon field="revenue"/></th>
+                <th style="width:140px">Средний чек</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.date | date:'dd.MM.yyyy' }}</td>
+                <td>{{ row.ordersCount }}</td>
+                <td>{{ row.revenue | number:'1.0-0' }} ₽</td>
+                <td>{{ row.ordersCount > 0 ? ((row.revenue / row.ordersCount) | number:'1.0-0') + ' ₽' : '—' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="4" class="text-center text-color-secondary py-4">Нет данных за период</td></tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </p-tabpanel>
+
+      <!-- ═══ ОТЧЁТ 2: Топ товаров ═══ -->
+      <p-tabpanel [value]="1">
+        @if (topBarChart()) {
+          <p-card class="mb-4 mt-3">
+            <div class="flex justify-content-between align-items-center mb-3">
+              <span class="font-semibold">Топ-10 товаров по выручке</span>
+              <p-button icon="pi pi-file-export" label="Скачать CSV" severity="secondary" size="small"
+                        [outlined]="true" (onClick)="exportTopProducts()" />
+            </div>
+            <p-chart type="bar" [data]="topBarChart()" [options]="barChartOptions" height="320" />
+          </p-card>
+        }
+
+        <p-card header="Таблица топ товаров">
+          <p-table [value]="topProducts()" styleClass="p-datatable-sm p-datatable-striped">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>#</th>
+                <th>Товар</th>
+                <th>Бренд</th>
+                <th style="width:100px">Продано</th>
+                <th style="width:140px">Выручка</th>
+                <th style="width:90px">Доля</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row let-i="rowIndex">
+              <tr>
+                <td class="font-bold text-color-secondary">{{ i + 1 }}</td>
+                <td class="font-medium">{{ row.productTitle }}</td>
+                <td class="text-color-secondary">{{ row.brandTitle }}</td>
+                <td>{{ row.totalSold }} шт</td>
+                <td class="font-semibold">{{ row.totalRevenue | number:'1.0-0' }} ₽</td>
+                <td>{{ row.sharePercent }}%</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="6" class="text-center text-color-secondary py-4">Нет данных за период</td></tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </p-tabpanel>
+
+      <!-- ═══ ОТЧЁТ 3: Новые клиенты ═══ -->
+      <p-tabpanel [value]="2">
+        <div class="flex align-items-center gap-3 mb-4 mt-3">
+          <p-card styleClass="text-center px-5">
+            <div class="text-3xl font-bold" style="color:var(--green-500)">{{ totalNewCustomers() }}</div>
+            <div class="text-color-secondary mt-1">Новых клиентов за период</div>
+          </p-card>
+        </div>
+
+        @if (customersChart()) {
+          <p-card class="mb-4">
+            <span class="font-semibold block mb-3">Новые клиенты по периодам</span>
+            <p-chart type="bar" [data]="customersChart()" [options]="barChartOptions2" height="280" />
+          </p-card>
+        }
+
+        <p-card header="Детализация">
+          <p-table [value]="newCustomers()" styleClass="p-datatable-sm p-datatable-striped"
+                   [scrollable]="true" scrollHeight="280px">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Период</th>
+                <th style="width:160px">Новые клиенты</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.date | date:'dd.MM.yyyy' }}</td>
+                <td>{{ row.count }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="2" class="text-center text-color-secondary py-4">Нет данных за период</td></tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </p-tabpanel>
+
+    </p-tabpanels>
+  </p-tabs>
+
+}

@@ -27,4 +27,16 @@ export class CatalogHttpService extends HttpBase {
   getSimilar$(skuId: string, take = 6): Observable<ResponseObject<any[]>> {
     return this.httpClient.get<ResponseObject<any[]>>(`${this.apiUrl}/Catalog/similar/${skuId}?take=${take}`);
   }
+
+  getPopular$(take = 10): Observable<ResponseObject<any[]>> {
+    return this.httpClient.get<ResponseObject<any[]>>(`${this.apiUrl}/Catalog/popular?take=${take}`);
+  }
+
+  getDiscounted$(take = 10): Observable<ResponseObject<any[]>> {
+    return this.httpClient.get<ResponseObject<any[]>>(`${this.apiUrl}/Catalog/discounted?take=${take}`);
+  }
+
+  getBatch$(skuIds: string[]): Observable<ResponseObject<any[]>> {
+    return this.httpClient.post<ResponseObject<any[]>>(`${this.apiUrl}/Catalog/batch`, skuIds);
+  }
 }

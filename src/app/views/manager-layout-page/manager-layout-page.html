@@ -24,7 +24,27 @@
     </div>
 
     <div class="layout-topbar-actions">
-      <p-avatar icon="pi pi-user" shape="circle" />
+      <div class="flex align-items-center gap-2">
+        <p-avatar icon="pi pi-user" shape="circle" />
+        <span class="font-medium text-sm hidden md:inline">{{ managerName() }}</span>
+        <p-button
+          icon="pi pi-home"
+          label="На сайт"
+          severity="secondary"
+          size="small"
+          [outlined]="true"
+          pTooltip="Перейти на сайт"
+          (onClick)="goToSite()"
+        />
+        <p-button
+          icon="pi pi-sign-out"
+          severity="danger"
+          size="small"
+          [outlined]="true"
+          pTooltip="Выйти"
+          (onClick)="logout()"
+        />
+      </div>
     </div>
   </div>
 
@@ -38,6 +58,12 @@
             <a routerLink="dashboard" routerLinkActive="active-route" pRipple>
               <i class="pi pi-fw pi-chart-bar layout-menuitem-icon"></i>
               <span>Дашборд</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="analytics" routerLinkActive="active-route" pRipple>
+              <i class="pi pi-fw pi-chart-line layout-menuitem-icon"></i>
+              <span>Аналитика</span>
             </a>
           </li>
         </ul>
