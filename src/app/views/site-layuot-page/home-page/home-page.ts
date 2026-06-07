@@ -46,11 +46,14 @@ export class HomePage implements OnInit {
 
   bannerIndex = 0;
 
+  // numVisible=5 — для экранов > 1440px (не покрытых breakpoints)
   carouselOptions = [
-    { breakpoint: '1200px', numVisible: 4, numScroll: 1 },
-    { breakpoint: '992px',  numVisible: 3, numScroll: 1 },
-    { breakpoint: '768px',  numVisible: 2, numScroll: 1 },
-    { breakpoint: '480px',  numVisible: 1, numScroll: 1 },
+    { breakpoint: '1440px', numVisible: 5, numScroll: 1 },
+    { breakpoint: '1280px', numVisible: 4, numScroll: 1 },
+    { breakpoint: '1024px', numVisible: 4, numScroll: 1 },
+    { breakpoint: '768px',  numVisible: 3, numScroll: 1 },
+    { breakpoint: '576px',  numVisible: 2, numScroll: 1 },
+    { breakpoint: '480px',  numVisible: 2, numScroll: 1 },
   ];
 
   ngOnInit(): void {

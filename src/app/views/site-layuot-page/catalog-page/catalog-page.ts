@@ -52,6 +52,7 @@ export class CatalogPage implements OnInit {
 
   isLoggedIn = toSignal(this.authService.user$.pipe(map(u => !!u)));
   addingSkuId: string | null = null;
+  filterOpen = false;
 
   isInWishlist(skuId: string): boolean { return this.wishlistService.isInWishlist(skuId); }
   toggleWishlist(skuId: string): void  { this.wishlistService.toggle(skuId); }

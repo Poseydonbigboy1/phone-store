@@ -6,7 +6,10 @@
   overflow: hidden;
   background: #000;
 
-  ::ng-deep .p-carousel-content { border-radius: 16px; }
+  @media (max-width: 767px) { border-radius: 12px; }
+  @media (max-width: 479px) { border-radius: 8px; }
+
+  ::ng-deep .p-carousel-content { border-radius: inherit; }
 
   ::ng-deep .p-carousel-indicators {
     position: absolute;
@@ -15,6 +18,8 @@
     transform: translateX(-50%);
     gap: 6px;
     padding: 0;
+
+    @media (max-width: 479px) { bottom: 8px; gap: 4px; }
   }
 
   ::ng-deep .p-carousel-indicator button {
@@ -24,12 +29,16 @@
     background: rgba(255, 255, 255, 0.45);
     border: none;
     transition: background 0.2s, width 0.2s;
+
+    @media (max-width: 479px) { width: 6px; height: 6px; }
   }
 
   ::ng-deep .p-carousel-indicator.p-carousel-indicator-active button {
     background: #fff;
     width: 22px;
     border-radius: 4px;
+
+    @media (max-width: 479px) { width: 16px; }
   }
 
   ::ng-deep .p-carousel-prev-button,
@@ -38,6 +47,8 @@
     border: none !important;
     color: #fff !important;
     backdrop-filter: blur(4px);
+
+    @media (max-width: 479px) { display: none !important; }
 
     &:hover { background: rgba(255,255,255,0.3) !important; }
   }
@@ -60,13 +71,18 @@
 
 .banner-img {
   width: 100%;
-  height: 440px;
   object-fit: cover;
   display: block;
   transition: transform 0.5s ease;
 
-  @media (max-width: 768px) { height: 220px; }
-  @media (max-width: 480px) { height: 170px; }
+  // Высота по брейкпоинтам
+  height: 480px;                                            // xl / 2xl (≥1280px)
+
+  @media (max-width: 479px)  { height: 175px; }            // xs — маленький телефон
+  @media (min-width: 480px) and (max-width: 767px)  { height: 240px; } // sm — телефон
+  @media (min-width: 768px) and (max-width: 1023px) { height: 320px; } // md — планшет
+  @media (min-width: 1024px) and (max-width: 1279px){ height: 400px; } // lg — небольшой десктоп
+  @media (min-width: 1440px) { height: 520px; }            // 2xl — широкий
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -76,11 +92,15 @@
   position: relative;
   border-radius: 16px;
   overflow: hidden;
-  min-height: 420px;
   display: flex;
   align-items: flex-end;
 
-  @media (max-width: 768px) { min-height: 280px; }
+  min-height: 480px;
+
+  @media (max-width: 479px)  { min-height: 220px; border-radius: 10px; }
+  @media (min-width: 480px) and (max-width: 767px)  { min-height: 300px; border-radius: 12px; }
+  @media (min-width: 768px) and (max-width: 1023px) { min-height: 360px; }
+  @media (min-width: 1440px) { min-height: 540px; }
 }
 
 .hero-fallback__bg {
@@ -95,8 +115,11 @@
   z-index: 1;
   padding: 2.5rem;
   flex: 1;
+  max-width: 640px;
 
-  @media (max-width: 600px) { padding: 1.5rem; }
+  @media (max-width: 479px) { padding: 1.25rem; }
+  @media (min-width: 480px) and (max-width: 767px) { padding: 1.75rem; }
+  @media (min-width: 1440px) { padding: 3.5rem; max-width: 760px; }
 }
 
 .hero-fallback__tag {
@@ -108,18 +131,22 @@
   color: #94a3b8;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
 
   i { color: #60a5fa; }
+
+  @media (max-width: 479px) { font-size: 0.65rem; margin-bottom: 0.5rem; }
 }
 
 .hero-fallback__title {
-  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-size: clamp(1.5rem, 5vw, 3.25rem);
   font-weight: 800;
   color: #fff;
   line-height: 1.15;
   margin: 0 0 0.875rem;
   letter-spacing: -0.02em;
+
+  @media (max-width: 479px) { margin-bottom: 0.6rem; }
 }
 
 .hero-fallback__subtitle {
@@ -128,6 +155,9 @@
   line-height: 1.6;
   margin: 0 0 1.75rem;
   max-width: 420px;
+
+  @media (max-width: 479px) { font-size: 0.8rem; margin-bottom: 1rem; display: none; }
+  @media (min-width: 480px) and (max-width: 767px) { font-size: 0.875rem; margin-bottom: 1.25rem; }
 }
 
 .hero-fallback__cta {
@@ -143,6 +173,8 @@
   text-decoration: none;
   transition: transform 0.15s, background 0.15s;
 
+  @media (max-width: 479px) { padding: 0.6rem 1.25rem; font-size: 0.825rem; }
+
   &:hover { transform: translateY(-2px); background: #f1f5f9; }
 }
 
@@ -156,7 +188,9 @@
   gap: 0.5rem;
   align-items: flex-end;
 
-  @media (max-width: 700px) { display: none; }
+  // Только на md+ (скрываем на мобилках и маленьких планшетах)
+  @media (max-width: 900px) { display: none; }
+  @media (min-width: 1440px) { right: 3rem; bottom: 3rem; }
 }
 
 .hero-badge {
@@ -177,14 +211,18 @@
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SECTIONS — spacing
+// SECTION SPACING — секции с mb
 // ═══════════════════════════════════════════════════════════════
-section {
-  &:not(:last-of-type) { margin-bottom: 2.5rem; }
+.mb-5 {
+  margin-bottom: 2.5rem !important;
+
+  @media (max-width: 479px)  { margin-bottom: 1.5rem !important; }
+  @media (min-width: 480px) and (max-width: 767px) { margin-bottom: 1.75rem !important; }
+  @media (min-width: 1440px) { margin-bottom: 3rem !important; }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CAROUSEL: no clip inside card-wrap so hover shadow shows
+// CAROUSEL — убираем clip чтобы видна тень при ховере
 // ═══════════════════════════════════════════════════════════════
 ::ng-deep .p-carousel-item {
   padding: 0.25rem;
