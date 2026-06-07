@@ -1,5 +1,5 @@
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
@@ -10,11 +10,9 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputMaskModule } from 'primeng/inputmask';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { StepperModule } from 'primeng/stepper';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 
@@ -24,8 +22,9 @@ import { ToastModule } from 'primeng/toast';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe, DecimalPipe, ReactiveFormsModule,
-    StepperModule, SelectButtonModule, FloatLabelModule, InputTextModule, InputMaskModule,
-    TextareaModule, ButtonModule, CardModule, DividerModule, ToastModule, MessageModule,
+    SelectButtonModule, FloatLabelModule, InputTextModule,
+    TextareaModule, ButtonModule, CardModule, DividerModule,
+    ToastModule, MessageModule,
   ],
   providers: [MessageService],
   templateUrl: './checkout-page.html',
@@ -38,12 +37,13 @@ export class CheckoutPage implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly fb = inject(FormBuilder);
 
-  isSubmitting = false;
-  errorMessage: string | null = null;
+  step = signal(1);
+  isSubmitting = signal(false);
+  errorMessage = signal<string | null>(null);
 
   readonly deliveryOptions = [
-    { label: 'Курьер',    value: EDeliveryType.Courier, icon: 'pi pi-truck' },
-    { label: 'Самовывоз', value: EDeliveryType.Pickup,  icon: 'pi pi-box'  },
+    { label: 'Курьер',    value: EDeliveryType.Courier },
+    { label: 'Самовывоз', value: EDeliveryType.Pickup  },
   ];
 
   readonly form = this.fb.group({
@@ -72,10 +72,27 @@ export class CheckoutPage implements OnInit {
     return this.form.get('deliveryType')?.value === EDeliveryType.Courier;
   }
 
+  get step1Valid(): boolean {
+    const f = this.form;
+    return !f.get('recipientName')!.invalid &&
+           !f.get('phone')!.invalid &&
+           (!this.isCourier || !f.get('address')!.invalid);
+  }
+
+  goToStep2(): void {
+    if (!this.step1Valid) {
+      this.form.get('recipientName')!.markAsTouched();
+      this.form.get('phone')!.markAsTouched();
+      this.form.get('address')!.markAsTouched();
+      return;
+    }
+    this.step.set(2);
+  }
+
   submit(): void {
     if (this.form.invalid) return;
-    this.isSubmitting = true;
-    this.errorMessage = null;
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
     const v = this.form.value;
 
     this.checkoutHttp.checkout$({
@@ -83,23 +100,28 @@ export class CheckoutPage implements OnInit {
         type:          v.deliveryType ?? EDeliveryType.Courier,
         recipientName: v.recipientName ?? '',
         phone:         v.phone ?? '',
-        address:       v.address ?? undefined,
-        comment:       v.comment ?? undefined,
+        address:       v.address || undefined,
+        comment:       v.comment || undefined,
       },
     }).subscribe({
       next: res => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         if (res?.isSuccess) {
           this.cart.clear();
-          this.messageService.add({ severity: 'success', summary: 'Заказ оформлен!', detail: `№ ${res.data!.orderId.slice(0, 8)}`, life: 5000 });
-          setTimeout(() => this.router.navigate(['/orders']), 1500);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Заказ оформлен!',
+            detail: `№ ${res.data!.orderId.slice(0, 8)}`,
+            life: 5000,
+          });
+          setTimeout(() => this.router.navigate(['/main/orders']), 1500);
         } else {
-          this.errorMessage = res?.message ?? 'Ошибка оформления заказа';
+          this.errorMessage.set(res?.message ?? 'Ошибка оформления заказа');
         }
       },
       error: err => {
-        this.isSubmitting = false;
-        this.errorMessage = err?.message ?? 'Ошибка оформления заказа';
+        this.isSubmitting.set(false);
+        this.errorMessage.set(err?.error?.message ?? err?.message ?? 'Ошибка оформления заказа');
       },
     });
   }

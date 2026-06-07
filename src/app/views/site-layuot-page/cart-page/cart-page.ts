@@ -58,7 +58,7 @@ export class CartPage implements OnInit {
   }
 
   goToCheckout(): void {
-    this.router.navigate(['/checkout']);
+    this.router.navigate(['/main/checkout']);
   }
 
   goToCatalog(): void {

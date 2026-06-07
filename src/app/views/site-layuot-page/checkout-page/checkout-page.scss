@@ -1,14 +1,28 @@
-.delivery-option {
+.step-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.5rem;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--surface-200);
+  color: var(--text-color-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s, color 0.2s;
+
+  &.active {
+    background: var(--primary-color);
+    color: #fff;
+  }
+
+  &.done {
+    background: var(--green-500);
+    color: #fff;
+  }
 }
 
 .order-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
   padding: 0.4rem 0;
   border-bottom: 1px solid var(--surface-border);
   &:last-of-type { border-bottom: none; }
