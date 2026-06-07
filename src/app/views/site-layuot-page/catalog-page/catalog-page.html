@@ -77,16 +77,28 @@
                       }
                     </div>
 
-                    <!-- Кнопка -->
-                    <p-button
-                      icon="pi pi-cart-plus"
-                      label="В корзину"
-                      severity="success"
-                      styleClass="w-full"
-                      size="small"
-                      [loading]="!!addingSkuId && addingSkuId === product?.skuId"
-                      (onClick)="addToCart(product)"
-                    />
+                    <!-- Кнопки -->
+                    <div class="flex gap-2">
+                      <p-button
+                        icon="pi pi-cart-plus"
+                        label="В корзину"
+                        severity="success"
+                        styleClass="flex-1"
+                        size="small"
+                        [loading]="!!addingSkuId && addingSkuId === product?.skuId"
+                        (onClick)="addToCart(product)"
+                      />
+                      @if (isLoggedIn()) {
+                        <p-button
+                          [icon]="isInWishlist(product.skuId) ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                          [severity]="isInWishlist(product.skuId) ? 'danger' : 'secondary'"
+                          [outlined]="!isInWishlist(product.skuId)"
+                          size="small"
+                          pTooltip="Избранное"
+                          (onClick)="toggleWishlist(product.skuId)"
+                        />
+                      }
+                    </div>
                   </div>
                 </div>
               </div>

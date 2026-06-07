@@ -4,19 +4,21 @@ import { Router, RouterOutlet } from '@angular/router';
 import { User } from '@models/data';
 import { AuthService } from '@services';
 import { CartService } from '../../core/services/cart.service';
+import { WishlistService } from '../../core/services/wishlist.service';
 import { MenuItem } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
 import { Nullable } from 'primeng/ts-helpers';
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-site-layuot-page',
-  imports: [RouterOutlet, MenubarModule, CommonModule, AsyncPipe, BadgeModule, ButtonModule, OverlayBadgeModule, InputTextModule, FormsModule],
+  imports: [RouterOutlet, MenubarModule, CommonModule, AsyncPipe, BadgeModule, ButtonModule, OverlayBadgeModule, InputTextModule, FormsModule, TooltipModule],
   templateUrl: './site-layuot-page.html',
   styleUrl: './site-layuot-page.scss',
   standalone: true,
@@ -27,9 +29,12 @@ export class SiteLayuotPage implements OnInit {
   cartCount$: Observable<number>;
   searchQuery = '';
 
-  private readonly authService = inject(AuthService);
-  readonly cartService = inject(CartService);
-  private readonly router = inject(Router);
+  private readonly authService    = inject(AuthService);
+  readonly cartService    = inject(CartService);
+  private readonly wishlistService = inject(WishlistService);
+  private readonly router          = inject(Router);
+
+  wishlistCount = this.wishlistService.count;
 
   constructor() {
     this.user$ = this.authService.user$;
@@ -39,7 +44,12 @@ export class SiteLayuotPage implements OnInit {
   ngOnInit() {
     this.user$.subscribe(user => {
       this.updateMenu(user);
-      if (user) this.cartService.load();
+      if (user) {
+        this.cartService.load();
+        this.wishlistService.load();
+      } else {
+        this.wishlistService.clear();
+      }
     });
   }
 
@@ -63,6 +73,10 @@ export class SiteLayuotPage implements OnInit {
 
   goToCart() {
     this.router.navigate(['/main/cart']);
+  }
+
+  goToWishlist() {
+    this.router.navigate(['/main/wishlist']);
   }
 
   onSearch(): void {

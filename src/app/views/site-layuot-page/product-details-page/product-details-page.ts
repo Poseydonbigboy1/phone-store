@@ -1,8 +1,11 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { ProductDetailsService } from './product-details-page.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
+import { CatalogHttpService } from '@backend';
 import { AuthService } from '@services';
 import { map } from 'rxjs';
 import { GalleriaModule } from 'primeng/galleria';
@@ -16,6 +19,8 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { ChipModule } from 'primeng/chip';
+import { CarouselModule } from 'primeng/carousel';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -23,29 +28,30 @@ import { MessageService } from 'primeng/api';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    DecimalPipe,
+    DecimalPipe, RouterModule,
     GalleriaModule, CardModule, ButtonModule, FieldsetModule,
     TabsModule, TableModule, ProgressSpinnerModule, ToastModule,
-    TagModule, DividerModule, ChipModule,
+    TagModule, DividerModule, ChipModule, CarouselModule, TooltipModule,
   ],
   templateUrl: './product-details-page.html',
   styleUrl: './product-details-page.scss',
   providers: [ProductDetailsService, MessageService],
 })
-export class ProductDetailsPage {
+export class ProductDetailsPage implements OnInit {
   private productDetailsService = inject(ProductDetailsService);
-  private cartService = inject(CartService);
-  private authService = inject(AuthService);
-  private messageService = inject(MessageService);
+  private cartService           = inject(CartService);
+  private wishlistService       = inject(WishlistService);
+  private catalogHttp           = inject(CatalogHttpService);
+  private authService           = inject(AuthService);
+  private messageService        = inject(MessageService);
 
-  product = toSignal(this.productDetailsService.product$);
-  isLoggedIn = toSignal(this.authService.user$.pipe(map(u => !!u)));
+  product      = toSignal(this.productDetailsService.product$);
+  isLoggedIn   = toSignal(this.authService.user$.pipe(map(u => !!u)));
   addingToCart = signal(false);
+  similar      = signal<any[]>([]);
 
-  // Выбранный SKU (по умолчанию — mainSku)
   selectedSkuId = signal<string | null>(null);
 
-  // Текущий SKU — mainSku или выбранный из additionalSkus
   currentSku = computed(() => {
     const p = this.product();
     if (!p) return null;
@@ -54,14 +60,28 @@ export class ProductDetailsPage {
     return p.additionalSkus?.find((s: any) => s.skuId === id) ?? p.mainSku;
   });
 
-  // Все варианты для чипов (mainSku + additionalSkus)
   allSkus = computed(() => {
     const p = this.product();
     if (!p) return [];
     return [p.mainSku, ...(p.additionalSkus ?? [])].filter(Boolean);
   });
 
-  // Метка чипа: первый специфичный компонент или цена
+  inWishlist = computed(() => {
+    const sku = this.currentSku();
+    return sku ? this.wishlistService.isInWishlist(sku.skuId) : false;
+  });
+
+  ngOnInit(): void {
+    // Load similar products once main product is resolved
+    this.productDetailsService.product$.subscribe(p => {
+      if (p?.mainSku?.skuId) {
+        this.catalogHttp.getSimilar$(p.mainSku.skuId, 8).subscribe(res => {
+          this.similar.set(res?.data ?? []);
+        });
+      }
+    });
+  }
+
   skuLabel(sku: any): string {
     const comp = sku?.skuSpecificComponents?.[0];
     if (comp) return `${comp.value}`;
@@ -72,6 +92,10 @@ export class ProductDetailsPage {
     this.selectedSkuId.set(sku.skuId);
   }
 
+  toggleWishlist(skuId: string): void {
+    this.wishlistService.toggle(skuId);
+  }
+
   isVideo(url: string): boolean {
     return /\.(mp4|webm|mov|avi)(\?.*)?$/i.test(url);
   }
@@ -80,6 +104,12 @@ export class ProductDetailsPage {
     { breakpoint: '1024px', numVisible: 5 },
     { breakpoint: '768px',  numVisible: 3 },
     { breakpoint: '560px',  numVisible: 1 },
+  ];
+
+  carouselOptions = [
+    { breakpoint: '1200px', numVisible: 3, numScroll: 1 },
+    { breakpoint: '768px',  numVisible: 2, numScroll: 1 },
+    { breakpoint: '480px',  numVisible: 1, numScroll: 1 },
   ];
 
   addToCart(): void {

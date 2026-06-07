@@ -1,0 +1,76 @@
+<p-toast />
+
+<div class="flex align-items-center justify-content-between mb-4">
+  <h2 class="m-0">Избранное</h2>
+</div>
+
+@if (loading()) {
+  <div class="flex justify-content-center py-8">
+    <p-progressSpinner strokeWidth="4" [style]="{ width: '48px', height: '48px' }" />
+  </div>
+} @else if (items().length === 0) {
+  <div class="flex flex-column align-items-center py-8 gap-3 text-color-secondary">
+    <i class="pi pi-heart text-6xl"></i>
+    <span class="text-xl">Список избранного пуст</span>
+    <p-button label="Перейти в каталог" icon="pi pi-arrow-left" routerLink="/main/products" severity="secondary" [outlined]="true" />
+  </div>
+} @else {
+  <div class="wishlist-grid">
+    @for (item of items(); track item.skuId) {
+      <div class="wish-card">
+        <!-- Изображение -->
+        <a [routerLink]="['/main/products', item.productId]" class="wish-img-wrap">
+          @if (imageUrl(item)) {
+            <img [src]="imageUrl(item)" [alt]="item.title" class="wish-img" />
+          } @else {
+            <div class="wish-img-placeholder">
+              <i class="pi pi-image text-4xl text-color-secondary"></i>
+            </div>
+          }
+        </a>
+
+        <!-- Инфо -->
+        <div class="wish-info">
+          <div class="text-color-secondary text-xs mb-1">{{ item.brandTitle }}</div>
+          <a [routerLink]="['/main/products', item.productId]" class="wish-title font-semibold">
+            {{ item.title }}
+          </a>
+
+          <div class="flex align-items-center gap-2 mt-2">
+            @if (item.discount > 0) {
+              <span class="text-color-secondary text-sm line-through">{{ item.price | number:'1.0-0' }} ₽</span>
+              <span class="font-bold" style="color: var(--green-500)">{{ finalPrice(item) | number:'1.0-0' }} ₽</span>
+              <p-tag [value]="'-' + item.discount + '%'" severity="warn" />
+            } @else {
+              <span class="font-bold">{{ item.price | number:'1.0-0' }} ₽</span>
+            }
+          </div>
+
+          @if (item.amount === 0) {
+            <p-tag value="Нет в наличии" severity="danger" styleClass="mt-2" />
+          }
+        </div>
+
+        <!-- Действия -->
+        <div class="wish-actions">
+          <p-button
+            label="В корзину"
+            icon="pi pi-cart-plus"
+            size="small"
+            [disabled]="item.amount === 0"
+            (onClick)="addToCart(item)"
+            styleClass="w-full"
+          />
+          <p-button
+            icon="pi pi-heart-fill"
+            severity="danger"
+            [outlined]="true"
+            size="small"
+            pTooltip="Удалить из избранного"
+            (onClick)="remove(item.skuId)"
+          />
+        </div>
+      </div>
+    }
+  </div>
+}

@@ -1,7 +1,6 @@
 export class User {
+  id: string = '';
   name: string = '';
   login: string = '';
   role: string = '';
-  // authToken: string = '';
-  // refreshToken: string = '';
 }

@@ -13,8 +13,10 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 import { AuthService } from '@services';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -26,7 +28,7 @@ import { SortBy, SortDirection } from '@models/common';
   imports: [
     DataViewModule, PaginatorModule, CommonModule, DecimalPipe, RouterLink,
     CatalogFilter, CardModule, ButtonModule, FormsModule, ScrollPanelModule,
-    ToastModule, TagModule, SelectModule,
+    ToastModule, TagModule, SelectModule, TooltipModule,
   ],
   providers: [CatalogPageService, MessageService],
   templateUrl: './catalog-page.html',
@@ -40,14 +42,18 @@ export class CatalogPage implements OnInit {
   isLoading$: Observable<boolean>;
   catalogFilters$: Observable<any>;
 
-  private cartService = inject(CartService);
-  private authService = inject(AuthService);
+  private cartService     = inject(CartService);
+  private wishlistService = inject(WishlistService);
+  private authService     = inject(AuthService);
   private messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   isLoggedIn = toSignal(this.authService.user$.pipe(map(u => !!u)));
   addingSkuId: string | null = null;
+
+  isInWishlist(skuId: string): boolean { return this.wishlistService.isInWishlist(skuId); }
+  toggleWishlist(skuId: string): void  { this.wishlistService.toggle(skuId); }
 
   sortOptions = [
     { label: 'По умолчанию', value: { sortBy: SortBy.None, sortDirection: SortDirection.Ascending } },

@@ -23,4 +23,8 @@ export class CatalogHttpService extends HttpBase {
   getFilters$(): Observable<ResponseObject<any>> {
     return this.httpClient.get<ResponseObject<any>>(`${this.apiUrl}/Catalog/filters`);
   }
+
+  getSimilar$(skuId: string, take = 6): Observable<ResponseObject<any[]>> {
+    return this.httpClient.get<ResponseObject<any[]>>(`${this.apiUrl}/Catalog/similar/${skuId}?take=${take}`);
+  }
 }

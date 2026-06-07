@@ -1,0 +1,21 @@
+.profile-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--primary-200);
+}
+
+.addr-card {
+  transition: box-shadow .15s;
+  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+}

@@ -1,7 +1,6 @@
-export class  ProfileResponse {
+export class ProfileResponse {
+    id: string = '';
     name: string = '';
     login: string = '';
     role: string = '';
-    // заказы
-    // корзина
 }

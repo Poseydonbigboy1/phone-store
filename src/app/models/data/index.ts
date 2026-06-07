@@ -14,3 +14,5 @@ export * from './manager-user';
 export * from './cart-item';
 export * from './delivery';
 export * from './order-summary';
+export * from './user-address';
+export * from './dashboard';

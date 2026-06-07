@@ -20,6 +20,18 @@
           </span>
 
           @if (user$ | async; as user) {
+            <!-- Избранное -->
+            <p-overlaybadge [value]="wishlistCount() || null" severity="danger">
+              <p-button
+                icon="pi pi-heart"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                pTooltip="Избранное"
+                (onClick)="goToWishlist()"
+              />
+            </p-overlaybadge>
+
             <!-- Иконка корзины с бейджем -->
             <p-overlaybadge
               [value]="(cartCount$ | async) || null"

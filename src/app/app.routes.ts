@@ -20,6 +20,18 @@ export const routes: Routes = [
     data: { breadcrumb: 'Панель менеджера' },
     children: [
       {
+        path: '',
+        data: { breadcrumb: 'Дашборд' },
+        loadComponent: () =>
+          import('./views/manager-layout-page/dashboard/dashboard').then(m => m.DashboardPage),
+      },
+      {
+        path: 'dashboard',
+        data: { breadcrumb: 'Дашборд' },
+        loadComponent: () =>
+          import('./views/manager-layout-page/dashboard/dashboard').then(m => m.DashboardPage),
+      },
+      {
         path: 'management',
         data: { breadcrumb: 'Управление' },
         children: [
@@ -147,6 +159,11 @@ export const routes: Routes = [
       {
         path: 'orders',
         loadComponent: () => import('./views/site-layuot-page/orders-page/orders-page').then(m => m.OrdersPage),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'wishlist',
+        loadComponent: () => import('./views/site-layuot-page/wishlist-page/wishlist-page').then(m => m.WishlistPage),
         canActivate: [authGuard],
       },
     ],

@@ -66,9 +66,10 @@ export class AuthService {
         next: (response) => {
           if (response.data) {
             const user = new User();
+            user.id    = response.data.id ?? '';
             user.login = response.data.login;
-            user.name = response.data.name;
-            user.role = response.data.role;
+            user.name  = response.data.name ?? '';
+            user.role  = response.data.role;
 
             this.currentUser$.next(user);
           }
