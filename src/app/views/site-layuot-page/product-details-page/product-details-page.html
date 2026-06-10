@@ -57,21 +57,42 @@
       }
       <h1 class="pd-title">{{ product.title }}</h1>
 
-      <!-- Выбор варианта SKU -->
-      @if (allSkus().length > 1) {
+      <!-- Конфигурация (память / ОЗУ и т.д.) — один чип = один SKU, показываем только отличающиеся хар-ки -->
+      @if (configGroups().length > 1) {
         <div class="pd-sku-section">
           <span class="pd-sku-label">Конфигурация</span>
           <div class="pd-sku-list">
-            @for (sku of allSkus(); track sku.skuId) {
+            @for (group of configGroups(); track group.key) {
+              @let isActive = currentConfigGroup()?.key === group.key;
               <button
                 class="pd-sku-chip"
-                [class.pd-sku-chip--active]="(selectedSkuId() ?? product.mainSku?.skuId) === sku.skuId"
-                [class.pd-sku-chip--unavailable]="sku.amount <= 0"
-                [disabled]="sku.amount <= 0"
-                (click)="selectSku(sku)"
+                [class.pd-sku-chip--active]="isActive"
+                [pTooltip]="isActive ? '' : configChipTooltip(group)"
+                tooltipPosition="top"
+                (click)="selectConfig(group.key)"
+              >{{ group.label }}</button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Цвет — только цвета, доступные в выбранной конфигурации -->
+      @if (availableColors().length > 1) {
+        <div class="pd-sku-section">
+          <span class="pd-sku-label">Цвет</span>
+          <div class="pd-sku-list">
+            @for (color of availableColors(); track color) {
+              @let isActive = activeColor() === color;
+              @let dot = getColorDot(color);
+              <button
+                class="pd-sku-chip pd-sku-chip--color"
+                [class.pd-sku-chip--active]="isActive"
+                [pTooltip]="isActive ? '' : colorChipTooltip(color)"
+                tooltipPosition="top"
+                (click)="selectColor(color)"
               >
-                {{ skuLabel(sku) }}
-                @if (sku.amount <= 0) { <span class="pd-sku-chip__sub">нет</span> }
+                @if (dot) { <span class="pd-color-dot" [style.background]="dot"></span> }
+                {{ color }}
               </button>
             }
           </div>

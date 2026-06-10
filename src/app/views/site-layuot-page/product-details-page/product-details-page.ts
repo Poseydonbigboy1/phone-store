@@ -50,20 +50,92 @@ export class ProductDetailsPage implements OnInit {
   addingToCart = signal(false);
   similar      = signal<any[]>([]);
 
-  selectedSkuId = signal<string | null>(null);
+  // ── Selection state ──────────────────────────────────────────
+  selectedConfigKey = signal<string | null>(null);
+  selectedColor     = signal<string | null>(null);
 
-  currentSku = computed(() => {
-    const p = this.product();
-    if (!p) return null;
-    const id = this.selectedSkuId();
-    if (!id || id === p.mainSku?.skuId) return p.mainSku;
-    return p.additionalSkus?.find((s: any) => s.skuId === id) ?? p.mainSku;
-  });
-
+  // ── All SKUs flat list ────────────────────────────────────────
   allSkus = computed(() => {
     const p = this.product();
     if (!p) return [];
     return [p.mainSku, ...(p.additionalSkus ?? [])].filter(Boolean);
+  });
+
+  // ── Non-color characteristics whose values differ between SKUs ─
+  varyingNonColorCharNames = computed(() => {
+    const skus = this.allSkus();
+    if (skus.length <= 1) return [];
+    const titles = new Set<string>();
+    skus.forEach(sku => sku?.skuSpecificComponents
+      ?.filter((c: any) => !this.isColorTitle(c.title))
+      .forEach((c: any) => titles.add(c.title)));
+    return [...titles].filter(title => {
+      const vals = new Set(skus.map(
+        sku => sku?.skuSpecificComponents?.find((c: any) => c.title === title)?.value ?? null
+      ));
+      return vals.size > 1;
+    });
+  });
+
+  // ── Config groups: one group = one unique combination of non-color chars ──
+  configGroups = computed(() => {
+    const names = this.varyingNonColorCharNames();
+    if (names.length === 0) return [];
+    const map = new Map<string, { key: string; label: string; skus: any[] }>();
+    this.allSkus().forEach(sku => {
+      const key = this.configKey(sku);
+      if (!map.has(key)) {
+        const label = names
+          .map(t => sku?.skuSpecificComponents?.find((c: any) => c.title === t)?.value ?? '')
+          .filter(Boolean)
+          .join(' / ');
+        map.set(key, { key, label, skus: [] });
+      }
+      map.get(key)!.skus.push(sku);
+    });
+    return [...map.values()];
+  });
+
+  // ── Currently selected config group (defaults to mainSku's group) ──
+  currentConfigGroup = computed(() => {
+    const groups = this.configGroups();
+    if (groups.length === 0) return null;
+    const key = this.selectedConfigKey() ?? this.configKey(this.product()?.mainSku);
+    return groups.find(g => g.key === key) ?? groups[0];
+  });
+
+  // ── Colors available in the currently selected config group ──
+  availableColors = computed(() => {
+    const group = this.currentConfigGroup();
+    const skus = group ? group.skus : this.allSkus();
+    const seen = new Set<string>();
+    const result: string[] = [];
+    skus.forEach(sku => {
+      const val = this.colorOf(sku);
+      if (val && !seen.has(val)) { seen.add(val); result.push(val); }
+    });
+    return result;
+  });
+
+  // ── Active color (defaults to mainSku's color) ────────────────
+  activeColor = computed(() =>
+    this.selectedColor() ??
+    this.colorOf(this.product()?.mainSku) ??
+    null
+  );
+
+  // ── The SKU that is currently "selected" ──────────────────────
+  currentSku = computed(() => {
+    const p = this.product();
+    if (!p) return null;
+    const group = this.currentConfigGroup();
+    const skus  = group ? group.skus : this.allSkus();
+    const color = this.activeColor();
+    if (color) {
+      const match = skus.find((s: any) => this.colorOf(s) === color);
+      if (match) return match;
+    }
+    return skus[0] ?? p.mainSku;
   });
 
   inWishlist = computed(() => {
@@ -71,8 +143,106 @@ export class ProductDetailsPage implements OnInit {
     return sku ? this.wishlistService.isInWishlist(sku.skuId) : false;
   });
 
+  // ── Select config group ───────────────────────────────────────
+  selectConfig(key: string): void {
+    this.selectedConfigKey.set(key);
+    // Keep color if it exists in the new group; otherwise pick first available
+    const group = this.configGroups().find(g => g.key === key);
+    if (!group) return;
+    const colorsInGroup = group.skus.map((s: any) => this.colorOf(s)).filter(Boolean);
+    const current = this.activeColor();
+    if (current && !colorsInGroup.includes(current)) {
+      this.selectedColor.set(colorsInGroup[0] ?? null);
+    }
+  }
+
+  selectColor(color: string): void {
+    this.selectedColor.set(color);
+  }
+
+  // ── Tooltip text for config chip ──────────────────────────────
+  configChipTooltip(group: { skus: any[] }): string {
+    const current = this.currentSku();
+    if (!current) return '';
+    // Prefer the SKU in this group that matches current color
+    const color = this.colorOf(current);
+    const sku = (color ? group.skus.find((s: any) => this.colorOf(s) === color) : null)
+      ?? group.skus[0];
+    return this.priceTooltip(sku, current);
+  }
+
+  // ── Tooltip text for color chip ───────────────────────────────
+  colorChipTooltip(color: string): string {
+    const current = this.currentSku();
+    if (!current) return '';
+    const group = this.currentConfigGroup();
+    const skus = group ? group.skus : this.allSkus();
+    const sku = skus.find((s: any) => this.colorOf(s) === color);
+    if (!sku) return '';
+    return this.priceTooltip(sku, current);
+  }
+
+  // ── Color dot lookup ──────────────────────────────────────────
+  private readonly colorMap: Record<string, string> = {
+    'черный': '#1a1a1a', 'чёрный': '#1a1a1a', 'black': '#1a1a1a',
+    'белый': '#e0e0e0',  'white': '#e0e0e0',
+    'серый': '#808080',  'gray': '#808080',  'grey': '#808080',
+    'синий': '#1565c0',  'blue': '#1565c0',
+    'красный': '#c62828','red': '#c62828',
+    'зеленый': '#2e7d32','зелёный': '#2e7d32','green': '#2e7d32',
+    'золотой': '#c9942a','золото': '#c9942a','gold': '#c9942a',
+    'розовый': '#e91e63','pink': '#e91e63',
+    'фиолетовый': '#7b1fa2','purple': '#7b1fa2',
+    'титановый': '#8d9eab','titanium': '#8d9eab',
+    'серебристый': '#bdbdbd','серебряный': '#bdbdbd','silver': '#bdbdbd',
+    'желтый': '#f9a825', 'жёлтый': '#f9a825','yellow': '#f9a825',
+    'оранжевый': '#e65100','orange': '#e65100',
+  };
+
+  getColorDot(value: string): string | null {
+    const lower = value.toLowerCase();
+    for (const [key, color] of Object.entries(this.colorMap)) {
+      if (lower.includes(key)) return color;
+    }
+    return null;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+
+  private isColorTitle(title: string): boolean {
+    return /^цвет$/i.test((title ?? '').trim());
+  }
+
+  private colorOf(sku: any): string | null {
+    return sku?.skuSpecificComponents?.find((c: any) => this.isColorTitle(c.title))?.value ?? null;
+  }
+
+  private configKey(sku: any): string {
+    return this.varyingNonColorCharNames()
+      .map(t => sku?.skuSpecificComponents?.find((c: any) => c.title === t)?.value ?? '')
+      .join('|');
+  }
+
+  private effectivePrice(sku: any): number {
+    const p = sku?.price ?? 0;
+    const d = sku?.discount ?? 0;
+    return Math.round(p * (1 - d / 100));
+  }
+
+  private priceTooltip(sku: any, current: any): string {
+    const price   = this.effectivePrice(sku);
+    const curPrice = this.effectivePrice(current);
+    const diff = price - curPrice;
+    const priceStr = price.toLocaleString('ru-RU') + ' ₽';
+    if (diff === 0) return priceStr;
+    const sign    = diff > 0 ? '+' : '−';
+    const diffStr = Math.abs(diff).toLocaleString('ru-RU') + ' ₽';
+    return `${priceStr} (${sign}${diffStr})`;
+  }
+
+  // ── Lifecycle ─────────────────────────────────────────────────
+
   ngOnInit(): void {
-    // Load similar products and track recently viewed once main product is resolved
     this.productDetailsService.product$.subscribe(p => {
       if (p?.mainSku?.skuId) {
         this.catalogHttp.getSimilar$(p.mainSku.skuId, 8).subscribe(res => {
@@ -88,23 +258,8 @@ export class ProductDetailsPage implements OnInit {
     const MAX = 10;
     let ids: string[] = [];
     try { ids = JSON.parse(localStorage.getItem(KEY) ?? '[]'); } catch { ids = []; }
-    // Remove duplicate, prepend
     ids = [skuId, ...ids.filter(id => id !== skuId)].slice(0, MAX);
     localStorage.setItem(KEY, JSON.stringify(ids));
-  }
-
-  skuLabel(sku: any): string {
-    const comp = sku?.skuSpecificComponents?.[0];
-    if (comp) return `${comp.value}`;
-    return `${sku?.price?.toLocaleString('ru-RU') ?? ''} ₽`;
-  }
-
-  selectSku(sku: any): void {
-    this.selectedSkuId.set(sku.skuId);
-  }
-
-  toggleWishlist(skuId: string): void {
-    this.wishlistService.toggle(skuId);
   }
 
   isVideo(url: string): boolean {
@@ -117,7 +272,6 @@ export class ProductDetailsPage implements OnInit {
     { breakpoint: '560px',  numVisible: 1 },
   ];
 
-  // numVisible=4 — для экранов > 1440px
   carouselOptions = [
     { breakpoint: '1440px', numVisible: 4, numScroll: 1 },
     { breakpoint: '1280px', numVisible: 4, numScroll: 1 },
@@ -149,5 +303,9 @@ export class ProductDetailsPage implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err?.error?.message ?? 'Не удалось добавить товар', life: 4000 });
       },
     });
+  }
+
+  toggleWishlist(skuId: string): void {
+    this.wishlistService.toggle(skuId);
   }
 }

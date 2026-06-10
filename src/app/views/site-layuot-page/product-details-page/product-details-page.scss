@@ -190,7 +190,23 @@
 
   &--unavailable { opacity: 0.45; cursor: not-allowed; }
 
+  &--color {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
   &__sub { font-size: 0.65rem; color: #94a3b8; display: block; }
+}
+
+.pd-color-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.18);
+  flex-shrink: 0;
+
+  .pd-sku-chip--active & { border-color: rgba(255, 255, 255, 0.4); }
 }
 
 // ── Price ─────────────────────────────────────────────────────
