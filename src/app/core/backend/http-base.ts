@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 export class HttpBase {
-  protected apiUrl: string = 'http://localhost:3334/api';
+  protected apiUrl: string = environment.apiUrl;
   protected httpClient: HttpClient;
 
   constructor() {
