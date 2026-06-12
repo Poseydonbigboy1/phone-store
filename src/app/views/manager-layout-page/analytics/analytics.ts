@@ -161,6 +161,7 @@ export class AnalyticsPage implements OnInit {
 
   revenueChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     scales: {
       y:  { type: 'linear', display: true, position: 'left' },
@@ -172,11 +173,13 @@ export class AnalyticsPage implements OnInit {
   barChartOptions = {
     indexAxis: 'y' as const,
     responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
   };
 
   barChartOptions2 = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
   };

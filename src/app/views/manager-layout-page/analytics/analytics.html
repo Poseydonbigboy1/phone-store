@@ -1,7 +1,7 @@
 <p-toast />
 
 <!-- ─── Фильтры ─── -->
-<div class="flex flex-wrap align-items-end gap-3 mb-4 surface-card border-1 surface-border border-round p-3">
+<div class="analytics-filters flex flex-wrap align-items-end gap-3 mb-4 surface-card border-1 surface-border border-round p-3">
   <div class="flex flex-column gap-1">
     <label class="text-sm text-color-secondary">Дата с</label>
     <p-datepicker
@@ -96,7 +96,7 @@
               <p-button icon="pi pi-file-export" label="Скачать CSV" severity="secondary" size="small"
                         [outlined]="true" (onClick)="exportRevenue()" />
             </div>
-            <p-chart type="line" [data]="revenueChart()" [options]="revenueChartOptions" height="300" />
+            <p-chart type="line" [data]="revenueChart()" [options]="revenueChartOptions" height="300px" />
           </p-card>
         }
 
@@ -136,7 +136,7 @@
               <p-button icon="pi pi-file-export" label="Скачать CSV" severity="secondary" size="small"
                         [outlined]="true" (onClick)="exportTopProducts()" />
             </div>
-            <p-chart type="bar" [data]="topBarChart()" [options]="barChartOptions" height="320" />
+            <p-chart type="bar" [data]="topBarChart()" [options]="barChartOptions" height="320px" />
           </p-card>
         }
 
@@ -181,7 +181,7 @@
         @if (customersChart()) {
           <p-card class="mb-4">
             <span class="font-semibold block mb-3">Новые клиенты по периодам</span>
-            <p-chart type="bar" [data]="customersChart()" [options]="barChartOptions2" height="280" />
+            <p-chart type="bar" [data]="customersChart()" [options]="barChartOptions2" height="280px" />
           </p-card>
         }
 
