@@ -11,7 +11,7 @@ export class CatalogPageService {
   products$: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
 
   skip$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-  take$: BehaviorSubject<number> = new BehaviorSubject<number>(12);
+  take$: BehaviorSubject<number> = new BehaviorSubject<number>(50);
   total$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   search$: BehaviorSubject<string> = new BehaviorSubject<string>('');
   sortBy$: BehaviorSubject<number> = new BehaviorSubject<number>(0);

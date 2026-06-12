@@ -134,7 +134,7 @@ export class CatalogPage implements OnInit {
 
   onPageChange(event: any) {
     this.catalogPageService.skip$.next(event.first ?? 0);
-    this.catalogPageService.take$.next(event.rows ?? 12);
+    this.catalogPageService.take$.next(event.rows ?? 50);
     this.catalogPageService.refreshProducts();
   }
 }
