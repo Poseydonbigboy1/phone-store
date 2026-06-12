@@ -12,14 +12,15 @@
       </ng-template>
       <ng-template pTemplate="end">
         <div class="flex flex-wrap gap-2">
-          <p-tag
-            *ngFor="let f of appliedFilters"
-            [value]="f.key + ': ' + f.value"
-            icon="pi pi-times"
-            severity="secondary"
-            styleClass="cursor-pointer"
-            (click)="removeFilter(f.key)"
-          />
+          @for (f of appliedFilters; track f.key) {
+            <p-tag
+              [value]="f.text"
+              icon="pi pi-times"
+              severity="secondary"
+              styleClass="cursor-pointer"
+              (click)="removeFilter(f.key)"
+            />
+          }
         </div>
       </ng-template>
     </p-toolbar>

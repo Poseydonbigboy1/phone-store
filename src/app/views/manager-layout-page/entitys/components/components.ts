@@ -47,7 +47,7 @@ export class Components implements OnInit {
   selectedId: string | null = null;
   displayFilter = false;
   filterForm: FormGroup;
-  appliedFilters: { key: string; value: string }[] = [];
+  appliedFilters: { key: string; text: string }[] = [];
 
   constructor(
     private svc: ComponentsService,
@@ -117,7 +117,7 @@ export class Components implements OnInit {
   applyFilters(): void {
     this.appliedFilters = [];
     const title = this.filterForm.get('title')?.value;
-    if (title) this.appliedFilters.push({ key: 'title', value: title });
+    if (title) this.appliedFilters.push({ key: 'title', text: `Название содержит «${title}»` });
     this.displayFilter = false;
     this.paginatorState = { ...this.paginatorState, first: 0, page: 0 };
     this.svc.load(this.paginatorState, title ?? '');

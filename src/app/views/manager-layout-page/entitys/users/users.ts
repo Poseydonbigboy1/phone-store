@@ -42,7 +42,7 @@ export class Users implements OnInit {
   selectedId: string | null = null;
   displayFilter = false;
   filterForm: FormGroup;
-  appliedFilters: { key: string; value: string }[] = [];
+  appliedFilters: { key: string; text: string }[] = [];
 
   constructor(
     private svc: UsersManagerService,
@@ -102,7 +102,7 @@ export class Users implements OnInit {
   applyFilters(): void {
     this.appliedFilters = [];
     const login = this.filterForm.get('login')?.value;
-    if (login) this.appliedFilters.push({ key: 'login', value: login });
+    if (login) this.appliedFilters.push({ key: 'login', text: `Логин содержит «${login}»` });
     this.displayFilter = false;
     this.paginatorState = { ...this.paginatorState, first: 0, page: 0 };
     this.svc.load(this.paginatorState, login ?? '');

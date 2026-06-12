@@ -49,7 +49,7 @@ export class Brands implements OnInit {
 
   displayFilter = false;
   filterForm: FormGroup;
-  appliedFilters: { key: string; value: string }[] = [];
+  appliedFilters: { key: string; text: string }[] = [];
 
   constructor(
     private brandService: BrandService,
@@ -131,7 +131,7 @@ export class Brands implements OnInit {
   applyFilters(): void {
     this.appliedFilters = [];
     const title = this.filterForm.get('title')?.value;
-    if (title) this.appliedFilters.push({ key: 'title', value: title });
+    if (title) this.appliedFilters.push({ key: 'title', text: `Название содержит «${title}»` });
     this.displayFilter = false;
     this.paginatorState = { ...this.paginatorState, first: 0, page: 0 };
     this.brandService.loadBrands(this.paginatorState, this.filterForm.value);
