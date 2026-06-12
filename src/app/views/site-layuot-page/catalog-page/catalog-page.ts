@@ -2,7 +2,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataViewModule } from 'primeng/dataview';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonModule } from 'primeng/skeleton';
 import { Observable } from 'rxjs';
 import { CatalogPageService } from './catalog-page.service';
 import { CatalogFilter } from './catalog-filter/catalog-filter';
@@ -29,7 +29,7 @@ import { SortBy, SortDirection } from '@models/common';
   imports: [
     DataViewModule, PaginatorModule, CommonModule, DecimalPipe, RouterLink,
     CatalogFilter, CardModule, ButtonModule, FormsModule, ScrollPanelModule,
-    ToastModule, TagModule, SelectModule, TooltipModule, ProgressSpinnerModule,
+    ToastModule, TagModule, SelectModule, TooltipModule, SkeletonModule,
   ],
   providers: [CatalogPageService, MessageService],
   templateUrl: './catalog-page.html',
@@ -53,6 +53,9 @@ export class CatalogPage implements OnInit {
   isLoggedIn = toSignal(this.authService.user$.pipe(map(u => !!u)));
   addingSkuId: string | null = null;
   filterOpen = false;
+
+  /** Карточки-скелетоны, показываемые во время загрузки каталога */
+  skeletonItems = Array.from({ length: 12 }, (_, i) => i);
 
   isInWishlist(skuId: string): boolean { return this.wishlistService.isInWishlist(skuId); }
   toggleWishlist(skuId: string): void  { this.wishlistService.toggle(skuId); }

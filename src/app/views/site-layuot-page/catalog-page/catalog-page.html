@@ -48,8 +48,19 @@
     <!-- Сетка товаров (скроллится только эта область) -->
     <div class="catalog-scroll">
     @if ((isLoading$ | async)) {
-      <div class="catalog-loading">
-        <p-progressSpinner />
+      <div class="catalog-grid">
+        @for (s of skeletonItems; track s) {
+          <div class="skeleton-card">
+            <p-skeleton styleClass="skeleton-card__img" />
+            <div class="skeleton-card__body">
+              <p-skeleton width="45%" height="0.65rem" />
+              <p-skeleton width="90%" height="0.95rem" />
+              <p-skeleton width="60%" height="0.95rem" />
+              <p-skeleton width="55%" height="1.3rem" styleClass="skeleton-card__price" />
+              <p-skeleton width="100%" height="2.1rem" borderRadius="8px" styleClass="skeleton-card__btn" />
+            </div>
+          </div>
+        }
       </div>
     } @else if (((products$ | async) ?? []).length === 0) {
       <div class="catalog-empty">

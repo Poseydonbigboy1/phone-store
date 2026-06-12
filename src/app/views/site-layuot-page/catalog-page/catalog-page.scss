@@ -201,8 +201,7 @@ $sidebar-width-2xl: 300px;
   padding-right: 0.25rem;   // зазор под скроллбар, чтобы карточки не липли
 }
 
-// спиннер / пустое состояние занимают всю высоту области прокрутки
-.catalog-loading,
+// пустое состояние занимает всю высоту области прокрутки
 .catalog-empty { flex: 1; }
 
 // ── Toolbar ───────────────────────────────────────────────────
@@ -297,7 +296,45 @@ $sidebar-width-2xl: 300px;
   }
 }
 
-// ── Empty / Loading ───────────────────────────────────────────
+// ── Skeleton card (загрузка каталога) ─────────────────────────
+.skeleton-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  // host каждого p-skeleton — на всю ширину колонки
+  p-skeleton { display: block; }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0.875rem 0.875rem;
+
+    @media (max-width: 479px) { padding: 0.6rem 0.7rem 0.75rem; }
+  }
+
+  &__price { margin-top: 0.35rem; }
+  &__btn   { margin-top: 0.5rem; }
+}
+
+// высота «изображения» скелетона повторяет .product-card-ui__img-wrap.
+// !important — т.к. p-skeleton выставляет height/width инлайн-стилем.
+::ng-deep .skeleton-card__img.p-skeleton {
+  width: 100% !important;
+  height: 190px !important;
+  border-radius: 0;
+
+  @media (max-width: 479px)  { height: 150px !important; }
+  @media (min-width: 480px) and (max-width: 767px) { height: 165px !important; }
+  @media (min-width: 1280px) { height: 205px !important; }
+  @media (min-width: 1440px) { height: 215px !important; }
+}
+
+// ── Empty ─────────────────────────────────────────────────────
 .catalog-empty {
   display: flex;
   flex-direction: column;
@@ -312,15 +349,6 @@ $sidebar-width-2xl: 300px;
   i    { font-size: 3rem; color: #cbd5e1; }
   span { font-size: 1.05rem; font-weight: 600; color: #475569; }
   p    { font-size: 0.875rem; color: #94a3b8; margin: 0; }
-}
-
-.catalog-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 4rem;
-
-  @media (max-width: 479px) { padding: 2rem; }
 }
 
 // ── Pagination ────────────────────────────────────────────────
