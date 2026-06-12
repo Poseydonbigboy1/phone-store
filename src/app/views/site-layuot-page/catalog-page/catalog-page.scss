@@ -158,6 +158,7 @@ $sidebar-width-2xl: 300px;
   flex-direction: column;
   gap: 1.25rem;
   min-width: 0;
+  min-height: 0;            // нужно, чтобы внутренний скролл .catalog-scroll работал
 
   @media (max-width: 479px) { gap: 1rem; }
 
@@ -165,34 +166,44 @@ $sidebar-width-2xl: 300px;
   // сверху и пагинация снизу были всегда видны, а скроллился только список
   @media (min-width: 1024px) {
     height: calc(100vh - 180px);
-    min-height: 0;
   }
   @media (min-width: 1440px) {
     height: calc(100vh - 196px);
   }
 }
 
-// pc (lg+): тулбар и пагинация закреплены, между ними скроллится только
-// .catalog-scroll. Сама сетка внутри — обычной (естественной) высоты, поэтому
-// карточки НЕ сжимаются: при 48 товарах область просто прокручивается.
-@media (min-width: 1024px) {
-  .catalog-toolbar,
-  .catalog-pagination { flex-shrink: 0; }
+// xs/sm/md: каталог занимает всю доступную высоту .layout-main (через цепочку
+// height: 100%), чтобы тулбар с кнопками «Фильтры» + сортировка и пагинация
+// оставались на месте при прокрутке, а скроллился только список товаров.
+@media (max-width: 1023px) {
+  :host { display: block; height: 100%; }
 
-  .catalog-scroll {
-    flex: 1;
+  .catalog-layout {
+    height: 100%;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    padding-right: 0.25rem;   // зазор под скроллбар, чтобы карточки не липли
+    grid-template-rows: minmax(0, 1fr);   // единственная строка тянется на всю высоту
   }
-
-  // спиннер / пустое состояние занимают всю высоту области прокрутки
-  .catalog-loading,
-  .catalog-empty { flex: 1; }
 }
+
+// Тулбар (фильтр + сортировка) и пагинация закреплены, между ними скроллится
+// только .catalog-scroll с товарами. Карточки сохраняют размер — при большом
+// числе товаров область просто прокручивается. Действует и на ПК, и на телефоне.
+.catalog-toolbar,
+.catalog-pagination { flex-shrink: 0; }
+
+.catalog-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-right: 0.25rem;   // зазор под скроллбар, чтобы карточки не липли
+}
+
+// спиннер / пустое состояние занимают всю высоту области прокрутки
+.catalog-loading,
+.catalog-empty { flex: 1; }
 
 // ── Toolbar ───────────────────────────────────────────────────
 .catalog-toolbar {
