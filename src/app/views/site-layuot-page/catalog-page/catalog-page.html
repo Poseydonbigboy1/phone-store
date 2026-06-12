@@ -80,6 +80,9 @@
               <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__title">
                 {{ product.title }}
               </a>
+              @if (product.variantTitle) {
+                <span class="product-card-ui__variant">{{ product.variantTitle }}</span>
+              }
               <div class="product-card-ui__price-area">
                 @if (product.discount > 0) {
                   <div class="flex align-items-center gap-2 flex-wrap">
