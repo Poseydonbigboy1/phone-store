@@ -47,13 +47,21 @@ $sidebar-width-2xl: 300px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
 
-  // lg+: sticky в потоке
+  // lg+: sticky в потоке. Высота ограничена так, чтобы фильтр не вылезал
+  // за экран: вычитаем topbar (64px) + верт. паддинги .layout-main (2×2rem)
+  // + footer (52px) = 180px. Скроллится только контент фильтра, общий скролл
+  // страницы из-за фильтра не появляется.
   @media (min-width: 1024px) {
     position: sticky;
-    top: 80px;
-    max-height: calc(100vh - 96px);
+    top: 0;
+    max-height: calc(100vh - 180px);
     overflow-y: auto;
     padding: 1rem;
+  }
+
+  // 2xl: у .layout-main паддинги больше (2×2.5rem) → вычитаем 196px
+  @media (min-width: 1440px) {
+    max-height: calc(100vh - 196px);
   }
 
   // xs/sm/md — drawer, фиксированный справа (или слева)
@@ -152,6 +160,38 @@ $sidebar-width-2xl: 300px;
   min-width: 0;
 
   @media (max-width: 479px) { gap: 1rem; }
+
+  // pc (lg+): высота фиксируется по экрану (как у сайдбара), чтобы тулбар
+  // сверху и пагинация снизу были всегда видны, а скроллился только список
+  @media (min-width: 1024px) {
+    height: calc(100vh - 180px);
+    min-height: 0;
+  }
+  @media (min-width: 1440px) {
+    height: calc(100vh - 196px);
+  }
+}
+
+// pc (lg+): тулбар и пагинация закреплены, между ними скроллится только
+// .catalog-scroll. Сама сетка внутри — обычной (естественной) высоты, поэтому
+// карточки НЕ сжимаются: при 48 товарах область просто прокручивается.
+@media (min-width: 1024px) {
+  .catalog-toolbar,
+  .catalog-pagination { flex-shrink: 0; }
+
+  .catalog-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-right: 0.25rem;   // зазор под скроллбар, чтобы карточки не липли
+  }
+
+  // спиннер / пустое состояние занимают всю высоту области прокрутки
+  .catalog-loading,
+  .catalog-empty { flex: 1; }
 }
 
 // ── Toolbar ───────────────────────────────────────────────────

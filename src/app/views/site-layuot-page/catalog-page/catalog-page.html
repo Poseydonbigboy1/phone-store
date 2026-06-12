@@ -45,7 +45,8 @@
       />
     </div>
 
-    <!-- Сетка товаров -->
+    <!-- Сетка товаров (скроллится только эта область) -->
+    <div class="catalog-scroll">
     @if ((isLoading$ | async)) {
       <div class="catalog-loading">
         <p-progressSpinner />
@@ -111,6 +112,7 @@
         }
       </div>
     }
+    </div>
 
     <!-- Пагинация -->
     @if (((total$ | async) ?? 0) > 0) {

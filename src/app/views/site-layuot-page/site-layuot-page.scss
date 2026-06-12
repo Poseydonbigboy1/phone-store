@@ -455,12 +455,22 @@ $topbar-height-xs: 56px;
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SHELL — фиксированная высота: topbar сверху, footer всегда снизу,
+// скроллится только .layout-main между ними (без скролла всей страницы)
+// ═══════════════════════════════════════════════════════════════
+.layout-wrapper {
+  height: 100vh;
+  overflow: hidden;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // MAIN CONTENT
 // ═══════════════════════════════════════════════════════════════
 .layout-main-container {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;            // чтобы внутренний скролл .layout-main работал
   margin-top: $topbar-height;
 
   @media (max-width: 767px) { margin-top: $topbar-height-xs; }
@@ -468,6 +478,8 @@ $topbar-height-xs: 56px;
 
 .layout-main {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;         // скроллится только контент; футер закреплён снизу
   width: 100%;
   margin: 0 auto;
 
