@@ -65,9 +65,31 @@
   }
 }
 
-::ng-deep .pd-galleria {
-  .p-galleria-item-container { background: #f8fafc; border-radius: 12px; }
-  .p-galleria-thumbnail-item img { border-radius: 6px; }
+// Лента превью
+.pd-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+
+  @media (max-width: 479px) { gap: 0.375rem; margin-top: 0.5rem; }
+}
+
+.pd-thumb-btn {
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #f8fafc;
+  cursor: pointer;
+  line-height: 0;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover { border-color: #cbd5e1; }
+
+  &--active {
+    border-color: #1e293b;
+    box-shadow: 0 0 0 1px #1e293b;
+  }
 }
 
 .pd-media {

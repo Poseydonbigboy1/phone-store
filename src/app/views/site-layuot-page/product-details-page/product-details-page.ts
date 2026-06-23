@@ -8,7 +8,6 @@ import { WishlistService } from '../../../core/services/wishlist.service';
 import { CatalogHttpService } from '@backend';
 import { AuthService } from '@services';
 import { map } from 'rxjs';
-import { GalleriaModule } from 'primeng/galleria';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FieldsetModule } from 'primeng/fieldset';
@@ -29,7 +28,7 @@ import { MessageService } from 'primeng/api';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DecimalPipe, RouterModule,
-    GalleriaModule, CardModule, ButtonModule, FieldsetModule,
+    CardModule, ButtonModule, FieldsetModule,
     TabsModule, TableModule, ProgressSpinnerModule, ToastModule,
     TagModule, DividerModule, ChipModule, CarouselModule, TooltipModule,
   ],
@@ -45,6 +44,9 @@ export class ProductDetailsPage implements OnInit {
   private authService           = inject(AuthService);
   private messageService        = inject(MessageService);
   private route                 = inject(ActivatedRoute);
+
+  /** Индекс активного изображения в галерее (signal — надёжно работает в zoneless) */
+  activeImageIndex = signal(0);
 
   product      = toSignal(this.productDetailsService.product$);
   isLoggedIn   = toSignal(this.authService.user$.pipe(map(u => !!u)));
@@ -246,6 +248,7 @@ export class ProductDetailsPage implements OnInit {
   ngOnInit(): void {
     this.productDetailsService.product$.subscribe(p => {
       if (p?.mainSku?.skuId) {
+        this.activeImageIndex.set(0);
         this.applyInitialSku();
         this.catalogHttp.getSimilar$(p.mainSku.skuId, 8).subscribe(res => {
           this.similar.set(res?.data ?? []);
@@ -277,12 +280,6 @@ export class ProductDetailsPage implements OnInit {
   isVideo(url: string): boolean {
     return /\.(mp4|webm|mov|avi)(\?.*)?$/i.test(url);
   }
-
-  responsiveOptions: any[] = [
-    { breakpoint: '1024px', numVisible: 5 },
-    { breakpoint: '768px',  numVisible: 3 },
-    { breakpoint: '560px',  numVisible: 1 },
-  ];
 
   carouselOptions = [
     { breakpoint: '1440px', numVisible: 4, numScroll: 1 },

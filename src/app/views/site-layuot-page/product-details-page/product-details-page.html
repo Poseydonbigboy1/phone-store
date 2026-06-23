@@ -17,30 +17,37 @@
     <div class="pd-gallery">
       @if (product.images?.length) {
         @let imgs = product.images ?? [];
-        <p-galleria
-          [value]="imgs"
-          [responsiveOptions]="responsiveOptions"
-          [containerStyle]="{ 'max-width': '100%' }"
-          [numVisible]="5"
-          [showIndicators]="imgs.length > 1"
-          [showThumbnails]="imgs.length > 1"
-          styleClass="pd-galleria"
-        >
-          <ng-template pTemplate="item" let-item>
-            @if (isVideo(item)) {
-              <video [src]="item" controls class="pd-media"></video>
-            } @else {
-              <img [src]="item" [alt]="product.title" class="pd-media" />
+        @let current = imgs[activeImageIndex()] ?? imgs[0];
+
+        <!-- Основное изображение -->
+        <div class="pd-gallery-main">
+          @if (isVideo(current)) {
+            <video [src]="current" controls class="pd-media"></video>
+          } @else {
+            <img [src]="current" [alt]="product.title" class="pd-media" />
+          }
+        </div>
+
+        <!-- Лента превью -->
+        @if (imgs.length > 1) {
+          <div class="pd-thumbs">
+            @for (img of imgs; track img; let i = $index) {
+              <button
+                type="button"
+                class="pd-thumb-btn"
+                [class.pd-thumb-btn--active]="i === activeImageIndex()"
+                (click)="activeImageIndex.set(i)"
+                [attr.aria-label]="'Изображение ' + (i + 1)"
+              >
+                @if (isVideo(img)) {
+                  <video [src]="img" muted preload="metadata" class="pd-thumb"></video>
+                } @else {
+                  <img [src]="img" [alt]="product.title" class="pd-thumb" />
+                }
+              </button>
             }
-          </ng-template>
-          <ng-template pTemplate="thumbnail" let-item>
-            @if (isVideo(item)) {
-              <video [src]="item" muted preload="metadata" class="pd-thumb"></video>
-            } @else {
-              <img [src]="item" [alt]="product.title" class="pd-thumb" />
-            }
-          </ng-template>
-        </p-galleria>
+          </div>
+        }
       } @else {
         <div class="pd-no-image">
           <i class="pi pi-mobile"></i>
