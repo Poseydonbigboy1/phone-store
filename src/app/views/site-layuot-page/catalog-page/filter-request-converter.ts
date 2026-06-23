@@ -14,7 +14,9 @@ export class FilterRequestConverter {
           if (item.type === 'checkbox' && item.value === true) {
             filterValues.push({
               componentTitle: group.title,
-              value: item.title,
+              // filterValue — «сырое» значение для бэка (для boolean это 'true',
+              // тогда как title содержит отображаемое «Да»)
+              value: item.filterValue ?? item.title,
               matchMode: 'equals',
             });
           }
