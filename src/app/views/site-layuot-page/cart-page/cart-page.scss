@@ -5,12 +5,14 @@
   padding: 1rem;
   border-bottom: 1px solid var(--surface-border);
   transition: background 0.2s;
+  flex-wrap: wrap;
 
   &:hover { background: var(--surface-hover); }
   &:last-child { border-bottom: none; }
 }
 
-.item-info { flex: 1; }
+// Название/цена занимают всё свободное место и могут сжиматься
+.item-info { flex: 1 1 220px; min-width: 0; }
 .item-title { font-weight: 600; font-size: 1rem; }
 .item-brand { color: var(--text-color-secondary); font-size: 0.85rem; }
 
@@ -20,6 +22,29 @@
   font-size: 0.85rem;
 }
 .price-final { font-weight: 700; color: var(--primary-color); }
-.line-total { font-weight: 600; min-width: 90px; text-align: right; }
+
+// Управляющие элементы не сжимаются и не «уезжают»
+.line-total {
+  flex: 0 0 auto;
+  font-weight: 600;
+  min-width: 90px;
+  text-align: right;
+}
+
+::ng-deep .cart-qty {
+  flex: 0 0 auto;
+  width: 9rem;
+
+  .p-inputnumber-input { text-align: center; width: 100%; }
+}
+
+::ng-deep .cart-remove { flex: 0 0 auto; }
+
+// Узкие экраны: количество и итог переносятся под названием
+@media (max-width: 575px) {
+  .item-info { flex: 1 1 100%; }
+  .cart-item-row { gap: 0.75rem; }
+  .line-total { margin-left: auto; }
+}
 
 .summary-card { position: sticky; top: 1rem; }

@@ -42,12 +42,12 @@
 
                 <!-- Количество -->
                 <p-inputnumber
+                  styleClass="cart-qty"
                   [ngModel]="item.quantity"
                   (ngModelChange)="onQtyChange(item.skuId, $event)"
                   [showButtons]="true"
                   [min]="1"
                   [max]="item.amount"
-                  [style]="{ width: '8rem' }"
                   buttonLayout="horizontal"
                   decrementButtonIcon="pi pi-minus"
                   incrementButtonIcon="pi pi-plus"
@@ -58,8 +58,10 @@
 
                 <!-- Удалить -->
                 <p-button
+                  styleClass="cart-remove"
                   icon="pi pi-trash"
                   [text]="true"
+                  [rounded]="true"
                   severity="danger"
                   pTooltip="Убрать из корзины"
                   (onClick)="remove(item.skuId)"
