@@ -73,7 +73,7 @@
         @for (product of (products$ | async) ?? []; track product.skuId) {
           <div class="product-card-ui">
 
-            <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__img-wrap">
+            <a [routerLink]="['/main/products', product.productId]" [queryParams]="{ sku: product.skuId }" class="product-card-ui__img-wrap">
               @if (product.images?.length) {
                 <img [src]="product.images[0]" [alt]="product.title" />
               } @else {
@@ -88,7 +88,7 @@
               @if (product.brandTitle) {
                 <span class="product-card-ui__brand">{{ product.brandTitle }}</span>
               }
-              <a [routerLink]="['/main/products', product.productId]" class="product-card-ui__title">
+              <a [routerLink]="['/main/products', product.productId]" [queryParams]="{ sku: product.skuId }" class="product-card-ui__title">
                 {{ product.title }}
               </a>
               @if (product.variantTitle) {

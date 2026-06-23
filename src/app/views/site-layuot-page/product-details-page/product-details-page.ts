@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductDetailsService } from './product-details-page.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CartService } from '../../../core/services/cart.service';
@@ -44,6 +44,7 @@ export class ProductDetailsPage implements OnInit {
   private catalogHttp           = inject(CatalogHttpService);
   private authService           = inject(AuthService);
   private messageService        = inject(MessageService);
+  private route                 = inject(ActivatedRoute);
 
   product      = toSignal(this.productDetailsService.product$);
   isLoggedIn   = toSignal(this.authService.user$.pipe(map(u => !!u)));
@@ -245,12 +246,23 @@ export class ProductDetailsPage implements OnInit {
   ngOnInit(): void {
     this.productDetailsService.product$.subscribe(p => {
       if (p?.mainSku?.skuId) {
+        this.applyInitialSku();
         this.catalogHttp.getSimilar$(p.mainSku.skuId, 8).subscribe(res => {
           this.similar.set(res?.data ?? []);
         });
         this.trackRecentlyViewed(p.mainSku.skuId);
       }
     });
+  }
+
+  /** Подставляет конфигурацию/цвет SKU, на который кликнули в каталоге (?sku=...) */
+  private applyInitialSku(): void {
+    const targetSkuId = this.route.snapshot.queryParamMap.get('sku');
+    if (!targetSkuId) return;
+    const sku = this.allSkus().find((s: any) => s?.skuId === targetSkuId);
+    if (!sku) return;
+    this.selectedConfigKey.set(this.configKey(sku));
+    this.selectedColor.set(this.colorOf(sku));
   }
 
   private trackRecentlyViewed(skuId: string): void {
