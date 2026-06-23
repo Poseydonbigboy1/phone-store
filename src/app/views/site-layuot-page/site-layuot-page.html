@@ -42,7 +42,8 @@
       <!-- Избранное (только для авторизованных) -->
       @if (user$ | async) {
         <p-overlaybadge
-          [value]="(wishlistCount() > 0 ? wishlistCount() : null)"
+          [value]="wishlistCount()"
+          [badgeDisabled]="wishlistCount() === 0"
           severity="danger" styleClass="topbar-badge-wrap">
           <button class="layout-topbar-action"
                   pTooltip="Избранное" tooltipPosition="bottom"
@@ -54,7 +55,8 @@
 
       <!-- Корзина (все пользователи) -->
       <p-overlaybadge
-        [value]="((cartCount$ | async) ?? 0) > 0 ? (cartCount$ | async) : null"
+        [value]="(cartCount$ | async) ?? 0"
+        [badgeDisabled]="((cartCount$ | async) ?? 0) === 0"
         severity="danger" styleClass="topbar-badge-wrap">
         <button class="layout-topbar-action"
                 pTooltip="Корзина" tooltipPosition="bottom"
